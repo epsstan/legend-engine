@@ -25,6 +25,8 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.Package
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.Runtime;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.RuntimePointer;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.section.ImportAwareCodeSection;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Authorizer;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.AuthorizerConfigPointer;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.Execution;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.KeyedExecutionParameter;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service.KeyedSingleExecutionTest;
@@ -77,6 +79,9 @@ public class ServiceParseTreeWalker
         // documentation
         ServiceParserGrammar.ServiceDocumentationContext documentationContext = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.serviceDocumentation(), "documentation", service.sourceInformation);
         service.documentation = PureGrammarParserUtility.fromGrammarString(documentationContext.STRING().getText(), true);
+        // authorization
+        ServiceParserGrammar.ServiceAuthorizerContext authorizerContext = PureGrammarParserUtility.validateAndExtractOptionalField(ctx.serviceAuthorizer(), "authorizer", service.sourceInformation);
+        service.authorizer = this.visitAuthorizer(authorizerContext);
         // auto activate update flag (optional)
         ServiceParserGrammar.ServiceAutoActivateUpdatesContext autoActivateUpdatesContext = PureGrammarParserUtility.validateAndExtractOptionalField(ctx.serviceAutoActivateUpdates(), "autoActivateUpdates", service.sourceInformation);
         service.autoActivateUpdates = autoActivateUpdatesContext != null && Boolean.parseBoolean(autoActivateUpdatesContext.BOOLEAN().getText());
@@ -90,6 +95,16 @@ public class ServiceParseTreeWalker
         ServiceParserGrammar.ServiceTestContext testContext = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.serviceTest(), "test", service.sourceInformation);
         service.test = this.visitTest(testContext);
         return service;
+    }
+
+    private Authorizer visitAuthorizer(ServiceParserGrammar.ServiceAuthorizerContext ctx) {
+        if (ctx == null) {
+            return null;
+        }
+        AuthorizerConfigPointer authorizer = new AuthorizerConfigPointer();
+        authorizer.element = PureGrammarParserUtility.fromQualifiedName(ctx.qualifiedName().packagePath() == null ? Collections.emptyList() : ctx.qualifiedName().packagePath().identifier(), ctx.qualifiedName().identifier());
+        authorizer.elementSourceInformation = walkerSourceInformation.getSourceInformation(ctx.qualifiedName());
+        return authorizer;
     }
 
     private Execution visitExecution(ServiceParserGrammar.ServiceExecContext ctx)

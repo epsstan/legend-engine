@@ -1,4 +1,4 @@
-// Copyright 2021 Goldman Sachs
+// Copyright 2020 Goldman Sachs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,23 +14,16 @@
 
 package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.service;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.PackageableElement;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.PackageableElementVisitor;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.connection.Connection;
 
-import java.util.List;
+import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Service extends PackageableElement
+public class PackableAuthorizer extends PackageableElement
 {
-    public String pattern;
-    public List<String> owners;
-    public Authorizer authorizer;
-    public String documentation;
-    public boolean autoActivateUpdates = true;
-    public Execution execution;
-    public ServiceTest test;
-    public List<ServiceTag> tags;
+    public String authroizerKey;
+    public Map<String, String> configurationMap;
 
     @Override
     public <T> T accept(PackageableElementVisitor<T> visitor)

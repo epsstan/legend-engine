@@ -14,6 +14,7 @@ SERVICE_MULTI:                      'Multi';
 SERVICE_PATTERN:                    'pattern';
 SERVICE_OWNERS:                     'owners';
 SERVICE_DOCUMENTATION:              'documentation';
+SERVICE_AUTHORIZER:                 'authorizer';
 SERVICE_AUTO_ACTIVATE_UPDATES:      'autoActivateUpdates';
 
 SERVICE_EXECUTION:                  'execution';

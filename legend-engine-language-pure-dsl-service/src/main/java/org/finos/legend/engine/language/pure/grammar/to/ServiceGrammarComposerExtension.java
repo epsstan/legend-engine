@@ -75,6 +75,10 @@ public class ServiceGrammarComposerExtension implements PureGrammarComposerExten
             serviceBuilder.append(getTabString()).append("owners:\n").append(getTabString()).append("[\n").append(LazyIterate.collect(service.owners, o -> getTabString(2) + convertString(o, true)).makeString(",\n")).append("\n").append(getTabString()).append("];\n");
         }
         serviceBuilder.append(getTabString()).append("documentation: ").append(convertString(service.documentation, true)).append(";\n");
+        if (service.authorizer != null)
+        {
+            serviceBuilder.append(getTabString()).append("authorizer: ").append(service.authorizer.element).append(";\n");
+        }
         serviceBuilder.append(getTabString()).append("autoActivateUpdates: ").append(service.autoActivateUpdates ? "true" : "false").append(";\n");
         Execution execution = service.execution;
         if (execution instanceof PureExecution)

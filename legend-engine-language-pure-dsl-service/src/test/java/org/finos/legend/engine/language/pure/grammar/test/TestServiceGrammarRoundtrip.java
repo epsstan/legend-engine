@@ -14,7 +14,13 @@
 
 package org.finos.legend.engine.language.pure.grammar.test;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 
 public class TestServiceGrammarRoundtrip extends TestGrammarRoundtrip.TestGrammarRoundtripTestSuite
 {
@@ -158,41 +164,9 @@ public class TestServiceGrammarRoundtrip extends TestGrammarRoundtrip.TestGramma
     @Test
     public void testServiceWithEmbeddedRuntimeWithOptionalMapping()
     {
-        String unformatted = "###Service\n" +
-                "Service meta::pure::myServiceSingle\n" +
-                "{\n" +
-                "  pattern: 'url/myUrl/';\n" +
-                // empty owner list will not be shown
-                "  owners:[];\n" +
-                "  documentation: 'this is just for context';\n" +
-                "  autoActivateUpdates: true;\n" +
-                "  execution: Single\n" +
-                "  {\n" +
-                "    query: src: meta::transform::tests::Address[1]|$src.a;\n" +
-                "    mapping: meta::myMapping;\n" +
-                "    runtime:\n" +
-                "    #{\n" +
-                "      connections:\n" +
-                "      [\n" +
-                "        ModelStore:\n" +
-                "        [\n" +
-                "          id1: test::myConnection,\n" +
-                "          id2: #{ JsonModelConnection { class: meta::mySimpleClass; url: 'my_url'; }}#,\n" +
-                "          id3: #{ JsonModelConnection { class: meta::mySimpleClass; url: 'my_url'; }}#\n" +
-                "        ]\n" +
-                "      ];\n" +
-                "    }#;\n" +
-                "  }\n" +
-                "  test: Single\n" +
-                "  {\n" +
-                "    data: 'moreThanData';\n" +
-                "    asserts:\n" +
-                "    [\n" +
-                "      { [], res: Result<Any|*>[1]|$res.values->cast(@TabularDataSet).rows->size() == 1 },\n" +
-                "      { [], res: Result<Any|*>[1]|$res.values->cast(@TabularDataSet).rows->size() == 1 }\n" +
-                "    ];\n" +
-                "  }\n" +
-                "}\n";
+
+        String unformatted = loadTestResource("samples/grammer/service_with_embedded_runtime_with_optional_mapping.pure");
+
         String formatted = "###Service\n" +
                 "Service meta::pure::myServiceSingle\n" +
                 "{\n" +
@@ -269,5 +243,27 @@ public class TestServiceGrammarRoundtrip extends TestGrammarRoundtrip.TestGramma
                 "    ];\n" +
                 "  }\n" +
                 "}\n");
+    }
+
+    @Test
+    public void testServiceWithAuthorizer() {
+        String unformatted = loadTestResource("samples/grammer/service_with_authorizer.pure");
+        String formatted = loadTestResource("samples/grammer/service_with_authorizer_formatted.pure");
+        testFormat(formatted, unformatted);
+    }
+
+    private static String loadTestResource(final String resourcePath)
+    {
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        try (InputStream inputStream = classloader.getResourceAsStream(resourcePath);
+             StringWriter writer = new StringWriter()) {
+            if (inputStream == null) {
+                throw new IllegalArgumentException(String.format("Resource at '%s' not present on classpath", resourcePath));
+            }
+            IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8);
+            return writer.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -36,6 +36,7 @@ service:                                SERVICE qualifiedName
                                                     servicePattern
                                                     | serviceOwners
                                                     | serviceDocumentation
+                                                    | serviceAuthorizer
                                                     | serviceAutoActivateUpdates
                                                     | serviceExec
                                                     | serviceTest
@@ -51,6 +52,8 @@ serviceOwners:                          SERVICE_OWNERS COLON
                                         SEMI_COLON
 ;
 serviceDocumentation:                   SERVICE_DOCUMENTATION COLON STRING SEMI_COLON
+;
+serviceAuthorizer:                      SERVICE_AUTHORIZER COLON qualifiedName SEMI_COLON
 ;
 serviceAutoActivateUpdates:             SERVICE_AUTO_ACTIVATE_UPDATES COLON BOOLEAN SEMI_COLON
 ;
