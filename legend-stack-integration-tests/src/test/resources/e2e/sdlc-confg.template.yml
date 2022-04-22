@@ -1,0 +1,80 @@
+applicationName: Legend SDLC
+
+server:
+  adminContextPath: /sdlc/admin
+  applicationConnectors:
+    - type: http
+      port: __LEGEND_SDLC_PORT__
+      maxRequestHeaderSize: 128KiB
+  adminConnectors:
+    - type: http
+      port: __LEGEND_SDLC_ADMIN_PORT__
+  gzip:
+    includedMethods:
+      - GET
+      - POST
+  requestLog:
+    type: classic
+    level: OFF
+    appenders:
+      - type: console
+        logFormat: "OFF"
+  rootPath: /sdlc/api
+
+projectStructure:
+  projectCreation:
+    groupIdPattern: ^org\.finos\.legend\..+
+
+filterPriorities:
+  GitLab: 1
+  org.pac4j.j2e.filter.CallbackFilter: 2
+  org.pac4j.j2e.filter.SecurityFilter: 3
+  CORS: 4
+
+pac4j:
+  callbackPrefix: /sdlc/api/pac4j/login
+  mongoUri: __MONGO_URI__
+  mongoDb: legend
+  clients:
+    - org.finos.legend.server.pac4j.gitlab.GitlabClient:
+        name: gitlab
+        clientId: b94ad538b2992ce7ff9f6b7e76aec5d6164ecbed12f5b44651aed639c00c62ee
+        secret: 3e7004cddf40b4d0d8d83b66eb218a25c3c4c537bd57221287238744a19570c2
+        discoveryUri: https://gitlab.com/.well-known/openid-configuration
+        scope: openid profile api
+    - org.finos.legend.server.pac4j.gitlab.GitlabPersonalAccessTokenClient:
+        name: gitlabPAToken
+        headerTokenName: PRIVATE-TOKEN
+        scheme: https
+        gitlabHost: gitlab.com
+        gitlabApiVersion: v4
+  mongoSession:
+    enabled: true
+    collection: userSessions
+  bypassPaths:
+    - /sdlc/api/info
+
+gitLab:
+  newProjectVisibility: public
+  projectTag: pure
+  uat:
+    server:
+      scheme: https
+      host: gitlab.com
+    app:
+      id: b94ad538b2992ce7ff9f6b7e76aec5d6164ecbed12f5b44651aed639c00c62ee
+      secret: 3e7004cddf40b4d0d8d83b66eb218a25c3c4c537bd57221287238744a19570c2
+      redirectURI: __LEGEND_SDLC_URL__/api/auth/callback
+
+logging:
+  # Change this to affect library class logging
+  level: INFO
+  appenders:
+    - type: console
+      logFormat: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%thread] %c - %m%n"
+
+swagger:
+  resourcePackage: org.finos.legend.sdlc.server.resources
+  title: Legend LEGEND_SDLC
+  version: local-snapshot
+  schemes: []
