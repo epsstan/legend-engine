@@ -371,6 +371,57 @@ function <<test.Test>> meta::relational::tests::tds::tdsProject::testFilterAfter
       $result->sqlRemoveFormatting());   
 }
 
+function <<test.Test>> meta::relational::tests::tds::tdsProject::testFilterAfterLimitWithVisitor():Boolean[1]
+{
+   //let visitor = ^Visitor();
+   let result = execute(
+      |Person.all()
+         ->project(col(p|$p.age, 'age'))
+         ->sort(asc('age'))
+         ->limit(3)
+         ->filter(r|$r.getInteger('age') > 25)
+         ,
+      simpleRelationalMapping, 
+      testRuntime(), meta::pure::router::extension::defaultRelationalExtensions(),debug());
+   
+   assertSize($result.values.columns, 1);   
+   
+   assertEquals('',
+      $result.values.rows->map(r|$r.values->makeString('|'))->makeString(','));
+
+   assertEquals('select "age" as "age" from (select top 3 "root".AGE as "age" from personTable as "root" order by "age") as "subselect" where "age" > 25', 
+      $result->sqlRemoveFormatting());   
+}
+
+function <<test.Test>> meta::relational::tests::tds::tdsProject::testSimple():Boolean[1]
+{
+   let result = execute(
+      |Person.all()
+         ->project(col(p|$p.age, 'age'))
+         ,
+      simpleRelationalMapping, 
+      testRuntime(), meta::pure::router::extension::defaultRelationalExtensions(),debug());
+   
+   assertSize($result.values.columns, 1);   
+   
+   assertEquals('',
+      $result.values.rows->map(r|$r.values->makeString('|'))->makeString(','));
+
+   assertEquals('select "age" as "age" from (select top 3 "root".AGE as "age" from personTable as "root" order by "age") as "subselect" where "age" > 25', 
+      $result->sqlRemoveFormatting());   
+}
+
+function <<test.Test>> meta::relational::tests::tds::tdsProject::testSimple2():Boolean[1]
+{
+   let result = execute(
+      |Person.all()->filter(p | $p.firm.employees->exists(e | $e.firstName == 'Oliver')),
+      simpleRelationalMapping, 
+      testRuntime(), meta::pure::router::extension::defaultRelationalExtensions(),debug());
+      
+      true;
+   
+}
+
 function <<test.Test>> meta::relational::tests::tds::tdsProject::testFilterAfterLimit2():Boolean[1]
 {
    let result = execute(

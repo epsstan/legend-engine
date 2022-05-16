@@ -64,7 +64,7 @@ Class meta::pure::lineage::scanRelations::RelationTree
 
 function meta::pure::lineage::scanRelations::scanRelations(f:FunctionDefinition<Any>[1], m:Mapping[1], extensions:meta::pure::router::extension::RouterExtension[*]):RelationTree[1]
 {
-   scanRelations($f, $m, $extensions, noDebug());
+   scanRelations($f, $m, $extensions, debug());
 }
 
 function meta::pure::lineage::scanRelations::scanRelations(f:FunctionDefinition<Any>[1], m:Mapping[1], extensions:meta::pure::router::extension::RouterExtension[*], debug: meta::pure::tools::DebugContext[1]):RelationTree[1]
@@ -82,6 +82,35 @@ function meta::pure::lineage::scanRelations::scanRelations(v:ValueSpecification[
    let result = scanRelations($propertyTree->inlineQualifiedPropertyNodes(), $m, [], [], $debug)->toOne()->reOrderAndMergeRelationTree();
    print(if($debug.debug,|$debug.space+'Table Tree: ' + $result->relationTreeAsString('') + ' \n',|''));
    $result;
+}
+
+Class meta::pure::lineage::scanRelations::ScanDetails
+{
+  relationTree: RelationTree[1];
+  propertyTree: PropertyPathTree[1];  
+}
+
+function meta::pure::lineage::scanRelations::scanRelationsHelper(f:FunctionDefinition<Any>[1], m:Mapping[1], extensions:meta::pure::router::extension::RouterExtension[*]):ScanDetails[1]
+{
+   scanRelationsHelper($f, $m, $extensions, noDebug());
+}
+
+function meta::pure::lineage::scanRelations::scanRelationsHelper(f:FunctionDefinition<Any>[1], m:Mapping[1], extensions:meta::pure::router::extension::RouterExtension[*], debug: meta::pure::tools::DebugContext[1]):ScanDetails[1]
+{
+   print(if($debug.debug,|$debug.space+'Function: ' + $f->meta::pure::router::printer::asString() + ' \n',|''));
+   scanRelationsHelper($f.expressionSequence->evaluateAndDeactivate()->last()->toOne(), $f->openVariableValues(), $m, $extensions, $debug);
+}
+
+
+function meta::pure::lineage::scanRelations::scanRelationsHelper(v:ValueSpecification[1], o:Map<String, List<Any>>[1], m:Mapping[1], extensions:meta::pure::router::extension::RouterExtension[*], debug: meta::pure::tools::DebugContext[1]):ScanDetails[1]
+{
+   let funcBody = $v->inlineQualifiedProperties(newMap([]->cast(@Pair<VariableExpression, ValueSpecification>), VariableExpression->classPropertyByName('name')->cast(@Property<VariableExpression,String|1>)), $o, $extensions);
+   print(if($debug.debug,|$debug.space+'Function Expression with inlined qualifiers: ' + $funcBody->meta::pure::router::printer::asString() + ' \n',|''));
+   let propertyTree = $funcBody->scanProperties(^List<PropertyPathNode>(), [], [], $debug).result->buildPropertyTree();
+   print(if($debug.debug,|$debug.space+'Property Tree: ' + $propertyTree->meta::pure::lineage::scanProperties::propertyTree::printTree('') + ' \n',|''));
+   let result = scanRelations($propertyTree->inlineQualifiedPropertyNodes(), $m, [], [], $debug)->toOne()->reOrderAndMergeRelationTree();
+   print(if($debug.debug,|$debug.space+'Table Tree: ' + $result->relationTreeAsString('') + ' \n',|''));
+   ^ScanDetails(relationTree=$result, propertyTree=$propertyTree);
 }
 
 function meta::pure::lineage::scanRelations::scanRelations(p: PropertyPathTree[1], m:Mapping[1]):RelationTree[1]
