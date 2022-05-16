@@ -19,6 +19,30 @@ import meta::relational::functions::database::*;
 import meta::pure::graphFetch::execution::*;
 import meta::relational::tests::model::simple::*;
 
+function meta::pure::lineage::scanRelations::test::query1():ScanDetails[1]
+{
+   let query = {|meta::relational::tests::model::simple::Firm.all()-> project([f|$f.legalName,
+                                                                           f|$f.employees.firstName,
+                                                                           f|$f.employees.lastName,
+                                                                           f|$f.employees.age],
+                                                                          ['Firm Name','Employee First Name','Employee Last Name', 'Employee Age'])};
+   let mapping = meta::relational::tests::caseSentitiveMapping;
+
+   meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
+}
+
+function meta::pure::lineage::scanRelations::test::query2():ScanDetails[1]
+{
+   let query = {|meta::relational::tests::model::simple::Firm.all()-> filter(f | $f.employees->exists(e | $e.age > 2))->project([f|$f.legalName,
+                                                                           f|$f.employees.firstName,
+                                                                           f|$f.employees.lastName],
+                                                                          ['Firm Name','Employee First Name','Employee Last Name'])};
+   let mapping = meta::relational::tests::caseSentitiveMapping;
+
+   meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
+}
+
+
 
 function meta::pure::lineage::scanRelations::test::testTableTree_Inheritance_1_PropertyTree():ScanDetails[1]
 {

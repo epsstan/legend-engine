@@ -1,0 +1,83 @@
+
+import meta::pure::lineage::scanProperties::propertyTree::*;
+import meta::pure::lineage::scanProperties::*;
+import meta::pure::lineage::scanRelations::*;
+
+Class meta::pure::lineage::scanRelations::User
+{
+   name: String[1];
+   userName: String[1];
+
+   dataClassification: Integer[1];
+}
+
+Class meta::pure::lineage::scanRelations::AuthzResult
+{
+  result:Boolean[1];
+  reason:String[1];
+}
+
+function meta::pure::lineage::scanRelations::isAuthorized(valueKey:String[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):AuthzResult[1]
+{
+    let userClassification = $user.dataClassification;
+    let valueClassificaton = if(
+                                $dataMd->keys()->contains($valueKey),
+                                | let attrs = $dataMd->get($valueKey)->toOne(); 
+                                  if($attrs->keys()->contains('data-classification'), | $attrs->get('data-classification')->toOne(),|0);, 
+                                |0);
+    let result = $userClassification >= $valueClassificaton;
+    let reason = 'Condition : [ User classification = ' + $userClassification->toString() + ' >= ' + ' Data classifcation = ' + $valueClassificaton->toString() + ']';
+    if ($result, | ^AuthzResult(result=$result, reason=$reason), | ^AuthzResult(result=$result, reason = 'Failed ' + $reason));
+}
+
+function meta::pure::lineage::scanRelations::visitValueImpl(valueKey:String[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):Boolean[1]
+{
+  let authzResult = meta::pure::lineage::scanRelations::isAuthorized($valueKey, $user, $dataMd);
+  let authzResultPretty = if($authzResult.result, |$authzResult.result->toString(), |'FALSE');
+  println('Visiting ' + $valueKey + ' : Authorized = ' + $authzResultPretty + ' : ' + $authzResult.reason);
+  $authzResult.result;
+}
+
+function meta::pure::lineage::scanRelations::visitPropertyValue(p:PropertyPathNode[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):Boolean[1]
+{
+  let valueKey = $p.class.name->toOne()+'.'+$p.property.name->toOne();
+  meta::pure::lineage::scanRelations::visitValueImpl($valueKey, $user, $dataMd);
+}
+
+
+function meta::pure::lineage::scanRelations::visitClassValue(c:Class<Any>[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):Boolean[1]
+{
+  let valueKey = $c.name->toOne();
+  meta::pure::lineage::scanRelations::visitValueImpl($valueKey, $user, $dataMd);
+}
+
+function meta::pure::lineage::scanRelations::visitStringValue(value:String[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):Boolean[1]
+{
+  meta::pure::lineage::scanRelations::visitValueImpl($value, $user, $dataMd);
+}
+
+
+function meta::pure::lineage::scanRelations::visit(root:PropertyPathTree[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):Boolean[1]
+{ 
+    let rootResult = $root.value->match(
+      [
+        c:Class<Any>[1] | meta::pure::lineage::scanRelations::visitClassValue($c, $user, $dataMd),
+        s:String[1] | meta::pure::lineage::scanRelations::visitStringValue($s, $user, $dataMd),
+        p:PropertyPathNode[1] | meta::pure::lineage::scanRelations::visitPropertyValue($p, $user, $dataMd)
+      ]
+    );
+
+    let childrenResult = $root.children->sort({a,b| if($a.value->instanceOf(PropertyPathNode) && $b.value->instanceOf(PropertyPathNode),
+                             |let c = $a.value->cast(@PropertyPathNode);
+                              let d = $b.value->cast(@PropertyPathNode);
+                              let e = $c.class.name->toOne()+'.'+$c.property.name->toOne();
+                              let f = $d.class.name->toOne()+'.'+$d.property.name->toOne();
+                              $e->compare($f);,
+                             |0
+                          );
+                     })
+              ->map(c| meta::pure::lineage::scanRelations::visit($c, $user, $dataMd));
+
+  $rootResult && !$childrenResult->contains(false);
+  
+}

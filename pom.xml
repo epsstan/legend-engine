@@ -447,6 +447,7 @@
                     <execution>
                         <id>enforce</id>
                         <configuration>
+                            <skip>true</skip>
                             <rules>
                                 <requireJavaVersion>
                                     <version>[11.0.10,12)</version>
