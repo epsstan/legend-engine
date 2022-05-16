@@ -19,6 +19,27 @@ import meta::relational::functions::database::*;
 import meta::pure::graphFetch::execution::*;
 import meta::relational::tests::model::simple::*;
 
+
+function meta::pure::lineage::scanRelations::test::testTableTree_Inheritance_1_PropertyTree():ScanDetails[1]
+{
+   let query = {|meta::relational::tests::model::inheritance::Person.all()-> project([f|$f.name,
+                                                                           f|$f.vehicles-> subType(@meta::relational::tests::model::inheritance::Car).owner.name,
+                                                                           f|$f.vehicles-> subType(@meta::relational::tests::model::inheritance::Bicycle).owner.name],
+                                                                          ['Person','Car Owner','Bicycle Owner'])};
+   let mapping = meta::relational::tests::mapping::inheritance::relational::inheritanceMappingDB;
+
+   meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
+}
+
+function meta::pure::lineage::scanRelations::test::testAuthz():ScanDetails[1]
+{
+   let query = {|meta::relational::tests::model::simple::Firm.all()-> project([f|$f.legalName, f|$f.employees.name, f|$f.employees.age],
+                                                                          ['Firm Legal Name', 'Employee Name', 'Employee Age'])};
+   let mapping = meta::relational::tests::caseSentitiveMapping;
+
+   meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
+}
+
 function <<meta::pure::profiles::test.Test>> meta::pure::lineage::scanRelations::test::testTableTree_Inheritance_1():Boolean[1]
 {
    let query = {|meta::relational::tests::model::inheritance::Person.all()-> project([f|$f.name,

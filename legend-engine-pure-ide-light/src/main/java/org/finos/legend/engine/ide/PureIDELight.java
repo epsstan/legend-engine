@@ -18,7 +18,8 @@ public class PureIDELight extends PureIDEServer
 {
     public static void main(String[] args) throws Exception
     {
-        new PureIDELight().run(args);
+        PureIDELight pureIDELight = new PureIDELight();
+        pureIDELight.run(args);
     }
 
     public MutableList<RepositoryCodeStorage> buildRepositories(SourceLocationConfiguration sourceLocationConfiguration)

@@ -43,6 +43,7 @@ import meta::pure::router::routing::*;
 // Execution Plan
 function meta::relational::mapping::planExecution(sq:meta::pure::mapping::StoreQuery[1], ext:RoutedValueSpecification[0..1], m:Mapping[0..1], runtime:Runtime[0..1], exeCtx:ExecutionContext[1], extensions:RouterExtension[*], debug:DebugContext[1]):ExecutionNode[1]
 {
+  println('aaaaaaaaaaaaaaaaaaaaaaaaaa');
    let store = $sq.store->cast(@Database);
    let fe = $sq.fe->evaluateAndDeactivate();
    if($fe.func->in([meta::pure::graphFetch::execution::graphFetchFunctions()]),
@@ -253,11 +254,13 @@ function meta::relational::mapping::utcToTimeZoneSupportFunction():String[1]
 // Execution flow
 function meta::relational::mapping::execution(sq:meta::pure::mapping::StoreQuery[1], ext:RoutedValueSpecification[0..1], m:Mapping[1], runtime:Runtime[1], exeCtx:ExecutionContext[1], extensions:RouterExtension[*], debug:DebugContext[1]):Result<Any|*>[1]
 {
+   println('-----------------');
    execution($sq.store->cast(@Database), $sq.fe, $ext, $m, $runtime, $sq.inScopeVars, $exeCtx, $extensions, $debug);
 }
 
 function meta::relational::mapping::execution(store: Database[1], f:FunctionExpression[1], ext:RoutedValueSpecification[0..1], m:Mapping[1], runtime:Runtime[1], inScopeVars:Map<String, List<Any>>[1], exeCtx:ExecutionContext[1], extensions:meta::pure::router::extension::RouterExtension[*], debug:DebugContext[1]):Result<Any|*>[1]
 {
+  println('-----------------');
    let toSqlQueryStart = now();
 
    let relationalExecutionContext = $exeCtx->match([r:RelationalExecutionContext[1]|$r, a:Any[0..1]|[]]);
@@ -308,6 +311,7 @@ function meta::relational::mapping::execution(store: Database[1], f:FunctionExpr
 function meta::relational::mapping::executeQuery(sql:String[1], query:SQLQuery[0..1], paths: Pair<String, PathInformation>[*], connection : DatabaseConnection[1], runtime: Runtime[1], class:Type[0..1], ext:RoutedValueSpecification[0..1], m: Mapping[1], sqlGenerationTimeInNanoSecond:Integer[0..1], g_queryTimeOutInSeconds: Integer[0..1], exeCtx:ExecutionContext[1], extensions: RouterExtension[*], debug:DebugContext[1]):Result<Any|*>[1]
 {
    print(if(!$debug.debug, |'', | $debug.space+'>Execute SQL: '+$sql+'\n'));
+  
 
    let queryTimeOutInSeconds = if($g_queryTimeOutInSeconds->isNotEmpty(),
                                        | $g_queryTimeOutInSeconds->toOne(),
