@@ -1,0 +1,40 @@
+
+import meta::pure::functions::collection::*;
+
+function meta::relational::authz::test::authzDemoImpl(
+      user:meta::relational::authz::User[1], 
+      dataMd:Map<String, Map<String, Integer>>[1],
+      scanDetails:meta::pure::lineage::scanRelations::ScanDetails[1]
+):Any[1]
+{
+  println('+ Authz tree for user = ' + $user.userName);
+  let result = meta::relational::authz::visit($scanDetails.propertyTree, $user, $dataMd);
+  println('+ Authz result = ' + $result->toString());
+  $result;
+}
+
+function meta::relational::authz::test::authzDemo():Any[1]
+{
+
+  let dataMetadata = newMap(
+    [
+      pair('Person', newMap([pair('data-classification', 1)])),
+      pair('Person.firstName', newMap([pair('data-classification', 2)])),
+      pair('Person.lastName', newMap([pair('data-classification', 2)])),
+      pair('Person.age', newMap([pair('data-classification', 6)]))
+    ]
+  );
+
+
+  let alice = ^meta::relational::authz::User(name='alice', userName='alice', dataClassification=1);
+  meta::relational::authz::test::authzDemoImpl($alice, $dataMetadata, meta::pure::lineage::scanRelations::test::query1());
+
+  let bob = ^meta::relational::authz::User(name='bob', userName='bob', dataClassification=2);
+  meta::relational::authz::test::authzDemoImpl($bob, $dataMetadata, meta::pure::lineage::scanRelations::test::query1());
+
+  let charlie = ^meta::relational::authz::User(name='charlie', userName='charlie', dataClassification=7);
+  meta::relational::authz::test::authzDemoImpl($charlie, $dataMetadata, meta::pure::lineage::scanRelations::test::query1());
+
+  meta::relational::authz::test::authzDemoImpl($charlie, $dataMetadata, meta::pure::lineage::scanRelations::test::query2());
+}
+
