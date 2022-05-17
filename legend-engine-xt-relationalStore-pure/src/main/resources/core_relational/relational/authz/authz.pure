@@ -37,10 +37,31 @@ function meta::relational::authz::print(r: meta::relational::authz::AuthzResults
   1;
 }
 
+function meta::relational::authz::printAsString(r: meta::relational::authz::AuthzResults[1]):Any[1]
+{
+  let str1 = 'Aggregate authz result = ' + $r.aggregate->toString();
+  let str2 = 
+  fold( 
+      $r.results->keyValues()->map(kv | 'Path : ' + $kv.first + ' => ' + $kv.second.result->toString() + ' : reason = ' + $kv.second.reason),
+      {val, acc | $acc + $val + '\n'}, 
+      ''
+  );
+
+  $str1 + '\n' + $str2;
+}
+
 function meta::relational::authz::add(results:meta::relational::authz::AuthzResults[1], path:String[1], result: meta::relational::authz::AuthzResult[1]):meta::relational::authz::AuthzResults[1]
 {
   ^meta::relational::authz::AuthzResults(aggregate=$results.aggregate && $result.result, results=$results.results->put($path, $result));
 }
+
+function meta::relational::authz::merge(resultsList:meta::relational::authz::AuthzResults[0..*]):meta::relational::authz::AuthzResults[1]
+{
+  let mergedResults = fold($resultsList->map(r | $r.results), {val, acc| $acc->putAll($val)}, newMap([]));
+  let mergedAggregate = !$mergedResults->values()->map(r | $r.result)->contains(false);
+  ^meta::relational::authz::AuthzResults(aggregate=$mergedAggregate, results=$mergedResults);
+}
+
 
 function meta::relational::authz::isAuthorized(valueKey:String[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):AuthzResult[1]
 {
@@ -55,40 +76,41 @@ function meta::relational::authz::isAuthorized(valueKey:String[1], user:User[1],
     if ($result, | ^AuthzResult(result=$result, reason=$reason), | ^AuthzResult(result=$result, reason = 'Failed ' + $reason));
 }
 
-function meta::relational::authz::visitValueImpl(valueKey:String[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):Boolean[1]
+function meta::relational::authz::visitValueImpl(valueKey:String[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1], results:meta::relational::authz::AuthzResults[1]):meta::relational::authz::AuthzResults[1]
 {
   let authzResult = meta::relational::authz::isAuthorized($valueKey, $user, $dataMd);
   let authzResultPretty = if($authzResult.result, |$authzResult.result->toString(), |'FALSE');
   println('Visiting ' + $valueKey + ' : Authorized = ' + $authzResultPretty + ' : ' + $authzResult.reason);
-  $authzResult.result;
+  
+  meta::relational::authz::add($results, $valueKey, $authzResult);
 }
 
-function meta::relational::authz::visitPropertyValue(p:PropertyPathNode[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):Boolean[1]
+function meta::relational::authz::visitPropertyValue(p:PropertyPathNode[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1],results:meta::relational::authz::AuthzResults[1]):meta::relational::authz::AuthzResults[1]
 {
   let valueKey = $p.class.name->toOne()+'.'+$p.property.name->toOne();
-  meta::relational::authz::visitValueImpl($valueKey, $user, $dataMd);
+  meta::relational::authz::visitValueImpl($valueKey, $user, $dataMd, $results);
 }
 
 
-function meta::relational::authz::visitClassValue(c:Class<Any>[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):Boolean[1]
+function meta::relational::authz::visitClassValue(c:Class<Any>[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1], results:meta::relational::authz::AuthzResults[1]):meta::relational::authz::AuthzResults[1]
 {
   let valueKey = $c.name->toOne();
-  meta::relational::authz::visitValueImpl($valueKey, $user, $dataMd);
+  meta::relational::authz::visitValueImpl($valueKey, $user, $dataMd, $results);
 }
 
-function meta::relational::authz::visitStringValue(value:String[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):Boolean[1]
+function meta::relational::authz::visitStringValue(value:String[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1], results:meta::relational::authz::AuthzResults[1]):meta::relational::authz::AuthzResults[1]
 {
-  meta::relational::authz::visitValueImpl($value, $user, $dataMd);
+  meta::relational::authz::visitValueImpl($value, $user, $dataMd, $results);
 }
 
 
-function meta::relational::authz::visit(root:PropertyPathTree[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):Boolean[1]
+function meta::relational::authz::visitImpl(root:PropertyPathTree[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1], results:meta::relational::authz::AuthzResults[1]):meta::relational::authz::AuthzResults[1]
 { 
     let rootResult = $root.value->match(
       [
-        c:Class<Any>[1] | meta::relational::authz::visitClassValue($c, $user, $dataMd),
-        s:String[1] | meta::relational::authz::visitStringValue($s, $user, $dataMd),
-        p:PropertyPathNode[1] | meta::relational::authz::visitPropertyValue($p, $user, $dataMd)
+        c:Class<Any>[1] | meta::relational::authz::visitClassValue($c, $user, $dataMd, $results),
+        s:String[1] | meta::relational::authz::visitStringValue($s, $user, $dataMd, $results),
+        p:PropertyPathNode[1] | meta::relational::authz::visitPropertyValue($p, $user, $dataMd, $results)
       ]
     );
 
@@ -101,8 +123,13 @@ function meta::relational::authz::visit(root:PropertyPathTree[1], user:User[1], 
                              |0
                           );
                      })
-              ->map(c| meta::relational::authz::visit($c, $user, $dataMd));
+              ->map(c| meta::relational::authz::visitImpl($c, $user, $dataMd, $results));
 
-  $rootResult && !$childrenResult->contains(false);
-  
+  meta::relational::authz::merge($rootResult->concatenate($childrenResult));
+}
+
+function meta::relational::authz::visit(root:PropertyPathTree[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):meta::relational::authz::AuthzResults[1]
+{ 
+    let results = meta::relational::authz::newAuthzResults();
+    meta::relational::authz::visitImpl($root, $user, $dataMd, $results);
 }
