@@ -13,10 +13,33 @@ Class meta::relational::authz::User
 }
 
 // TODO - Move to different package. Not relational
+Class meta::relational::authz::AuthzResults
+{
+  aggregate: Boolean[1];
+  results: Map<String, AuthzResult>[1];
+}
+
 Class meta::relational::authz::AuthzResult
 {
-  result:Boolean[1];
-  reason:String[1];
+  result: Boolean[1];
+  reason: String[1];
+}
+
+function meta::relational::authz::newAuthzResults():AuthzResults[1]
+{
+  ^meta::relational::authz::AuthzResults(aggregate=false, results=newMap([]))
+}
+
+function meta::relational::authz::print(r: meta::relational::authz::AuthzResults[1]):Any[1]
+{
+  println('Aggregate authz result = ' + $r.aggregate->toString());
+  $r.results->keyValues()->map(kv | println( 'Path : ' + $kv.first + ' => ' + $kv.second.result->toString() + ' : reason = ' + $kv.second.reason));
+  1;
+}
+
+function meta::relational::authz::add(results:meta::relational::authz::AuthzResults[1], path:String[1], result: meta::relational::authz::AuthzResult[1]):meta::relational::authz::AuthzResults[1]
+{
+  ^meta::relational::authz::AuthzResults(aggregate=$results.aggregate && $result.result, results=$results.results->put($path, $result));
 }
 
 function meta::relational::authz::isAuthorized(valueKey:String[1], user:User[1], dataMd:Map<String, Map<String, Integer>>[1]):AuthzResult[1]
