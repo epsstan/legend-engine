@@ -1,0 +1,29 @@
+import meta::relational::authz::*;
+import meta::relational::authz::assert::*;
+
+function meta::relational::authz::assert::assertAuthorized(r: AuthzResults[1]):AuthzResults[1]
+{
+    assert($r.aggregate);
+    $r;
+}
+
+function meta::relational::authz::assert::assertUnAuthorized(r: AuthzResults[1]):AuthzResults[1]
+{
+    assertFalse($r.aggregate);
+    $r;
+}
+
+function meta::relational::authz::assert::assertAuthorized(r: AuthzResults[1], p:String[1], c:String[1]):AuthzResults[1]
+{
+    assert($r.results->get($p)->toOne().result);
+    assertEq($r.results->get($p)->toOne().reason, $c);
+    $r;
+}
+
+
+function meta::relational::authz::assert::assertUnAuthorized(r: AuthzResults[1], p:String[1], c:String[1]):AuthzResults[1]
+{
+    assertFalse($r.results->get($p)->toOne().result);
+    assertEq($r.results->get($p)->toOne().reason, $c);
+    $r;
+}
