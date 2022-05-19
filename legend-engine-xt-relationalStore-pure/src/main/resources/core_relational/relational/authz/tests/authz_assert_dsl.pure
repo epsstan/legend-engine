@@ -1,27 +1,47 @@
 import meta::relational::authz::*;
 import meta::relational::authz::assert::*;
+import meta::pure::functions::collection::*;
+import meta::pure::lineage::scanRelations::*;
+import meta::pure::lineage::scanRelations::*;
+import meta::pure::router::extension::*;
+import meta::relational::metamodel::join::*;
+import meta::relational::functions::database::*;
+import meta::pure::graphFetch::execution::*;
+import meta::relational::tests::model::simple::*;
+import meta::relational::authz::assert::*;
 
-function meta::relational::authz::assert::assertAuthorized(r: AuthzResults[1]):AuthzResults[1]
+function meta::relational::authz::test::evalAuthzForUser(
+      user:meta::relational::authz::User[1], 
+      dataMd:Map<String, Map<String, Integer>>[1],
+      scanDetails:meta::pure::lineage::scanRelations::ScanDetails[1]
+):meta::relational::authz::AuthzResults[1]
+{
+  println('+ Authz tree for user = ' + $user.userName);
+  let result = meta::relational::authz::visit($scanDetails.propertyTree, $user, $dataMd);
+  println('+ Authz result = ' + $result->toString());
+  $result;
+}
+
+function meta::relational::authz::assert::allowed(r: AuthzResults[1]):AuthzResults[1]
 {
     assert($r.aggregate);
     $r;
 }
 
-function meta::relational::authz::assert::assertUnAuthorized(r: AuthzResults[1]):AuthzResults[1]
+function meta::relational::authz::assert::denied(r: AuthzResults[1]):AuthzResults[1]
 {
     assertFalse($r.aggregate);
     $r;
 }
 
-function meta::relational::authz::assert::assertAuthorized(r: AuthzResults[1], p:String[1], c:String[1]):AuthzResults[1]
+function meta::relational::authz::assert::allowed(r: AuthzResults[1], p:String[1], c:String[1]):AuthzResults[1]
 {
     assert($r.results->get($p)->toOne().result);
     assertEq($r.results->get($p)->toOne().reason, $c);
     $r;
 }
 
-
-function meta::relational::authz::assert::assertUnAuthorized(r: AuthzResults[1], p:String[1], c:String[1]):AuthzResults[1]
+function meta::relational::authz::assert::denied(r: AuthzResults[1], p:String[1], c:String[1]):AuthzResults[1]
 {
     assertFalse($r.results->get($p)->toOne().result);
     assertEq($r.results->get($p)->toOne().reason, $c);
