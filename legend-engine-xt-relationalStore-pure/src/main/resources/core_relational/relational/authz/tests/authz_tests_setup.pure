@@ -1,0 +1,12 @@
+
+function meta::relational::authz::test::buildDataMetadata():Map<String, Map<String, Integer>>[1]
+{
+  newMap(
+    [
+      pair('Person', newMap([pair('data-classification', 1)])),
+      pair('Person.firstName', newMap([pair('data-classification', 2)])),
+      pair('Person.lastName', newMap([pair('data-classification', 2)])),
+      pair('Person.age', newMap([pair('data-classification', 6)]))
+    ]
+  );
+}

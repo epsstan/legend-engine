@@ -92,7 +92,7 @@ Class meta::pure::lineage::scanRelations::ScanDetails
 
 function meta::pure::lineage::scanRelations::scanRelationsHelper(f:FunctionDefinition<Any>[1], m:Mapping[1], extensions:meta::pure::router::extension::RouterExtension[*]):ScanDetails[1]
 {
-   scanRelationsHelper($f, $m, $extensions, noDebug());
+   scanRelationsHelper($f, $m, $extensions, debug());
 }
 
 function meta::pure::lineage::scanRelations::scanRelationsHelper(f:FunctionDefinition<Any>[1], m:Mapping[1], extensions:meta::pure::router::extension::RouterExtension[*], debug: meta::pure::tools::DebugContext[1]):ScanDetails[1]
@@ -107,6 +107,8 @@ function meta::pure::lineage::scanRelations::scanRelationsHelper(v:ValueSpecific
    let funcBody = $v->inlineQualifiedProperties(newMap([]->cast(@Pair<VariableExpression, ValueSpecification>), VariableExpression->classPropertyByName('name')->cast(@Property<VariableExpression,String|1>)), $o, $extensions);
    print(if($debug.debug,|$debug.space+'Function Expression with inlined qualifiers: ' + $funcBody->meta::pure::router::printer::asString() + ' \n',|''));
    let propertyTree = $funcBody->scanProperties(^List<PropertyPathNode>(), [], [], $debug).result->buildPropertyTree();
+   println('xxxx ');
+   println($v);
    print(if($debug.debug,|$debug.space+'Property Tree: ' + $propertyTree->meta::pure::lineage::scanProperties::propertyTree::printTree('') + ' \n',|''));
    let result = scanRelations($propertyTree->inlineQualifiedPropertyNodes(), $m, [], [], $debug)->toOne()->reOrderAndMergeRelationTree();
    print(if($debug.debug,|$debug.space+'Table Tree: ' + $result->relationTreeAsString('') + ' \n',|''));
@@ -167,7 +169,6 @@ function <<access.private>> meta::pure::lineage::scanRelations::scanRelations(p:
          $pn.property->match([
             prop : Property<Nil,Any|*>[1] |
                print(if($debug.debug,|$debug.space+'Process property: '+$prop.name->toOne()+', Source set: ' + if($epm->isNotEmpty(), |$epm, | $source).id->joinStrings('[', ', ', ']') + ' \n',|''));
-
                let mainRelation = $source->toOne().mainRelation->toOne();
                let propMappings = if($prop->hasGeneratedMilestoningDatePropertyStereotype(),
                                      | [],

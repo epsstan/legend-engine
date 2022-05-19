@@ -1,0 +1,119 @@
+import meta::pure::profiles::*;
+import meta::pure::functions::collection::*;
+import meta::pure::lineage::scanRelations::*;
+import meta::pure::lineage::scanRelations::*;
+import meta::pure::router::extension::*;
+import meta::relational::metamodel::join::*;
+import meta::relational::functions::database::*;
+import meta::pure::graphFetch::execution::*;
+import meta::relational::tests::model::simple::*;
+import meta::relational::authz::assert::*;
+import meta::relational::authz::test::*;
+
+function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test1():Boolean[1]
+{
+     let query = {|
+    meta::relational::tests::model::simple::Firm.all()
+      ->project(
+        [
+            f|$f.legalName,
+            f|$f.employees.firstName,
+            f|$f.employees.lastName,
+            f|$f.employees.age
+        ],
+        ['Firm Name','Employee First Name','Employee Last Name', 'Employee Age']
+      )
+  };
+  let mapping = meta::relational::tests::caseSentitiveMapping;
+  let scanDetails = meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
+
+  // Alice does not have authz over the full tree
+  let alice = ^meta::relational::authz::User(name='alice', userName='alice', dataClassification=1);
+  let aliceResults = evalAuthzForUser($alice, buildDataMetadata(), $scanDetails);
+
+  $aliceResults
+    ->denied()
+    ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->denied('Person.firstName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]')
+    ->denied('Person.lastName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]')
+    ->denied('Person.age', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 6]');  
+
+  // Charlie has authz over the full tree
+  let charlie = ^meta::relational::authz::User(name='charlie', userName='charlie', dataClassification=7);
+  let charlieResults = meta::relational::authz::test::evalAuthzForUser($charlie, buildDataMetadata(), $scanDetails);
+
+  $charlieResults
+    ->allowed()
+    ->allowed('Firm', 'Condition : [ User classification = 7 >=  Data classifcation = 0]')
+    ->allowed('Firm.legalName', 'Condition : [ User classification = 7 >=  Data classifcation = 0]')
+    ->allowed('Firm.employees', 'Condition : [ User classification = 7 >=  Data classifcation = 0]')
+    ->allowed('Person.firstName', 'Condition : [ User classification = 7 >=  Data classifcation = 2]')
+    ->allowed('Person.lastName', 'Condition : [ User classification = 7 >=  Data classifcation = 2]')
+    ->allowed('Person.age', 'Condition : [ User classification = 7 >=  Data classifcation = 6]');  
+  true;
+}
+
+/*
+  Filter
+*/
+function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test2():Boolean[1]
+{
+   let query = {|
+    meta::relational::tests::model::simple::Firm.all()
+      ->filter(f | $f.employees->exists(e | $e.age > 2))
+      ->project(
+        [
+            f|$f.legalName,
+            f|$f.employees.firstName,
+            f|$f.employees.lastName,
+            f|$f.employees.age
+        ],
+        ['Firm Name','Employee First Name','Employee Last Name', 'Employee Age']
+      )
+  };
+  let mapping = meta::relational::tests::caseSentitiveMapping;
+  let scanDetails = meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
+  
+  // Alice does not have authz over the full tree
+  let alice = ^meta::relational::authz::User(name='alice', userName='alice', dataClassification=1);
+  let aliceResults = evalAuthzForUser($alice, buildDataMetadata(), $scanDetails);
+
+  $aliceResults
+    ->denied()
+    ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->denied('Person.firstName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]')
+    ->denied('Person.lastName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]')
+    ->denied('Person.age', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 6]');  
+    true;
+}
+function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test3():Boolean[1]
+{
+  let query = {|
+    meta::relational::tests::model::simple::Firm.all()
+      ->project(
+        [
+            f|$f.legalName,
+            f|$f.employees.age->sum()
+        ],
+        ['Firm Name', 'Employee Age']
+      )
+  };
+  let mapping = meta::relational::tests::caseSentitiveMapping;
+  let scanDetails = meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
+
+  // Alice does not have authz over the full tree
+  let alice = ^meta::relational::authz::User(name='alice', userName='alice', dataClassification=1);
+  let aliceResults = evalAuthzForUser($alice, buildDataMetadata(), $scanDetails);
+
+  $aliceResults
+    ->denied()
+    ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->denied('Person.age', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 6]');  
+  true;
+}
