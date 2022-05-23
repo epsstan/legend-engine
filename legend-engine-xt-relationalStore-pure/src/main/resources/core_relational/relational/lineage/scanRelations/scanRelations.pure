@@ -92,7 +92,7 @@ Class meta::pure::lineage::scanRelations::ScanDetails
 
 function meta::pure::lineage::scanRelations::scanRelationsHelper(f:FunctionDefinition<Any>[1], m:Mapping[1], extensions:meta::pure::router::extension::RouterExtension[*]):ScanDetails[1]
 {
-   scanRelationsHelper($f, $m, $extensions, debug());
+   scanRelationsHelper($f, $m, $extensions, noDebug());
 }
 
 function meta::pure::lineage::scanRelations::scanRelationsHelper(f:FunctionDefinition<Any>[1], m:Mapping[1], extensions:meta::pure::router::extension::RouterExtension[*], debug: meta::pure::tools::DebugContext[1]):ScanDetails[1]
