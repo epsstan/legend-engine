@@ -158,6 +158,7 @@
         <module>legend-engine-extensions-collection-execution</module>
         <module>legend-engine-extensions-collection-generation</module>
         <module>legend-engine-testable</module>
+        <module>legend-engine-xt-authentication</module>
     </modules>
 
     <properties>
