@@ -10,10 +10,13 @@ import meta::relational::tests::model::simple::*;
 import meta::relational::authz::assert::*;
 import meta::relational::authz::test::*;
 
-function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test1():Boolean[1]
+
+function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::tds::test1():Boolean[1]
 {
+    // Simple case 
+
      let query = {|
-    meta::relational::tests::model::simple::Firm.all()
+      meta::relational::tests::model::simple::Firm.all()
       ->project(
         [
             f|$f.legalName,
@@ -33,6 +36,7 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test1
 
   $aliceResults
     ->denied()
+    ->properties('Firm|Firm.employees|Firm.legalName|Person.age|Person.firstName|Person.lastName|root')
     ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
@@ -46,6 +50,7 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test1
 
   $charlieResults
     ->allowed()
+    ->properties('Firm|Firm.employees|Firm.legalName|Person.age|Person.firstName|Person.lastName|root')
     ->allowed('Firm', 'Condition : [ User classification = 7 >=  Data classifcation = 0]')
     ->allowed('Firm.legalName', 'Condition : [ User classification = 7 >=  Data classifcation = 0]')
     ->allowed('Firm.employees', 'Condition : [ User classification = 7 >=  Data classifcation = 0]')
@@ -55,11 +60,9 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test1
   true;
 }
 
-/*
-  Filter
-*/
-function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test2():Boolean[1]
+function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::tds::test2():Boolean[1]
 {
+   // Verify that filter property is scanned even thought it is not projected
    let query = {|
     meta::relational::tests::model::simple::Firm.all()
       ->filter(f | $f.employees->exists(e | $e.age > 2))
@@ -82,6 +85,7 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test2
 
   $aliceResults
     ->denied()
+    ->properties('Firm|Firm.employees|Firm.legalName|Person.age|Person.firstName|Person.lastName|root')
     ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
@@ -91,8 +95,9 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test2
     true;
 }
 
-function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test3():Boolean[1]
+function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::tds::test3():Boolean[1]
 {
+  // Verify aggregation property is included
   let query = {|
     meta::relational::tests::model::simple::Firm.all()
       ->project(
@@ -112,6 +117,7 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test3
 
   $aliceResults
     ->denied()
+    ->properties('Firm|Firm.employees|Firm.legalName|Person.age|root')
     ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
@@ -119,11 +125,9 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test3
   true;
 }
 
-/*
-  Rename columns
-*/
 function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::tds::test4():Boolean[1]
 {
+  // Verify colum rename does not affect property tree
   let query = {|
     meta::relational::tests::model::simple::Firm.all()
       ->project(
@@ -133,21 +137,54 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::tds:
         ],
         ['Firm Name', 'Employee First Name']
       )
-      ->renameColumns([^Pair<String,String>(first = 'dddd', second = 'First Name')])
+      ->renameColumns([^Pair<String,String>(first = 'Firm Name', second = 'Col1'), ^Pair<String,String>(first = 'Employee First Name', second = 'Col2')])
   };
   let mapping = meta::relational::tests::caseSentitiveMapping;
+  let executeResult = executeHelper($query, meta::relational::tests::testRuntime(), $mapping);
+  assertEq('Col1,Col2', $executeResult.values.columns->map(r|$r.name->makeString('|'))->makeString(',') );
+
   let scanDetails = meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
 
-  executeHelper($query, meta::relational::tests::testRuntime(), $mapping);
-
-  // Alice does not have authz over the full tree
   let alice = ^meta::relational::authz::User(name='alice', userName='alice', dataClassification=1);
   let aliceResults = evalAuthzForUser($alice, buildDataMetadata(), $scanDetails);
 
   $aliceResults
     ->denied()
+    ->properties('Firm|Firm.employees|Firm.legalName|Person.firstName|root')
     ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]');
   true;
 }
+
+function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::tds::test5():Boolean[1]
+{
+
+  // concatenate two expressions. Property tree includes both expressions
+  let query = {|
+    meta::relational::tests::model::simple::Person.all()
+      ->project(
+        [ p|$p.lastName],
+        ['Some name']
+      )
+      ->concatenate(meta::relational::tests::model::simple::Firm.all()->project([ f|$f.legalName],
+        ['Some name']))
+  };
+  let mapping = meta::relational::tests::caseSentitiveMapping;
+  
+  let scanDetails = meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
+
+  let alice = ^meta::relational::authz::User(name='alice', userName='alice', dataClassification=1);
+  let aliceResults = evalAuthzForUser($alice, buildDataMetadata(), $scanDetails);
+
+  $aliceResults
+    ->denied()
+    ->properties('Firm|Firm.legalName|Person|Person.lastName|root')
+    ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->denied('Person.lastName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]');
+  true;
+}
+
+// TODO - extend
+// TODO - join

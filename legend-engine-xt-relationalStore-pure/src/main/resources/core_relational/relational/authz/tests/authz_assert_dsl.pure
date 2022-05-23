@@ -34,6 +34,18 @@ function meta::relational::authz::assert::denied(r: AuthzResults[1]):AuthzResult
     $r;
 }
 
+function meta::relational::authz::assert::propertySize(r: AuthzResults[1], e: Integer[1]):AuthzResults[1]
+{
+    assertEq($e, $r.results->keys()->size());
+    $r;
+}
+
+function meta::relational::authz::assert::properties(r: AuthzResults[1], s: String[1]):AuthzResults[1]
+{
+    assertEq($s, $r.results->keys()->sort()->makeString('|'));
+    $r;
+}
+
 function meta::relational::authz::assert::allowed(r: AuthzResults[1], p:String[1], c:String[1]):AuthzResults[1]
 {
     assert($r.results->get($p)->toOne().result);

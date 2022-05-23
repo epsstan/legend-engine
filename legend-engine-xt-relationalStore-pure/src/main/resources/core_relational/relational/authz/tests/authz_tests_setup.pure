@@ -1,4 +1,10 @@
 
+function <<test.BeforePackage>> meta::relational::authz::test::setUp():Boolean[1]
+{
+    meta::relational::tests::createTablesAndFillDb();
+}
+
+
 function meta::relational::authz::test::buildDataMetadata():Map<String, Map<String, Integer>>[1]
 {
   newMap(
