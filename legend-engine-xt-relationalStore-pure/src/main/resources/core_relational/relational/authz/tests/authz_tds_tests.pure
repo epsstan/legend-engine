@@ -188,3 +188,4 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::tds:
 
 // TODO - extend
 // TODO - join
+// TODO - qualified property
