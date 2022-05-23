@@ -1,0 +1,26 @@
+import meta::relational::tests::model::simple::*;
+import meta::relational::mapping::*;
+import meta::relational::runtime::*;
+import meta::relational::tests::*;
+import meta::relational::tests::*;
+import meta::pure::runtime::*;
+import meta::pure::mapping::*;
+
+
+function meta::relational::authz::test::executeHelper(q: LambdaFunction<{->TabularDataSet[1]}>[1], r:Runtime[1], m:Mapping[1]):Any[1]
+{
+   let result = execute(
+      $q,
+      simpleRelationalMapping, 
+      testRuntime(), meta::pure::router::extension::defaultRelationalExtensions());
+   
+   assertSize($result.values.columns, 2);   
+   
+   assertEquals('Peter|Hello,John|Hello,John|Hello,Anthony|Hello,Fabrice|Hello,Oliver|Hello,David|Hello',
+      $result.values.rows->map(r|$r.values->makeString('|'))->makeString(','));
+   
+   assertEquals('select "persontable_0"."firstName" as "First Name", "persontable_0"."hello" as "Other" from (select "root".FIRSTNAME as "firstName", \'Hello\' as "hello" from personTable as "root") as "persontable_0"', 
+      $result->sqlRemoveFormatting());   
+
+      1;
+}

@@ -90,6 +90,7 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test2
     ->denied('Person.age', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 6]');  
     true;
 }
+
 function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test3():Boolean[1]
 {
   let query = {|
@@ -115,5 +116,38 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::tds::test3
     ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->denied('Person.age', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 6]');  
+  true;
+}
+
+/*
+  Rename columns
+*/
+function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::tds::test4():Boolean[1]
+{
+  let query = {|
+    meta::relational::tests::model::simple::Firm.all()
+      ->project(
+        [
+            f|$f.legalName,
+            f|$f.employees.firstName
+        ],
+        ['Firm Name', 'Employee First Name']
+      )
+      ->renameColumns([^Pair<String,String>(first = 'dddd', second = 'First Name')])
+  };
+  let mapping = meta::relational::tests::caseSentitiveMapping;
+  let scanDetails = meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
+
+  executeHelper($query, meta::relational::tests::testRuntime(), $mapping);
+
+  // Alice does not have authz over the full tree
+  let alice = ^meta::relational::authz::User(name='alice', userName='alice', dataClassification=1);
+  let aliceResults = evalAuthzForUser($alice, buildDataMetadata(), $scanDetails);
+
+  $aliceResults
+    ->denied()
+    ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
+    ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]');
   true;
 }
