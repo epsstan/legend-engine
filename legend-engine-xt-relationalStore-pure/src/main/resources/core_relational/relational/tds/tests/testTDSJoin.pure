@@ -225,8 +225,11 @@ import meta::relational::metamodel::join::*;
 
 function <<test.Test>> meta::relational::tests::tds::tdsJoin::testInnerJoinSimple():Boolean[1]
 {
-   let result = execute(|testJoinTDS_Person.all()->project([#/testJoinTDS_Person/personID!personID#, #/testJoinTDS_Person/lastName!personName#, #/testJoinTDS_Person/employerID!eID#])
-                        ->join(testJoinTDS_Firm.all()->project([#/testJoinTDS_Firm/legalName!firmName#, #/testJoinTDS_Firm/firmID!fID#]), JoinType.INNER, {a,b|$a.getInteger('eID') == $b.getInteger('fID');}), testJoinTDSMapping, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions());
+   let result = execute(|
+                  testJoinTDS_Person.all()->project([#/testJoinTDS_Person/personID!personID#, #/testJoinTDS_Person/lastName!personName#, #/testJoinTDS_Person/employerID!eID#])
+                    ->join(testJoinTDS_Firm.all()->project([#/testJoinTDS_Firm/legalName!firmName#, #/testJoinTDS_Firm/firmID!fID#]),
+                        JoinType.INNER, {a,b|$a.getInteger('eID') == $b.getInteger('fID');}
+                   ), testJoinTDSMapping, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions());
    assertSize($result.values.rows, 7 );
    assertSameElements(['1,Smith,1,Firm X,1', '2,Johnson,1,Firm X,1', '3,Hill,1,Firm X,1', '4,Allen,1,Firm X,1',
                        '5,Roberts,2,Firm A,2', '6,Hill,3,Firm B,3', '7,Harris,4,Firm C,4'], $result.values.rows->map(r|$r.values->makeString(',')));
