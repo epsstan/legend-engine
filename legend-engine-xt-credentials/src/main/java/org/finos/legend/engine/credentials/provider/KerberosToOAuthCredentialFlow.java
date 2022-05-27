@@ -10,12 +10,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @Value.Enclosing
-public class KerberosToOAuthCredentialFlow extends AbstractCredentialsProviderFlow<
-        LegendKerberosCredential,
-        LegendOAuthCredential,
-        KerberosToOAuthCredentialFlow.ConfigurationParams,
-        LegendOAuthCredential.CredentialRequestParams
-        >
+public class KerberosToOAuthCredentialFlow extends AbstractCredentialsProviderFlow<KerberosToOAuthCredentialFlow.ConfigurationParams, LegendKerberosCredential, LegendOAuthCredential, LegendOAuthCredential.CredentialRequestParams>
 {
 
     private ConfigurationParams configurationParams;
@@ -30,7 +25,7 @@ public class KerberosToOAuthCredentialFlow extends AbstractCredentialsProviderFl
     }
 
     @Override
-    public CredentialsProviderFlow<LegendKerberosCredential, LegendOAuthCredential, ConfigurationParams, LegendOAuthCredential.CredentialRequestParams> configure(ConfigurationParams configurationParams) {
+    public CredentialsProviderFlow<ConfigurationParams, LegendKerberosCredential, LegendOAuthCredential, LegendOAuthCredential.CredentialRequestParams> configure(ConfigurationParams configurationParams) {
         this.configurationParams = configurationParams;
         return this;
     }

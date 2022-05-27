@@ -3,6 +3,7 @@ package org.finos.legend.engine.credentials.provider;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.finos.legend.engine.credentials.credential.*;
+import org.finos.legend.engine.credentials.registry.CredentialsProviderFlowRegistry;
 import org.finos.legend.engine.shared.core.identity.Identity;
 import org.finos.legend.engine.shared.core.identity.credential.LegendKerberosCredential;
 import org.junit.Before;
@@ -88,6 +89,7 @@ public class CredentialsProviderTest {
                         LegendKerberosCredential.class,
                         ImmutableLegendAwsCredential.CredentialRequestParams.builder().build()
                 );
+
         AwsCredentials underlying = supplier.get().getUnderlying();
         S3Client s3 = S3Client.builder().region(Region.US_EAST_1)
                 .credentialsProvider(StaticCredentialsProvider.create(underlying))

@@ -20,20 +20,13 @@ import org.finos.legend.engine.shared.core.identity.Identity;
 import java.util.function.Supplier;
 
 
-public interface CredentialsProviderFlow<IC extends Credential, OC extends  Credential, C, CR> {
-    /*
-        A flow implements a transformation rule where an inbound identity and credential can be transformed into an outbound credential.
-
-        The flow is intended to be a generic construct. Example usages include :
-        - Creating a credential to connect to a database
-        - Creating a credential to connect to a REST API
-     */
+public interface CredentialsProviderFlow<C, IC extends Credential, OC extends  Credential, CR> {
 
     Class<IC> inboundCredentialType();
 
     Class<OC> outboundCredentialType();
 
-    CredentialsProviderFlow<IC, OC, C, CR> configure(C configurationParams);
+    CredentialsProviderFlow<C, IC, OC, CR> configure(C configurationParams);
 
     Supplier<OC> makeCredential(Identity identity, Class<IC> inboundClass, CR requestParams) throws Exception;
 

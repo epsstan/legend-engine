@@ -1,7 +1,6 @@
 package org.finos.legend.engine.credentials.provider;
 
 import org.finos.legend.engine.credentials.credential.LegendAwsCredential;
-import org.finos.legend.engine.credentials.credential.LegendOAuthCredential;
 import org.finos.legend.engine.shared.core.identity.Identity;
 import org.finos.legend.engine.shared.core.identity.credential.LegendKerberosCredential;
 import org.immutables.value.Value;
@@ -12,9 +11,9 @@ import java.util.function.Supplier;
 
 @Value.Enclosing
 public class KerberosToAWSCredentialFlow extends AbstractCredentialsProviderFlow<
+        KerberosToAWSCredentialFlow.ConfigurationParams,
         LegendKerberosCredential,
         LegendAwsCredential,
-        KerberosToAWSCredentialFlow.ConfigurationParams,
         LegendAwsCredential.CredentialRequestParams>
 {
     private ConfigurationParams configurationParams;
@@ -30,7 +29,7 @@ public class KerberosToAWSCredentialFlow extends AbstractCredentialsProviderFlow
     }
 
     @Override
-    public CredentialsProviderFlow<LegendKerberosCredential, LegendAwsCredential, ConfigurationParams, LegendAwsCredential.CredentialRequestParams> configure(KerberosToAWSCredentialFlow.ConfigurationParams configurationParams)
+    public CredentialsProviderFlow<ConfigurationParams, LegendKerberosCredential, LegendAwsCredential, LegendAwsCredential.CredentialRequestParams> configure(KerberosToAWSCredentialFlow.ConfigurationParams configurationParams)
     {
         this.configurationParams = configurationParams;
         return this;

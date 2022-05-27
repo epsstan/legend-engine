@@ -1,7 +1,7 @@
-package org.finos.legend.engine.credentials.provider;
+package org.finos.legend.engine.credentials.registry;
 
-import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
+import org.finos.legend.engine.credentials.provider.CredentialsProviderFlow;
 import org.finos.legend.engine.shared.core.identity.Credential;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class CredentialsProviderFlowRegistry
     }
 
 
-    public <IC extends Credential, OC extends Credential, C, CR> Optional<CredentialsProviderFlow<IC, OC, C, CR>> lookup(Class<IC> input, Class<OC> output) {
+    public <C, IC extends Credential, OC extends Credential, CR> Optional<CredentialsProviderFlow<C, IC, OC, CR>> lookup(Class<IC> input, Class<OC> output) {
         List<CredentialsProviderFlow> matches = this.flows.stream()
                 .filter(flow -> flow.inboundCredentialType().isAssignableFrom(input) && flow.outboundCredentialType().isAssignableFrom(output))
                 .collect(Collectors.toList());

@@ -24,14 +24,12 @@ import net.snowflake.client.jdbc.internal.org.bouncycastle.openssl.jcajce.JceOpe
 import net.snowflake.client.jdbc.internal.org.bouncycastle.operator.InputDecryptorProvider;
 import net.snowflake.client.jdbc.internal.org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.eclipse.collections.impl.utility.Iterate;
-import org.finos.legend.engine.credentials.credential.LegendAwsCredential;
 import org.finos.legend.engine.credentials.credential.LegendKeypairCredential;
 import org.finos.legend.engine.shared.core.identity.Identity;
 import org.finos.legend.engine.shared.core.identity.credential.LegendKerberosCredential;
 import org.finos.legend.engine.shared.core.identity.credential.PrivateKeyCredential;
 import org.finos.legend.engine.shared.core.vault.Vault;
 import org.immutables.value.Value;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 
 import javax.crypto.EncryptedPrivateKeyInfo;
 import javax.crypto.SecretKeyFactory;
@@ -45,11 +43,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @Value.Enclosing
-public class KerberosToKeyPairFlow extends AbstractCredentialsProviderFlow<
-        LegendKerberosCredential,
-        LegendKeypairCredential,
-        KerberosToKeyPairFlow.ConfigurationParams,
-        LegendKeypairCredential.CredentialRequestParams>
+public class KerberosToKeyPairFlow extends AbstractCredentialsProviderFlow<KerberosToKeyPairFlow.ConfigurationParams, LegendKerberosCredential, LegendKeypairCredential, LegendKeypairCredential.CredentialRequestParams>
 {
     private KerberosToKeyPairFlow.ConfigurationParams configurationParams;
 
@@ -65,7 +59,7 @@ public class KerberosToKeyPairFlow extends AbstractCredentialsProviderFlow<
     }
 
     @Override
-    public CredentialsProviderFlow<LegendKerberosCredential, LegendKeypairCredential, ConfigurationParams, LegendKeypairCredential.CredentialRequestParams> configure(ConfigurationParams configurationParams) {
+    public CredentialsProviderFlow<ConfigurationParams, LegendKerberosCredential, LegendKeypairCredential, LegendKeypairCredential.CredentialRequestParams> configure(ConfigurationParams configurationParams) {
         this.configurationParams = configurationParams;
         return this;
     }

@@ -14,15 +14,9 @@
 
 package org.finos.legend.engine.credentials.provider;
 
-import org.finos.legend.engine.credentials.credential.LegendPlaintextUserPasswordCredential;
 import org.finos.legend.engine.shared.core.identity.Credential;
-import org.finos.legend.engine.shared.core.identity.Identity;
-import org.finos.legend.engine.shared.core.identity.credential.LegendKerberosCredential;
 
-import java.util.Optional;
-import java.util.function.Supplier;
-
-abstract class AbstractCredentialsProviderFlow<IC extends Credential, OC extends  Credential, C, CR> implements CredentialsProviderFlow<IC, OC, C, CR>
+abstract class AbstractCredentialsProviderFlow<C, IC extends Credential, OC extends  Credential, CR> implements CredentialsProviderFlow<C, IC, OC, CR>
 {
     private Class<IC> input;
     private Class<OC> output;
