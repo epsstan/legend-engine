@@ -25,16 +25,16 @@ public class CredentialsProviderTest {
     public void setup() {
         ImmutableList<CredentialsProviderFlow> flows = Lists.immutable.of(
                 new KerberosToUsernamePasswordCredentialFlow()
-                        .configure(KerberosToUsernamePasswordCredentialFlowConfigurationParams.builder()
+                        .configure(ImmutableKerberosToUsernamePasswordCredentialFlow.ConfigurationParams.builder()
                                 .build()),
                 new KerberosToAWSCredentialFlow()
-                        .configure(KerberosToAWSCredentialFlowConfigurationParams.builder()
+                        .configure(ImmutableKerberosToAWSCredentialFlow.ConfigurationParams.builder()
                                 .build()),
                 new KerberosToKeyPairFlow()
-                        .configure(KerberosToKeyPairFlowConfigurationParams.builder()
+                        .configure(ImmutableKerberosToKeyPairFlow.ConfigurationParams.builder()
                                 .build()),
                 new KerberosToOAuthCredentialFlow()
-                        .configure(KerberosToOAuthCredentialFlowConfigurationParams.builder()
+                        .configure(ImmutableKerberosToOAuthCredentialFlow.ConfigurationParams.builder()
                                 .build())
         );
 
@@ -54,7 +54,7 @@ public class CredentialsProviderTest {
                 .makeCredential(
                     fakeKerberosIdentity,
                     LegendKerberosCredential.class,
-                    LegendPlaintextUserPasswordCredentialCredentialRequestParams.builder().someConfoig("someconfig").build()
+                    ImmutableLegendPlaintextUserPasswordCredential.CredentialRequestParams.builder().someConfig("someconfig").build()
         );
 
         assertEquals("fake-user-fred@EXAMPLE.COM-someconfig", supplier.get().getPassword());
@@ -71,7 +71,7 @@ public class CredentialsProviderTest {
                         .makeCredential(
                                 fakeKerberosIdentity,
                                 LegendKerberosCredential.class,
-                                LegendOAuthCredentialCredentialRequestParams.builder().oauthScopes("scope1").build()
+                                ImmutableLegendOAuthCredential.CredentialRequestParams.builder().oauthScopes("scope1").build()
                         );
         assertEquals("fake-token-fred@EXAMPLE.COM-[scope1]", supplier.get().getAccessToken());
     }
@@ -86,7 +86,7 @@ public class CredentialsProviderTest {
                 .makeCredential(
                         fakeKerberosIdentity,
                         LegendKerberosCredential.class,
-                        LegendAwsCredentialCredentialRequestParams.builder().build()
+                        ImmutableLegendAwsCredential.CredentialRequestParams.builder().build()
                 );
         AwsCredentials underlying = supplier.get().getUnderlying();
         S3Client s3 = S3Client.builder().region(Region.US_EAST_1)
@@ -107,7 +107,7 @@ public class CredentialsProviderTest {
                 .makeCredential(
                         fakeKerberosIdentity,
                         LegendKerberosCredential.class,
-                        LegendKeypairCredentialRequestParams.builder()
+                        ImmutableLegendKeypairCredential.CredentialRequestParams.builder()
                                 .userName("foo")
                                 .passphraseVaultReference("ref1")
                                 .privateKeyVaultReference("ref2")

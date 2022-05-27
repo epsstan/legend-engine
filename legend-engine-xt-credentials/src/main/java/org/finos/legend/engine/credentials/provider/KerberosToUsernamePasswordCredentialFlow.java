@@ -8,6 +8,7 @@ import org.immutables.value.Value;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+@Value.Enclosing
 public class KerberosToUsernamePasswordCredentialFlow extends AbstractCredentialsProviderFlow<
         LegendKerberosCredential,
         LegendPlaintextUserPasswordCredential,
@@ -17,7 +18,6 @@ public class KerberosToUsernamePasswordCredentialFlow extends AbstractCredential
     private KerberosToUsernamePasswordCredentialFlow.ConfigurationParams configurationParams;
 
     @Value.Immutable
-    @Value.Style(typeImmutable = "KerberosToUsernamePasswordCredentialFlow*")
     interface ConfigurationParams
     {
 
@@ -38,7 +38,7 @@ public class KerberosToUsernamePasswordCredentialFlow extends AbstractCredential
     public Supplier<LegendPlaintextUserPasswordCredential> makeCredential(Identity identity, Class<LegendKerberosCredential> inboundClass, LegendPlaintextUserPasswordCredential.CredentialRequestParams requestParams) throws Exception {
         Optional<LegendKerberosCredential> inboundCredential = identity.getCredential(inboundClass);
         // implement auth transformation
-        String generated = "fake-user-" + identity.getName() + "-" + requestParams.someConfoig();
+        String generated = "fake-user-" + identity.getName() + "-" + requestParams.someConfig();
         return () -> new LegendPlaintextUserPasswordCredential(generated, generated);
     }
 

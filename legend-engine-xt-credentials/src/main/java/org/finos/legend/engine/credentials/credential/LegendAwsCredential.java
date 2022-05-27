@@ -4,6 +4,7 @@ import org.finos.legend.engine.shared.core.identity.Credential;
 import org.immutables.value.Value;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 
+@Value.Enclosing
 public class LegendAwsCredential implements Credential
 {
     private AwsCredentials underlying;
@@ -17,7 +18,6 @@ public class LegendAwsCredential implements Credential
     }
 
     @Value.Immutable
-    @Value.Style(typeImmutable = "LegendAwsCredential*")
     public interface CredentialRequestParams
     {
     }

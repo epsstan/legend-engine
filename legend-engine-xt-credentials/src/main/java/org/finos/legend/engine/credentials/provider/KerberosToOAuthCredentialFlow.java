@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+@Value.Enclosing
 public class KerberosToOAuthCredentialFlow extends AbstractCredentialsProviderFlow<
         LegendKerberosCredential,
         LegendOAuthCredential,
@@ -20,7 +21,6 @@ public class KerberosToOAuthCredentialFlow extends AbstractCredentialsProviderFl
     private ConfigurationParams configurationParams;
 
     @Value.Immutable
-    @Value.Style(typeImmutable = "KerberosToOAuthCredentialFlow*")
     interface ConfigurationParams {
 
     }

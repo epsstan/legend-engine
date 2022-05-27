@@ -10,6 +10,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+@Value.Enclosing
 public class KerberosToAWSCredentialFlow extends AbstractCredentialsProviderFlow<
         LegendKerberosCredential,
         LegendAwsCredential,
@@ -19,7 +20,6 @@ public class KerberosToAWSCredentialFlow extends AbstractCredentialsProviderFlow
     private ConfigurationParams configurationParams;
 
     @Value.Immutable
-    @Value.Style(typeImmutable = "KerberosToAWSCredentialFlow*")
     interface ConfigurationParams
     {
 

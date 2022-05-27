@@ -44,6 +44,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+@Value.Enclosing
 public class KerberosToKeyPairFlow extends AbstractCredentialsProviderFlow<
         LegendKerberosCredential,
         LegendKeypairCredential,
@@ -53,7 +54,6 @@ public class KerberosToKeyPairFlow extends AbstractCredentialsProviderFlow<
     private KerberosToKeyPairFlow.ConfigurationParams configurationParams;
 
     @Value.Immutable
-    @Value.Style(typeImmutable = "KerberosToKeyPairFlow*")
     interface ConfigurationParams
     {
 
