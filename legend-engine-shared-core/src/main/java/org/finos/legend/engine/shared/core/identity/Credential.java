@@ -14,6 +14,7 @@
 
 package org.finos.legend.engine.shared.core.identity;
 
+// TODO - rename Credential
 public interface Credential
 {
     default boolean isValid()

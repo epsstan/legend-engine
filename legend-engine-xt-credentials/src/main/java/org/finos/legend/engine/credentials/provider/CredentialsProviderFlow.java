@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.authentication;
+package org.finos.legend.engine.credentials.provider;
 
 import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.identity.Identity;
 
+import java.util.function.Supplier;
 
-public interface AuthenticationFlow<IC extends Credential, OC extends  Credential> {
+
+public interface CredentialsProviderFlow<IC extends Credential, OC extends  Credential, C, CR> {
     /*
         A flow implements a transformation rule where an inbound identity and credential can be transformed into an outbound credential.
 
@@ -31,8 +33,8 @@ public interface AuthenticationFlow<IC extends Credential, OC extends  Credentia
 
     Class<OC> outboundCredentialType();
 
-    void configure(Object configurationParams);
+    CredentialsProviderFlow<IC, OC, C, CR> configure(C configurationParams);
 
-    OC makeCredential(Identity identity, IC inbound) throws Exception;
+    Supplier<OC> makeCredential(Identity identity, Class<IC> inboundClass, CR requestParams) throws Exception;
 
 }
