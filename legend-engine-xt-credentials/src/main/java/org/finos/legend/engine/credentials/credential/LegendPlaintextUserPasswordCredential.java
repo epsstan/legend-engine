@@ -6,6 +6,7 @@ import org.immutables.value.Value;
 // TODO - deprecate or refactor PlaintextUserPasswordCredential from legend-engine-shared-core
 
 @Value.Enclosing
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
 public class LegendPlaintextUserPasswordCredential extends PlaintextUserPasswordCredential
 {
     public LegendPlaintextUserPasswordCredential(String user, String password)
@@ -16,6 +17,6 @@ public class LegendPlaintextUserPasswordCredential extends PlaintextUserPassword
     @Value.Immutable
     public interface CredentialRequestParams
     {
-        String someConfig();
+        String name();
     }
 }

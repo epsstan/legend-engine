@@ -5,6 +5,7 @@ import org.immutables.value.Value;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 
 @Value.Enclosing
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
 public class LegendAwsCredential implements Credential
 {
     private AwsCredentials underlying;

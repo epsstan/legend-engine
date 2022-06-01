@@ -5,6 +5,7 @@ import org.finos.legend.engine.shared.core.identity.credential.PrivateKeyCredent
 import org.immutables.value.Value;
 
 @Value.Enclosing
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
 public class LegendKeypairCredential implements Credential
 {
     private PrivateKeyCredential underlying;

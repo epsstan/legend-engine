@@ -5,6 +5,7 @@ import org.immutables.value.Value;
 
 // TODO - deprecate/refactor use of OAuthCredential from legend-shared-core
 @Value.Enclosing
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
 public class LegendOAuthCredential extends OAuthCredential
 {
     public LegendOAuthCredential(String accessToken) {

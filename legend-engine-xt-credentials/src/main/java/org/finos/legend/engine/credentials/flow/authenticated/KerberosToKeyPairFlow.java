@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.credentials.provider;
+package org.finos.legend.engine.credentials.flow.authenticated;
 
 import com.google.common.base.Splitter;
 import net.snowflake.client.jdbc.internal.apache.commons.codec.binary.Base64;
@@ -43,7 +43,11 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @Value.Enclosing
-public class KerberosToKeyPairFlow extends AbstractCredentialsProviderFlow<KerberosToKeyPairFlow.ConfigurationParams, LegendKerberosCredential, LegendKeypairCredential, LegendKeypairCredential.CredentialRequestParams>
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
+public class KerberosToKeyPairFlow  extends AbstractAuthenticatedCredentialsProviderFlow<
+        LegendKerberosCredential,
+        LegendKeypairCredential,
+        LegendKeypairCredential.CredentialRequestParams>
 {
     private KerberosToKeyPairFlow.ConfigurationParams configurationParams;
 
@@ -53,20 +57,16 @@ public class KerberosToKeyPairFlow extends AbstractCredentialsProviderFlow<Kerbe
 
     }
 
-    public KerberosToKeyPairFlow()
+    public KerberosToKeyPairFlow(ConfigurationParams configurationParams)
     {
-        super(LegendKerberosCredential.class, LegendKeypairCredential.class);
-    }
-
-    @Override
-    public CredentialsProviderFlow<ConfigurationParams, LegendKerberosCredential, LegendKeypairCredential, LegendKeypairCredential.CredentialRequestParams> configure(ConfigurationParams configurationParams) {
+        //super(KerberosToKeyPairFlow.ConfigurationParams.class, LegendKerberosCredential.class, LegendKeypairCredential.class, LegendKeypairCredential.CredentialRequestParams.class);
+        super( LegendKerberosCredential.class, LegendKeypairCredential.class, LegendKeypairCredential.CredentialRequestParams.class);
         this.configurationParams = configurationParams;
-        return this;
     }
 
     @Override
-    public Supplier<LegendKeypairCredential> makeCredential(Identity identity, Class<LegendKerberosCredential> inboundClass, LegendKeypairCredential.CredentialRequestParams requestParams) throws Exception {
-        Optional<LegendKerberosCredential> inboundCredential = identity.getCredential(inboundClass);
+    public Supplier<LegendKeypairCredential> makeCredential(Identity identity, LegendKeypairCredential.CredentialRequestParams requestParams) throws Exception {
+        Optional<LegendKerberosCredential> inboundCredential = identity.getCredential(this.inboundCredentialType());
         // implement auth transformation
         String generated = "fake-token-" + identity.getName() + "-";
         return () -> new LegendKeypairCredential(this.makeCredential(requestParams.userName(), requestParams.privateKeyVaultReference(), requestParams.passphraseVaultReference()));

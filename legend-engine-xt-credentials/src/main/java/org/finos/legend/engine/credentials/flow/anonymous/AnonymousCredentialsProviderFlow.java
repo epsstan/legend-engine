@@ -12,30 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.credentials.provider;
+package org.finos.legend.engine.credentials.flow.anonymous;
 
 import org.finos.legend.engine.shared.core.identity.Credential;
 
-abstract class AbstractCredentialsProviderFlow<C, IC extends Credential, OC extends  Credential, CR> implements CredentialsProviderFlow<C, IC, OC, CR>
+import java.util.function.Supplier;
+
+
+public interface AnonymousCredentialsProviderFlow<OutboundCredential extends  Credential, CredentialRequestParams>
 {
-    private Class<IC> input;
-    private Class<OC> output;
+    Class<OutboundCredential> outboundCredentialType();
 
-    public AbstractCredentialsProviderFlow(Class<IC> input, Class<OC> output)
-    {
-        this.input = input;
-        this.output = output;
-    }
+    Class<CredentialRequestParams> credentialRequestParamsType();
 
-    @Override
-    public Class<IC> inboundCredentialType() {
-        return this.input;
-    }
-
-    @Override
-    public Class<OC> outboundCredentialType() {
-        return this.output;
-    }
-
-
+    Supplier<OutboundCredential> makeCredential(CredentialRequestParams requestParams) throws Exception;
 }

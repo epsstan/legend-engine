@@ -4,9 +4,10 @@ Sketch of a module to abstract various functionality related to credential acqui
 
 # Goals
 
-* Consolidate code for credential acquisition/management such that it can be reused across the platform in different contexts. E.g relational stores, service stores, persistence etc.
-* Similarly consolidate code for vault implementations.
+* Consolidate code for credential acquisition/management such that it can be reused across the platform in different contexts. E.g relational stores, service stores, persistence, service execution jars etc.
+* Consolidate code for different vault implementations 
 * Allow for platform specific customizations. i.e Allow Legend installations to extend/modify or provide their own implementations.
+* TODO : Minimize Java library dependencies
 
 # Anti Goals
 
@@ -19,107 +20,91 @@ See [CredentialsProviderTest](src/test/java/org/finos/legend/engine/credentials/
 
 # API Design / Implementation Choices  
 
-### Identity/Credential API
+### Identity API
 
 An ```Identity``` represents an entity that has an identity :). An ```Identity``` carries one/more ```Credential```s as proof of its identity.
 
-See [Identity.java](../legend-engine-shared-core/src/main/java/org/finos/legend/engine/shared/core/identity/Identity.java)
-
 This API approximates the ```javax.security.auth.Subject``` API. We decided not to use the ```javax.secruity.auth.Subject``` API to give us more API design/implementation flexbility.
+
+See Identity.java.
 
 ### Credential API
 
-Since every SDK has its own Java types for credentials, we have a Java type system for ```LegendCredential```s.  
+Every SDK (AWS S3, Google etc) has its own Java type system for credentials. So we have Legend types that wrap the native credentials. 
 
-A ```LegendCredential``` is a simple POJO. It can directly contain credential data like in ```LegendPlaintextUserPasswordCredential``` or wrap other credential types like in ```LegendAwsCredential```.
+See org.finos.legend.engine.credentials.credential package.
 
-### Credential Provider
+### Credentials Provider Flow 
  
-A ```CredentialsProviderFlow``` abstracts the business logic of providing or creating a credential. 
+A flow abstracts the business logic of providing or creating a credential.
 
-See [CredentialsProviderFlow.java](src/main/java/org/finos/legend/engine/credentials/provider/CredentialsProviderFlow.java)
+An ```AuthenticatedCredentialsProviderFlow``` uses the identity of the caller to create a credential. Therefore, the API accepts ```Identity``` as an input.
 
-### Credential Provider Lookup
-
-The platform provides a registry of credential provider flows. Clients look up a provider by passing in the current caller's identity and the desired target credential. 
-
-In some cases, acquiring a credential requires custom logic (e.g token exchange, brokered credential acquisition etc), which by itself might require a credential. 
-
-So callers are expected to choose one of the identity's credential to be used for this custom logic.
-
-The lookup API therefore is
-
-```java
-TODO - fix generics
-Optional<CredentialsProviderFlow<LegendKerberosCredential, LegendPlaintextUserPasswordCredential, Object, Object>> flow = this.flowRegistry.lookup(
-        LegendKerberosCredential.class,
-        LegendPlaintextUserPasswordCredential.class
-)
+In many cases, creating a credential requires runtime input. For e.g an OAuth scope the value for which is obtained from configuration in a Legend execution plan. Therefore, the API accepts a POJO.
+```
+public interface AuthenticatedCredentialsProviderFlow
+{
+    
+    Supplier<OutboundCredential> makeCredential(Identity identity, CredentialRequestParams requestParams) throws Exception;
+}
 ```
 
-###  Credential Provider Configuration
+### Credentials Provider Flow - Usage
 
-In some cases, creating a credential requires static configuration. This configuration is static in the sense that it is not specific to a credential creation request.
-
-For e.g, a Legend installation might use an identity provider like Ping and we might not want Ping specific configuration to be included in every Legend model.
-
-So, a credential provider exposes a ```configure``` life cycle method by which this configuration can be injected.
+A flow can be directly instantiated and invoked. 
 
 ```java
-    new KerberosToKeyPairFlow()
-        .configure(KerberosToKeyPairFlowConfigurationParams.builder()
-            .foo("foo")
-            .bar("bar")        
-            .build()
-        )
-```
-Flows are configured during platform initialization. 
+@Test
+    public void kerberosToOAuth() throws Exception {
 
-### Credential Creation Configuration
+        KerberosToOAuthCredentialFlow flow = new KerberosToOAuthCredentialFlow(ImmutableKerberosToOAuthCredentialFlow.ConfigurationParams.builder()
+                .build());
 
-In many cases, credential creation requires dynamic configuration. For e.g creating an OAuth token with specific scopes the values for which are sourced from a Legend model. 
-
-So, the credential creation API accepts a configuration object. 
-
-```java
-    flow
-        .makeCredential(
-            fakeKerberosIdentity,
-            LegendKerberosCredential.class,
-            LegendOAuthCredentialCredentialRequestParams.builder()
-                .oauthScopes("scope1")
-                .build()
-        );
+        Supplier<LegendOAuthCredential> supplier =
+                flow.makeCredential(
+                        fakeKerberosIdentity,
+                        ImmutableLegendOAuthCredential.CredentialRequestParams.builder().oauthScopes("scope1").build()
+                );
+        assertEquals("fake-token-fred@EXAMPLE.COM-[scope1]", supplier.get().getAccessToken());
+    }
 ```
 
-### Delayed Credential Creation
+See TestDirectUseOfAuthenticatedFlows.java
+
+### Credentials Provider Flow - Intermediation 
+
+We have use cases where the caller does not have a credential that can be used directly with a target authentication system. E.g The caller has a Kerberos credential but is trying to connect to a database that supports OAuth. 
+
+In some of these use cases, the platform can bridge this cap by exchanging the caller's credential for one that is compatible with the target.
+
+A flow is how we implement this bridge. 
+
+### Credentials Provider Flow - Lookup
+
+While a flow can be instantiated and used directly, in most cases, the flow to be used depends on some runtime context.
+
+For e.g during a relational plan execution, configuration in the plan might indicate that an OAuth credential for Snowflake is needed. In another case it might be OAuth but with say Google specific OAuth behavior.
+
+A ```registry``` provides a way for looking up a flow given a runtime context. 
+
+__Given that we cannot meaningfully abstract over the runtime context, this module does not provide a registry implementation. Clients of this module can build their custom registries.__ 
+
+For e.g FlowRegistry2 uses database type and the caller's identity to resolve a credential.
+
+### Credentials Provider Flow - Configuration
 
 TODO 
 
+### Credentials Provider Flow - Runtime discovery
 
-# Open Design Questions
+TODO : How do we configure and load these flows dynamically ?
 
-* Should flow lookup always require a credential ? 
+### Credential Creation Lifecycle
 
-* For e.g a "public" credential provider might not care about the identity of the caller. But the provider might be used in multiple contexts where the runtime identity has different credentials.
+TODO : Lazy creation, credential refresh
 
-To support this use case, the same flow code has to be registered multiple times with different inbound credentials. 
+### Legend API Backwards compatibility
 
-```
-class MyPublicFlow1 extends AbstractCredentialsProviderFlow<LegendKerberosCredential, MyPublicCredential, Object, Object>
-{
-}
-
-class MyPublicFlow2 extends AbstractCredentialsProviderFlow<LegendOAuthCredential, MyPublicCredential, Object, Object>
-{
-}
-```
-Do we want to support a different lookup API ??
-
-* Should ```makeCredential``` return a ```Suplier``` or the actual credential ?
-
-In some cases we want to delay credential acquisition. So a ```Supplier``` lets us defer the creation of the credential. But can/should we just the pass the ```CredentialsProviderFlow``` ?
-
-* How to handle credential refresh 
+TODO 
 
 

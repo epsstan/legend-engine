@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.credentials.provider;
+package org.finos.legend.engine.credentials.flow.authenticated;
 
 import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.identity.Identity;
@@ -20,14 +20,13 @@ import org.finos.legend.engine.shared.core.identity.Identity;
 import java.util.function.Supplier;
 
 
-public interface CredentialsProviderFlow<C, IC extends Credential, OC extends  Credential, CR> {
+public interface AuthenticatedCredentialsProviderFlow<InboundCredential extends Credential, OutboundCredential extends  Credential, CredentialRequestParams>
+{
+    Class<InboundCredential> inboundCredentialType();
 
-    Class<IC> inboundCredentialType();
+    Class<OutboundCredential> outboundCredentialType();
 
-    Class<OC> outboundCredentialType();
+    Class<CredentialRequestParams> credentialRequestParamsType();
 
-    CredentialsProviderFlow<C, IC, OC, CR> configure(C configurationParams);
-
-    Supplier<OC> makeCredential(Identity identity, Class<IC> inboundClass, CR requestParams) throws Exception;
-
+    Supplier<OutboundCredential> makeCredential(Identity identity, CredentialRequestParams requestParams) throws Exception;
 }

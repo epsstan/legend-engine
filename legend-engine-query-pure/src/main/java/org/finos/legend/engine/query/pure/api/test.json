@@ -1,0 +1,116 @@
+{
+  "mapping": "meta::relational::tests::caseSentitiveMapping",
+  "function": {
+    "_type": "lambda",
+    "body": [
+      {
+        "fControl": "serialize_Checked_MANY__RootGraphFetchTree_1__String_1_",
+        "function": "serialize",
+        "_type": "func",
+        "parameters": [
+          {
+            "fControl": "graphFetchChecked_T_MANY__RootGraphFetchTree_1__Checked_MANY_",
+            "function": "graphFetchChecked",
+            "_type": "func",
+            "parameters": [
+              {
+                "fControl": "getAll_Class_1__T_MANY_",
+                "function": "getAll",
+                "_type": "func",
+                "parameters": [
+                  {
+                    "fullPath": "meta::relational::tests::model::simple::Firm",
+                    "_type": "packageableElementPtr"
+                  }
+                ]
+              },
+              {
+                "subTrees": [
+                  {
+                    "subTrees": [
+                      {
+                        "_type": "propertyGraphFetchTree",
+                        "property": "firstName"
+                      },
+                      {
+                        "_type": "propertyGraphFetchTree",
+                        "property": "age"
+                      }
+                    ],
+                    "_type": "propertyGraphFetchTree",
+                    "property": "employees"
+                  }
+                ],
+                "_type": "rootGraphFetchTree",
+                "class": "meta::relational::tests::model::simple::Firm"
+              }
+            ]
+          },
+          {
+            "subTrees": [
+              {
+                "subTrees": [
+                  {
+                    "_type": "propertyGraphFetchTree",
+                    "property": "lastName"
+                  }
+                ],
+                "_type": "propertyGraphFetchTree",
+                "property": "employees"
+              }
+            ],
+            "_type": "rootGraphFetchTree",
+            "class": "meta::relational::tests::model::simple::Firm"
+          }
+        ]
+      }
+    ]
+  },
+  "context": {
+    "_type": "BaseExecutionContext"
+  },
+  "runtime": {
+    "_type": "legacyRuntime",
+    "connections": [
+      {
+        "_type": "RelationalDatabaseConnection",
+        "authenticationStrategy": {
+          "_type": "test"
+        },
+        "timeZone": "GMT",
+        "type": "H2",
+        "datasourceSpecification": {
+          "_type": "h2Local"
+        },
+        "element": "meta::relational::tests::db"
+      }
+    ]
+  },
+  "model": {
+    "sdlcInfo": {
+      "baseVersion": "-1",
+      "_type": "pure",
+      "version": "none",
+      "packageableElementPointers": [
+        {
+          "path": "meta::relational::tests::db",
+          "type": "STORE"
+        },
+        {
+          "path": "meta::relational::tests::dbInc",
+          "type": "STORE"
+        },
+        {
+          "path": "meta::relational::tests::caseSentitiveMapping",
+          "type": "MAPPING"
+        }
+      ]
+    },
+    "_type": "pointer",
+    "serializer": {
+      "name": "pure",
+      "version": "vX_X_X"
+    }
+  },
+  "clientVersion": "vX_X_X"
+}
