@@ -12,7 +12,6 @@ import meta::relational::authz::test::*;
 /*
   Simple graph fetch
 */
-/*
 function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::graphfetch::test1():Boolean[1]
 {
    let tree = #{
@@ -28,6 +27,7 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::grap
    let query = {|
     meta::relational::tests::model::simple::Firm.all()->graphFetchChecked($tree)->serialize($tree)};
   let mapping = meta::relational::tests::caseSentitiveMapping;
+
   let scanDetails = meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
 
   // Alice does not have authz over the full tree
@@ -36,6 +36,7 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::grap
 
   $aliceResults
     ->denied()
+    ->properties('Firm|Firm.employees|Firm.legalName|Person.age|Person.firstName|Person.lastName|root')
     ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
@@ -44,12 +45,11 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::grap
     ->denied('Person.age', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 6]');  
   true;
 }
-*/
 
 /*
     Query fetches a node (e.g employees) while serialize expands node properties
 */
-/*
+
 function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::graphfetch::test2():Boolean[1]
 {
    let queryTree = #{
@@ -80,20 +80,31 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::grap
 
   $aliceResults
     ->denied()
+    ->properties('Firm|Firm.employees|Firm.legalName|Person.age|Person.firstName|Person.lastName|root')
     ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->denied('Person.firstName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]')
     ->denied('Person.lastName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]')
     ->denied('Person.age', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 6]');  
+
+  /*
+  
+  TODO - The employees are not returned even though they are fully specified in the serialize tree. Maybe because they are not fully specified in the query tree ? 
+  
+  let result = execute($query, $mapping, meta::relational::tests::testRuntime(), meta::pure::router::extension::defaultRelationalExtensions()).values;
+  println($result);
+
+  // '[{"defects":[],"value":{"legalName":"Firm X","employees":[{"firstName":null,"lastName":null,"age":null}]}},{"defects":[],"value":{"legalName":"Firm A","employees":[]}}]'
+ 
+  */
+
   true;
 }
-*/
 
 /*
     Query fetches and serializes a node without expanding properties
 */
-/*
 function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::graphfetch::test3():Boolean[1]
 {
    let queryTree = #{
@@ -108,37 +119,44 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::grap
   let mapping = meta::relational::tests::caseSentitiveMapping;
   let scanDetails = meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
 
+
+  /*
+  TODO - The employees are not returned
+
+  let result = execute($query, $mapping, meta::relational::tests::testRuntime(), meta::pure::router::extension::defaultRelationalExtensions()).values;
+  println($result);
+
+  '[{"defects":[],"value":{"legalName":"Firm X","employees":[{}]}},{"defects":[],"value":{"legalName":"Firm A","employees":[]}}]'
+  */
+
   // Alice does not have authz over the full tree
   let alice = ^meta::relational::authz::User(name='alice', userName='alice', dataClassification=1);
   let aliceResults = evalAuthzForUser($alice, buildDataMetadata(), $scanDetails);
 
   $aliceResults
-    ->denied()
+    ->allowed()
+    ->properties('Firm|Firm.employees|Firm.legalName|root')
     ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.legalName', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
-    ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
-    ->denied('Person.firstName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]')
-    ->denied('Person.lastName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]')
-    ->denied('Person.age', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 6]');  
-  true;
+    ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]');
+    true;
 }
-*/
 
 
 function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::graphfetch::test4():Boolean[1]
 {
    let queryTree = #{
      Firm {
-       employees {
-          firstName
-       }
+      employees {
+        firstName
+      }
      }
    }#;
 
   let serializeTree = #{
      Firm {
        employees {
-          firstName
+          lastName
        }
      }
    }#;
@@ -148,41 +166,18 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::grap
     meta::relational::tests::model::simple::Firm.all()->graphFetchChecked($queryTree)->serialize($serializeTree)};
   let mapping = meta::relational::tests::caseSentitiveMapping;
 
-  let scanDetails = meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
 
-  // Alice does not have authz over the full tree
-  let alice = ^meta::relational::authz::User(name='alice', userName='alice', dataClassification=1);
-  let aliceResults = evalAuthzForUser($alice, buildDataMetadata(), $scanDetails);
-
-  $aliceResults
-    ->denied()
-    ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
-    ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
-    ->denied('Person.firstName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]')
-    ->denied('Person.lastName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]');
+  //let string = meta::relational::functions::sqlstring::toSQLString($query,  $mapping, meta::relational::runtime::DatabaseType.H2, meta::pure::router::extension::defaultRelationalExtensions());
+  //println($string);
   
-  // TODO - investigate disjoint trees
-  assert(false);
-}
+  /*
+    let result = execute($query, $mapping, meta::relational::tests::testRuntime(), meta::pure::router::extension::defaultRelationalExtensions()).values;
+    println($result);
+  */
 
-function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::graphfetch::test5():Boolean[1]
-{
-   let queryTree = #{
-     Person {
-       firstName
-     }
-   }#;
-
-  let serializeTree = #{
-     Person {
-       firstName
-     }
-   }#;
+//    '[{"defects":[],"value":{"employees":[{"lastName":null}]}},{"defects":[],"value":{"employees":[]}}]'
 
 
-  let query = {|
-    meta::relational::tests::model::simple::Person.all()->graphFetch($queryTree)->serialize($queryTree)};
-  let mapping = meta::relational::tests::simpleRelationalMapping;
 
   let scanDetails = meta::pure::lineage::scanRelations::scanRelationsHelper($query, $mapping, defaultRelationalExtensions())-> toOne();   
 
@@ -192,13 +187,16 @@ function <<meta::pure::profiles::test.Test>> meta::relational::authz::test::grap
 
   $aliceResults
     ->denied()
+    ->properties('Firm|Firm.employees|Person.firstName|Person.lastName|root')
     ->allowed('Firm', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
     ->allowed('Firm.employees', 'Condition : [ User classification = 1 >=  Data classifcation = 0]')
-    ->denied('Person.firstName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]')
-    ->denied('Person.lastName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]');
-  
-  // TODO - investigate disjoint trees
-  assert(false);
+    ->denied('Person.firstName', 'Failed Condition : [ User classification = 1 >=  Data classifcation = 2]');  
+    
+  true;
+
+  /*
+    TODO - The property tree is a union of both the query and serialization trees 
+  */
+
 }
 
-// TODO - investigate tree execution
