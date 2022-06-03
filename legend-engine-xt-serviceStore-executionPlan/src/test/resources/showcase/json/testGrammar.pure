@@ -316,7 +316,7 @@ ServiceStore meta::external::store::service::showcase::store::ShowcaseServiceSto
       (
          path : '/allTradesService';
          method : GET;
-         security : [];
+         security : [DUMMY];
          response : [meta::external::store::service::showcase::domain::S_Trade <- meta::external::store::service::showcase::store::tradeServiceStoreSchemaBinding];
       )
 

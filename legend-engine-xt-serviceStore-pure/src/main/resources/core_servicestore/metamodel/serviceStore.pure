@@ -122,6 +122,10 @@ Class <<typemodifiers.abstract>> meta::external::store::service::metamodel::Secu
 {
 }
 
+Class meta::external::store::service::metamodel::DummySecurityScheme extends SecurityScheme
+{
+}
+
 Class meta::external::store::service::metamodel::SerializationFormat
 {
    style   : String[0..1];

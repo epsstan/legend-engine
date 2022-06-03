@@ -37,9 +37,13 @@ import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.section.DefaultCodeSection;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.connection.ServiceStoreConnection;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.mapping.RootServiceStoreClassMapping;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.DummySecurityScheme;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
 
 public class ServiceStoreGrammarParserExtension implements IServiceStoreGrammarParserExtension
 {
@@ -106,6 +110,21 @@ public class ServiceStoreGrammarParserExtension implements IServiceStoreGrammarP
     public Iterable<? extends EmbeddedDataParser> getExtraEmbeddedDataParsers()
     {
         return Lists.immutable.with(new ServiceStoreEmbeddedDataParser());
+    }
+
+    @Override
+    public List<Function<String, SecurityScheme>> getExtraSecuritySchemesParsers()
+    {
+        return Collections.singletonList(type ->
+        {
+            switch (type)
+            {
+                case "DUMMY":
+                    return new DummySecurityScheme();
+                default:
+                    return null;
+            }
+        });
     }
 
     private static SourceCodeParserInfo getServiceStoreMappingElementParserInfo(MappingElementSourceCode mappingElementSourceCode)

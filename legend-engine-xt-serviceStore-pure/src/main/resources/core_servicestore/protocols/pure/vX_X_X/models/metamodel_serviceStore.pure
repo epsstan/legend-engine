@@ -93,6 +93,10 @@ Class <<typemodifiers.abstract>> meta::protocols::pure::vX_X_X::metamodel::store
    _type    : String[1];
 }
 
+Class meta::protocols::pure::vX_X_X::metamodel::store::service::DummySecurityScheme extends SecurityScheme
+{
+}
+
 Class meta::protocols::pure::vX_X_X::metamodel::store::service::ServiceGroupPtr
 {
    serviceStore : String[1];

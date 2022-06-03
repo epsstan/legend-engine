@@ -21,6 +21,7 @@ import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.finos.legend.engine.plan.execution.extension.ExecutionExtension;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
+import org.finos.legend.engine.shared.core.identity.Identity;
 import org.pac4j.core.profile.CommonProfile;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public interface IServiceStoreExecutionExtension extends ExecutionExtension
         return Lists.mutable.withAll(ServiceLoader.load(IServiceStoreExecutionExtension.class));
     }
 
-    default List<Function3<SecurityScheme, HttpClientBuilder, MutableList<CommonProfile>, Boolean>> getExtraSecuritySchemeProcessors()
+    default List<Function3<SecurityScheme, HttpClientBuilder, Identity, Boolean>> getExtraSecuritySchemeProcessors()
     {
         return FastList.newList();
     }

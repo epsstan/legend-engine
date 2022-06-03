@@ -30,6 +30,8 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.connect
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.mapping.ClassMapping;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.connection.ServiceStoreConnection;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.mapping.RootServiceStoreClassMapping;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.DummySecurityScheme;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ServiceStore;
 import org.finos.legend.engine.protocol.pure.v1.packageableElement.external.shared.Binding;
 import org.finos.legend.pure.generated.*;
@@ -38,6 +40,7 @@ import org.finos.legend.pure.m3.coreinstance.meta.pure.mapping.Mapping;
 import org.finos.legend.pure.m3.coreinstance.meta.pure.mapping.SetImplementation;
 
 import java.util.Collections;
+import java.util.function.Function;
 import java.util.List;
 
 public class ServiceStoreCompilerExtension implements IServiceStoreCompilerExtension
@@ -127,5 +130,18 @@ public class ServiceStoreCompilerExtension implements IServiceStoreCompilerExten
     public List<Function3<EmbeddedData, CompileContext, ProcessingContext, Root_meta_pure_data_EmbeddedData>> getExtraEmbeddedDataProcessors()
     {
         return Collections.singletonList(ServiceStoreEmbeddedDataCompiler::compileServiceStoreEmbeddedDataCompiler);
+    }
+
+    @Override
+    public List<Function<SecurityScheme, Root_meta_external_store_service_metamodel_SecurityScheme>> getExtraSecuritySchemeProcessors()
+    {
+        return Collections.singletonList(securityScheme ->
+        {
+            if(securityScheme instanceof DummySecurityScheme)
+            {
+                return new Root_meta_external_store_service_metamodel_DummySecurityScheme_Impl("");
+            }
+            return null;
+        });
     }
 }

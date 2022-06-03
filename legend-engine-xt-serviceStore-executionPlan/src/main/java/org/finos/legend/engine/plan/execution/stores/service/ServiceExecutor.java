@@ -48,6 +48,8 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.s
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.Location;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ServiceParameter;
+import org.finos.legend.engine.shared.core.identity.Identity;
+import org.finos.legend.engine.shared.core.identity.factory.IdentityFactoryProvider;
 import org.pac4j.core.profile.CommonProfile;
 
 import java.io.InputStream;
@@ -132,18 +134,16 @@ public class ServiceExecutor
             default:
                 throw new UnsupportedOperationException("The HTTP method " + httpMethod + " is not supported");
         }
-        ListIterate.forEach(headers, header -> request.addHeader(header));
+        ListIterate.forEach(headers, request::addHeader);
 
-        try
+        HttpClientBuilder clientBuilder = HttpClients.custom();
+        try (CloseableHttpClient httpClient = clientBuilder.build())
         {
-            HttpClientBuilder clientBuilder = HttpClients.custom();
-
             if (securitySchemes != null)
             {
-                securitySchemes.forEach(securityScheme -> processSecurityScheme(clientBuilder, profiles, securityScheme));
+                securitySchemes.forEach(securityScheme -> processSecurityScheme(clientBuilder, IdentityFactoryProvider.getInstance().makeIdentity(profiles), securityScheme));
             }
 
-            CloseableHttpClient httpClient = clientBuilder.build();
             CloseableHttpResponse httpResponse = httpClient.execute(request);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -217,11 +217,11 @@ public class ServiceExecutor
         return ListIterate.collectIf(headerParams, param -> (state.getResult(param.name) != null), param -> new BasicHeader(param.name, serializeHeaderParameter(((ConstantResult) state.getResult(param.name)).getValue(), param)));
     }
 
-    private static void processSecurityScheme(HttpClientBuilder httpClientBuilder, MutableList<CommonProfile> profiles, SecurityScheme securityScheme)
+    private static void processSecurityScheme(HttpClientBuilder httpClientBuilder, Identity identity, SecurityScheme securityScheme)
     {
-        List<Function3<SecurityScheme, HttpClientBuilder, MutableList<CommonProfile>, Boolean>> processors = ListIterate.flatCollect(IServiceStoreExecutionExtension.getExtensions(), ext -> ext.getExtraSecuritySchemeProcessors());
+        List<Function3<SecurityScheme, HttpClientBuilder, Identity, Boolean>> processors = ListIterate.flatCollect(IServiceStoreExecutionExtension.getExtensions(), ext -> ext.getExtraSecuritySchemeProcessors());
 
-        ListIterate.collect(processors, processor -> processor.value(securityScheme, httpClientBuilder, profiles))
+        ListIterate.collect(processors, processor -> processor.value(securityScheme, httpClientBuilder, identity))
                 .select(Objects::nonNull)
                 .getFirstOptional()
                 .orElseThrow(() -> new RuntimeException("No processor found for given security scheme. Unsupported SecurityScheme - " + securityScheme.getClass().getSimpleName()));

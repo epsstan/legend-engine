@@ -34,6 +34,8 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.connect
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.mapping.ClassMapping;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.connection.ServiceStoreConnection;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.mapping.RootServiceStoreClassMapping;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.DummySecurityScheme;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ServiceStore;
 
 import java.util.List;
@@ -82,6 +84,12 @@ public class ServiceStoreProtocolExtension implements PureProtocolExtension
                         .newInstance(PackageableElement.class)
                         .withSubtypes(FastList.newListWith(
                                 Tuples.pair(ServiceStore.class, "serviceStore")
+                        )).build(),
+
+                ProtocolSubTypeInfo.Builder
+                        .newInstance(SecurityScheme.class)
+                        .withSubtypes(FastList.newListWith(
+                                Tuples.pair(DummySecurityScheme.class, "dummy")
                         )).build()
         ));
     }
