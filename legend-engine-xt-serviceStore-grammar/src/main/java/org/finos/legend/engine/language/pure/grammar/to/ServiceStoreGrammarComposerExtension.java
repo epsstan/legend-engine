@@ -31,10 +31,13 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.connect
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.mapping.ClassMapping;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.connection.ServiceStoreConnection;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.mapping.RootServiceStoreClassMapping;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.DummySecurityScheme;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ServiceStore;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.finos.legend.engine.language.pure.grammar.to.PureGrammarComposerUtility.getTabString;
 
@@ -111,5 +114,18 @@ public class ServiceStoreGrammarComposerExtension implements IServiceStoreGramma
     public List<Function2<EmbeddedData, PureGrammarComposerContext, ContentWithType>> getExtraEmbeddedDataComposers()
     {
         return Collections.singletonList(ServiceStoreEmbeddedDataComposer::composeServiceStoreEmbeddedData);
+    }
+
+    @Override
+    public List<Function<SecurityScheme, String>> getExtraSecuritySchemesComposers()
+    {
+        return Collections.singletonList(securityScheme ->
+        {
+            if (securityScheme instanceof DummySecurityScheme)
+            {
+                return "Dummy";
+            }
+            return null;
+        });
     }
 }

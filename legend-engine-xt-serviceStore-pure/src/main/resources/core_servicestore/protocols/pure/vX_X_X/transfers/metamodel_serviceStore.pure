@@ -78,6 +78,7 @@ function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::store::se
 function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::store::service::transformSecurityScheme(a:SecurityScheme[1], extensions:RouterExtension[*]):meta::protocols::pure::vX_X_X::metamodel::store::service::SecurityScheme[1]
 {
    $a->match($extensions.serializerExtension('vX_X_X')->cast(@meta::protocols::pure::vX_X_X::extension::SerializerExtension_vX_X_X).moduleSerializerExtension('serviceStore')->cast(@meta::protocols::pure::vX_X_X::extension::store::service::ServiceStoreModuleSerializerExtension).transfers_securityScheme_transformSecurityScheme->concatenate([
+      d:DummySecurityScheme[1] | ^meta::protocols::pure::vX_X_X::metamodel::store::service::DummySecurityScheme(_type = 'dummy'),
       a:SecurityScheme[1]      | fail('Unsupported Authentication Strategy'); ^meta::protocols::pure::vX_X_X::metamodel::store::service::SecurityScheme(_type = 'unknown');
    ])->toOneMany())
 }
