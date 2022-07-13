@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.credentials.flow;
+package org.finos.legend.engine.credentials.provider;
 
 import org.finos.legend.engine.shared.core.identity.Credential;
 
-public abstract class AbstractCredentialsProviderFlowImpl<I extends Credential, O extends  Credential, P>
-        implements CredentialsProviderFlow<I, O, P>
+public abstract class AbstractCredentialsProviderImpl<I extends Credential, O extends  Credential, P>
+        implements CredentialsProvider<I, O, P>
 {
     private Class<I> inputCredentialType;
     private Class<O> outputCredentialType;
     private Class<P> credentialParamsType;
 
-    public AbstractCredentialsProviderFlowImpl(Class<I> inputCredentialType, Class<O> outputCredentialType, Class<P> credentialParamsType)
+    public AbstractCredentialsProviderImpl(Class<I> inputCredentialType, Class<O> outputCredentialType, Class<P> credentialParamsType)
     {
         this.inputCredentialType = inputCredentialType;
         this.outputCredentialType = outputCredentialType;

@@ -12,46 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.credentials.flow;
+package org.finos.legend.engine.credentials.provider;
 
-import org.finos.legend.engine.shared.core.identity.credential.LegendOAuthCredential;
+import org.finos.legend.engine.shared.core.identity.credential.LegendAwsCredential;
 import org.finos.legend.engine.shared.core.identity.Identity;
 import org.finos.legend.engine.shared.core.identity.credential.LegendKerberosCredential;
 import org.immutables.value.Value;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 @Value.Enclosing
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
-public class KerberosToOAuthCredentialFlow extends AbstractCredentialsProviderFlowImpl<
+public class KerberosToAWSCredentialProvider extends AbstractCredentialsProviderImpl<
         LegendKerberosCredential,
-        LegendOAuthCredential,
-        LegendOAuthCredential.Params>
+        LegendAwsCredential,
+        LegendAwsCredential.Params>
 {
+    private Configuration configuration;
+
     @Value.Immutable
     interface Configuration
     {
 
     }
 
-    private Configuration configuration;
-
-
-    public KerberosToOAuthCredentialFlow(Configuration configuration)
+    public KerberosToAWSCredentialProvider(Configuration configuration)
     {
-        super(LegendKerberosCredential.class, LegendOAuthCredential.class, LegendOAuthCredential.Params.class);
+        super(LegendKerberosCredential.class, LegendAwsCredential.class, LegendAwsCredential.Params.class);
         this.configuration = configuration;
     }
 
-
     @Override
-    public Supplier<LegendOAuthCredential> makeCredential(Identity identity, LegendOAuthCredential.Params params) throws Exception
+    public Supplier<LegendAwsCredential> makeCredential(Identity identity, LegendAwsCredential.Params params) throws Exception
     {
         Optional<LegendKerberosCredential> inboundCredential = identity.getCredential(this.inboundCredentialType());
-        // use the inbound credential - for e.g authenticate with an STS service using the inbound credential and obtain an LegendOAuthCredential
-        String generated = "fake-token-" + identity.getName() + "-" + Arrays.toString(params.oauthScopes());
-        return () -> new LegendOAuthCredential(generated);
+        // use the inbound credential - for e.g authenticate with an STS service using the inbound credential and obtain an AwsCredential
+        String generated = "fake-token-" + identity.getName() + "-";
+        return () -> new LegendAwsCredential(AwsBasicCredentials.create("fakeAccessKeyId", "fakeSecretAccessKey"));
     }
 }

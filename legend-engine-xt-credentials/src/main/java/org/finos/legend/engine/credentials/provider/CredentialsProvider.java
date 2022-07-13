@@ -15,15 +15,17 @@
 package org.finos.legend.engine.credentials.provider;
 
 import org.finos.legend.engine.shared.core.identity.Credential;
+import org.finos.legend.engine.shared.core.identity.Identity;
 
 import java.util.function.Supplier;
 
-
-public interface CredentialsProvider<OUT extends  Credential, P>
+public interface CredentialsProvider<I extends Credential, O extends  Credential, P>
 {
-    Class<OUT> outboundCredentialType();
+    Class<I> inboundCredentialType();
+
+    Class<O> outboundCredentialType();
 
     Class<P> credentialParamsType();
 
-    Supplier<OUT> makeCredential(P params) throws Exception;
+    Supplier<O> makeCredential(Identity identity, P params) throws Exception;
 }

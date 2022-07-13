@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.credentials;
+package org.finos.legend.engine.credentials.provider;
 
 import org.finos.legend.engine.shared.core.identity.credential.LegendAwsCredential;
 import org.finos.legend.engine.shared.core.identity.Identity;

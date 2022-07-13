@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.credentials.flow.registry;
+package org.finos.legend.engine.credentials.provider.registry;
 
 import org.eclipse.collections.api.list.ImmutableList;
-import org.finos.legend.engine.credentials.flow.CredentialsProviderFlow;
+import org.finos.legend.engine.credentials.provider.CredentialsProvider;
 import org.finos.legend.engine.shared.core.identity.Credential;
 
 import java.util.List;
@@ -24,17 +24,17 @@ import java.util.stream.Collectors;
 
 public class FlowRegistry1
 {
-    private ImmutableList<? extends CredentialsProviderFlow> authenticatedCredentialsProviderFlows;
+    private ImmutableList<? extends CredentialsProvider> authenticatedCredentialsProviderFlows;
 
-    public FlowRegistry1(ImmutableList<? extends CredentialsProviderFlow> authenticatedCredentialsProviderFlows)
+    public FlowRegistry1(ImmutableList<? extends CredentialsProvider> authenticatedCredentialsProviderFlows)
     {
         this.authenticatedCredentialsProviderFlows = authenticatedCredentialsProviderFlows;
     }
 
-    public <I extends Credential, O extends Credential, P> Optional<? extends CredentialsProviderFlow<I, O, P>>
+    public <I extends Credential, O extends Credential, P> Optional<? extends CredentialsProvider<I, O, P>>
         lookup(Class<I> input, Class<O> output)
     {
-        List<? extends CredentialsProviderFlow> matches = this.authenticatedCredentialsProviderFlows.stream()
+        List<? extends CredentialsProvider> matches = this.authenticatedCredentialsProviderFlows.stream()
                 .filter(flow -> flow.inboundCredentialType().isAssignableFrom(input) && flow.outboundCredentialType().isAssignableFrom(output))
                 .collect(Collectors.toList());
         if (matches.size() > 1) 
@@ -45,7 +45,7 @@ public class FlowRegistry1
         {
             return Optional.empty();
         }
-        Optional<? extends CredentialsProviderFlow> flow = Optional.of(matches.get(0));
-        return (Optional<? extends CredentialsProviderFlow<I, O, P>>) flow;
+        Optional<? extends CredentialsProvider> flow = Optional.of(matches.get(0));
+        return (Optional<? extends CredentialsProvider<I, O, P>>) flow;
     }
 }

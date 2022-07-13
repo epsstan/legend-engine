@@ -12,16 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.credentials.flow;
+package org.finos.legend.engine.credentials.provider;
 
-import org.finos.legend.engine.credentials.FakeIdentityWithKerberosCredential;
-import org.finos.legend.engine.shared.core.identity.Identity;
+import org.finos.legend.engine.credentials.provider.StaticUsernamePasswordCredentialProvider;
 import org.finos.legend.engine.shared.core.identity.credential.ImmutableLegendAwsCredential;
 import org.finos.legend.engine.shared.core.identity.credential.ImmutableLegendKeypairCredential;
 import org.finos.legend.engine.shared.core.identity.credential.ImmutableLegendOAuthCredential;
+import org.finos.legend.engine.shared.core.identity.credential.ImmutableLegendPlaintextUserPasswordCredential;
 import org.finos.legend.engine.shared.core.identity.credential.LegendAwsCredential;
 import org.finos.legend.engine.shared.core.identity.credential.LegendKeypairCredential;
 import org.finos.legend.engine.shared.core.identity.credential.LegendOAuthCredential;
+import org.finos.legend.engine.shared.core.identity.credential.LegendPlaintextUserPasswordCredential;
+import org.finos.legend.engine.shared.core.vault.PropertiesVaultImplementation;
+import org.finos.legend.engine.shared.core.vault.Vault;
 import org.junit.Before;
 import org.junit.Test;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
@@ -30,25 +33,48 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
 
+import java.util.Properties;
 import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestDirectUseOfFlows
+public class TestDirectUseOfCredentialProviders
 {
-    private Identity fakeKerberosIdentity;
+    private PropertiesVaultImplementation propertiesVaultImplementation;
+    private FakeIdentityWithKerberosCredential fakeKerberosIdentity;
 
     @Before
     public void setup()
     {
+        Properties properties = new Properties();
+        properties.put("user1", "password1");
+        this.propertiesVaultImplementation = new PropertiesVaultImplementation(properties);
+        Vault.INSTANCE.registerImplementation(propertiesVaultImplementation);
+
         this.fakeKerberosIdentity = new FakeIdentityWithKerberosCredential("fred@EXAMPLE.COM");
     }
 
     @Test
-    public void kerberosToOAuth() throws Exception
+    public void createUserPasswordCredential() throws Exception
     {
+        StaticUsernamePasswordCredentialProvider credentialProvider = new StaticUsernamePasswordCredentialProvider(
+                ImmutableStaticUsernamePasswordCredentialProvider.Configuration.builder().build()
+        );
 
-        KerberosToOAuthCredentialFlow flow = new KerberosToOAuthCredentialFlow(ImmutableKerberosToOAuthCredentialFlow.Configuration.builder()
+        Supplier<LegendPlaintextUserPasswordCredential> supplier = credentialProvider.makeCredential(
+                fakeKerberosIdentity,
+                ImmutableLegendPlaintextUserPasswordCredential.Params.builder().name("user1").build()
+        );
+
+        LegendPlaintextUserPasswordCredential credential = supplier.get();
+        assertEquals("user1", credential.getUser());
+        assertEquals("password1", credential.getPassword());
+    }
+
+    @Test
+    public void createOAuthCredentialFromKerberos() throws Exception
+    {
+        KerberosToOAuthCredentialProvider flow = new KerberosToOAuthCredentialProvider(ImmutableKerberosToOAuthCredentialProvider.Configuration.builder()
                 .build());
 
         Supplier<LegendOAuthCredential> supplier =
@@ -60,10 +86,9 @@ public class TestDirectUseOfFlows
     }
 
     @Test
-    public void kerberosToAWS() throws Exception
+    public void createS3CredentialFromKerberos() throws Exception
     {
-
-        KerberosToAWSCredentialFlow flow = new KerberosToAWSCredentialFlow(ImmutableKerberosToAWSCredentialFlow.Configuration.builder()
+        KerberosToAWSCredentialProvider flow = new KerberosToAWSCredentialProvider(ImmutableKerberosToAWSCredentialProvider.Configuration.builder()
                 .build());
 
         Supplier<LegendAwsCredential> supplier = flow.makeCredential(
@@ -76,17 +101,14 @@ public class TestDirectUseOfFlows
         S3Client s3 = S3Client.builder().region(Region.US_EAST_1)
                 .credentialsProvider(StaticCredentialsProvider.create(underlying))
                 .build();
-
-
         ListBucketsResponse listBucketsResponse = s3.listBuckets();
     }
 
-    // TODO - Can this be made generic and not tied to Snowflake ?
     @Test
-    public void kerberosToSnowflakeKeyPair() throws Exception
+    public void createSnowflakeKeypairFromKerberos() throws Exception
     {
 
-        KerberosToKeyPairFlow flow = new KerberosToKeyPairFlow(ImmutableKerberosToKeyPairFlow.Configuration.builder()
+        KerberosToKeyPairCredentialProvider flow = new KerberosToKeyPairCredentialProvider(ImmutableKerberosToKeyPairCredentialProvider.Configuration.builder()
                 .build());
 
         Supplier<LegendKeypairCredential> supplier = flow.makeCredential(
@@ -98,6 +120,6 @@ public class TestDirectUseOfFlows
                         .build()
         );
 
-        LegendKeypairCredential legendKeypairCredential = supplier.get();
+        supplier.get();
     }
 }

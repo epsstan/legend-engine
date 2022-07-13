@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.credentials.flow;
+package org.finos.legend.engine.credentials.provider;
 
 import com.google.common.base.Splitter;
 import net.snowflake.client.jdbc.internal.apache.commons.codec.binary.Base64;
@@ -44,7 +44,7 @@ import java.util.function.Supplier;
 
 @Value.Enclosing
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
-public class KerberosToKeyPairFlow  extends AbstractCredentialsProviderFlowImpl<
+public class KerberosToKeyPairCredentialProvider extends AbstractCredentialsProviderImpl<
         LegendKerberosCredential,
         LegendKeypairCredential,
         LegendKeypairCredential.Params>
@@ -57,7 +57,7 @@ public class KerberosToKeyPairFlow  extends AbstractCredentialsProviderFlowImpl<
 
     }
 
-    public KerberosToKeyPairFlow(Configuration configuration)
+    public KerberosToKeyPairCredentialProvider(Configuration configuration)
     {
         super(LegendKerberosCredential.class, LegendKeypairCredential.class, LegendKeypairCredential.Params.class);
         this.configuration = configuration;

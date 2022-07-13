@@ -14,6 +14,8 @@
 
 package org.finos.legend.engine.credentials.provider;
 
+import org.finos.legend.engine.shared.core.identity.Identity;
+import org.finos.legend.engine.shared.core.identity.credential.AnonymousCredential;
 import org.finos.legend.engine.shared.core.identity.credential.LegendPlaintextUserPasswordCredential;
 import org.finos.legend.engine.shared.core.vault.Vault;
 import org.immutables.value.Value;
@@ -22,7 +24,8 @@ import java.util.function.Supplier;
 
 @Value.Enclosing
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
-public class StaticUsernamePasswordCredentialProvider extends AbstractCredentialsProvider<
+public class StaticUsernamePasswordCredentialProvider extends AbstractCredentialsProviderImpl<
+        AnonymousCredential,
         LegendPlaintextUserPasswordCredential,
         LegendPlaintextUserPasswordCredential.Params>
 {
@@ -36,12 +39,12 @@ public class StaticUsernamePasswordCredentialProvider extends AbstractCredential
 
     public StaticUsernamePasswordCredentialProvider(Configuration configuration)
     {
-        super(LegendPlaintextUserPasswordCredential.class, LegendPlaintextUserPasswordCredential.Params.class);
+        super(AnonymousCredential.class, LegendPlaintextUserPasswordCredential.class, LegendPlaintextUserPasswordCredential.Params.class);
         this.configuration = configuration;
     }
 
     @Override
-    public Supplier<LegendPlaintextUserPasswordCredential> makeCredential(LegendPlaintextUserPasswordCredential.Params params) throws Exception
+    public Supplier<LegendPlaintextUserPasswordCredential> makeCredential(Identity identity, LegendPlaintextUserPasswordCredential.Params params) throws Exception
     {
         String vaultSecretReference = params.name();
         String password = Vault.INSTANCE.getValue(vaultSecretReference);
