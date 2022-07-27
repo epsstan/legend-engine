@@ -1,8 +1,5 @@
-package org.finos.legend.engine.plan.execution.stores.relational.connection.test.containers;
+package org.finos.legend.stack.integration.tests.containers;
 
-
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public interface LegendTestContainer
 {

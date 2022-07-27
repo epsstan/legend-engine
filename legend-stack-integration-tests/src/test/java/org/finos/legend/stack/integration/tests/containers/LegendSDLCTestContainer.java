@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.plan.execution.stores.relational.connection.test.containers;
+package org.finos.legend.stack.integration.tests.containers;
 
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
@@ -26,20 +26,18 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.stream.Collectors;
 
-public class LegendEngineTestContainer extends AbstractLegendTestContainer
+public class LegendSDLCTestContainer extends AbstractLegendTestContainer
 {
-    public static LegendEngineTestContainer build(String containerImageName, Network network, LegendMongoTestContainer mongoTestContainer) throws Exception
-    {
-        return new LegendEngineTestContainer(containerImageName, network, mongoTestContainer);
+    public static LegendSDLCTestContainer build(String containerImageName, Network network, LegendMongoTestContainer mongoTestContainer) throws Exception {
+        return new LegendSDLCTestContainer(containerImageName, network, mongoTestContainer);
     }
 
-    // Force a static port mapping as the Gitlab.com OAuth redirect urls are static
-    public final PortMapping portMapping = new PortMapping(6060, 6160);
+    public final PortMapping portMapping = new PortMapping(7070, 7170);
+    public final PortMapping adminPortMapping = new PortMapping(7071, 7171);
 
-    public LegendEngineTestContainer(String containerImageName, Network network, LegendMongoTestContainer mongoTestContainer) throws Exception
+    public LegendSDLCTestContainer(String containerImageName, Network network, LegendMongoTestContainer mongoTestContainer) throws Exception
     {
         super(containerImageName);
-
         this.writeConfigurations(mongoTestContainer);
 
         super.testContainer = new GenericContainer(DockerImageName.parse(this.imageName()))
@@ -52,13 +50,13 @@ public class LegendEngineTestContainer extends AbstractLegendTestContainer
                 .withNetwork(network)
                 .withNetworkAliases(this.containerNetworkName())
                 .withAccessToHost(true)
-                .withExposedPorts(portMapping.containerPort)
-                .withCreateContainerCmdModifier(super.buildPortMappingModifier(portMapping));
+                .withExposedPorts(portMapping.containerPort, adminPortMapping.containerPort)
+                .withCreateContainerCmdModifier(super.buildPortMappingModifier(portMapping, adminPortMapping));
     }
 
     @Override
     public String containerNetworkName() {
-        return "engine";
+        return "sdlc";
     }
 
     private void writeConfigurations(LegendMongoTestContainer mongoTestContainer) throws Exception {
@@ -66,7 +64,7 @@ public class LegendEngineTestContainer extends AbstractLegendTestContainer
     }
 
     private String assembleSDLCConfigYaml(LegendMongoTestContainer mongoTestContainer) throws Exception {
-        URL resource = LegendEngineTestContainer.class.getResource("/container-configs/engine-config.template.json");
+        URL resource = LegendSDLCTestContainer.class.getResource("/container-configs/sdlc-confg.template.yml");
         String template = Files.readAllLines(Paths.get(resource.toURI())).stream().collect(Collectors.joining("\n"));
         return this.parameterizeConfig(mongoTestContainer, template);
     }
@@ -75,10 +73,12 @@ public class LegendEngineTestContainer extends AbstractLegendTestContainer
     {
         return config
                 .replaceAll("__MONGO_URI__", mongoTestContainer.getContainerNetworkAccessibleMongoUri())
-                .replaceAll("__LEGEND_ENGINE_PORT__", String.valueOf(portMapping.containerPort));
+                .replaceAll("__LEGEND_SDLC_PORT__", String.valueOf(portMapping.containerPort))
+                .replaceAll("__LEGEND_SDLC_ADMIN_PORT__", String.valueOf(adminPortMapping.containerPort))
+                .replaceAll("__LEGEND_SDLC_URL__", this.getExternallyAccessibleBaseUrl());
     }
 
     public String getExternallyAccessibleBaseUrl() {
-        return String.format("http://%s:%d/exec", "localhost", portMapping.hostPort);
+        return String.format("http://%s:%d/sdlc", "localhost", portMapping.hostPort);
     }
 }

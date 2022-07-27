@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.finos.legend.engine.plan.execution.stores.relational.connection.test;
+package org.finos.legend.stack.integration.tests;
 
 import com.jayway.jsonpath.JsonPath;
 import org.apache.http.HttpHeaders;
@@ -30,10 +30,10 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.finos.legend.engine.plan.execution.stores.relational.connection.test.containers.AbstractLegendTestContainer;
-import org.finos.legend.engine.plan.execution.stores.relational.connection.test.containers.LegendEngineTestContainer;
-import org.finos.legend.engine.plan.execution.stores.relational.connection.test.containers.LegendMongoTestContainer;
-import org.finos.legend.engine.plan.execution.stores.relational.connection.test.containers.LegendSDLCTestContainer;
+import org.finos.legend.stack.integration.tests.containers.AbstractLegendTestContainer;
+import org.finos.legend.stack.integration.tests.containers.LegendEngineTestContainer;
+import org.finos.legend.stack.integration.tests.containers.LegendMongoTestContainer;
+import org.finos.legend.stack.integration.tests.containers.LegendSDLCTestContainer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
