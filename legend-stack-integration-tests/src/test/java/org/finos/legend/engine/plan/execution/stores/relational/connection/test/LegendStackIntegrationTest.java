@@ -69,7 +69,6 @@ public class LegendStackIntegrationTest
         MONGO_CONTAINER.start();
         MONGO_CONTAINER.testBeforeUse();
 
-
         LOGGER.info("Starting engine container");
         LEGEND_ENGINE_CONTAINER = LegendEngineTestContainer.build("finos/legend-engine-server:3.9.3", network, MONGO_CONTAINER);
         LEGEND_ENGINE_CONTAINER.start();
@@ -84,6 +83,7 @@ public class LegendStackIntegrationTest
     {
         MONGO_CONTAINER.stopAndIgnoreErrors();
         dumpLogs(LEGEND_ENGINE_CONTAINER, logDirectory);
+        dumpLogs(LEGEND_SDLC_CONTAINER, logDirectory);
     }
 
     private static void dumpLogs(AbstractLegendTestContainer container, Path logDir) throws Exception
