@@ -81,16 +81,24 @@ public class LegendStackIntegrationTest
     @AfterClass
     public static void teardown() throws Exception
     {
-        MONGO_CONTAINER.stopAndIgnoreErrors();
-        dumpLogs(LEGEND_ENGINE_CONTAINER, logDirectory);
-        dumpLogs(LEGEND_SDLC_CONTAINER, logDirectory);
+        stopAndIgnoreErrors(MONGO_CONTAINER);
+        stopAndDumpLogs(LEGEND_ENGINE_CONTAINER, logDirectory);
+        stopAndDumpLogs(LEGEND_SDLC_CONTAINER, logDirectory);
     }
 
-    private static void dumpLogs(AbstractLegendTestContainer container, Path logDir) throws Exception
+    private static void stopAndDumpLogs(AbstractLegendTestContainer container, Path logDir) throws Exception
     {
         if (container != null)
         {
             container.dumpLogs(logDir);
+        }
+    }
+
+    private static void stopAndIgnoreErrors(AbstractLegendTestContainer container) throws Exception
+    {
+        if (container != null)
+        {
+            container.stopAndIgnoreErrors();
         }
     }
 
