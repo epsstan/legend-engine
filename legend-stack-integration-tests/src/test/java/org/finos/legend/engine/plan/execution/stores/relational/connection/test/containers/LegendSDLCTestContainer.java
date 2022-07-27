@@ -1,14 +1,19 @@
+// Copyright 2021 Goldman Sachs
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package org.finos.legend.engine.plan.execution.stores.relational.connection.test.containers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.util.EntityUtils;
-import org.finos.legend.engine.shared.core.kerberos.HttpClientBuilder;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -20,9 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.stream.Collectors;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class LegendSDLCTestContainer extends AbstractLegendTestContainer
 {
@@ -62,7 +64,7 @@ public class LegendSDLCTestContainer extends AbstractLegendTestContainer
     }
 
     private String assembleSDLCConfigYaml(LegendMongoTestContainer mongoTestContainer) throws Exception {
-        URL resource = LegendSDLCTestContainer.class.getResource("/e2e/sdlc-confg.template.yml");
+        URL resource = LegendSDLCTestContainer.class.getResource("/container-configs/sdlc-confg.template.yml");
         String template = Files.readAllLines(Paths.get(resource.toURI())).stream().collect(Collectors.joining("\n"));
         return this.parameterizeConfig(mongoTestContainer, template);
     }
@@ -73,23 +75,10 @@ public class LegendSDLCTestContainer extends AbstractLegendTestContainer
                 .replaceAll("__MONGO_URI__", mongoTestContainer.getContainerNetworkAccessibleMongoUri())
                 .replaceAll("__LEGEND_SDLC_PORT__", String.valueOf(portMapping.containerPort))
                 .replaceAll("__LEGEND_SDLC_ADMIN_PORT__", String.valueOf(adminPortMapping.containerPort))
-                .replaceAll("__LEGEND_SDLC_URL__", this.getExternallyAccessibleUrl());
+                .replaceAll("__LEGEND_SDLC_URL__", this.getExternallyAccessibleBaseUrl());
     }
 
-    public String getExternallyAccessibleUrl() {
+    public String getExternallyAccessibleBaseUrl() {
         return String.format("http://%s:%d/sdlc", "localhost", portMapping.hostPort);
     }
-
-    @Override
-    public void testBeforeUse() throws Exception {
-        HttpClient httpClient = HttpClientBuilder.getHttpClient(new BasicCookieStore());
-        HttpGet httpGet = new HttpGet(this.getExternallyAccessibleUrl() + "/api/info");
-        HttpResponse healthCheckResponse = httpClient.execute(httpGet);
-        assertEquals(HttpStatus.SC_OK, healthCheckResponse.getStatusLine().getStatusCode());
-
-        String healthCheckResponseText = EntityUtils.toString(healthCheckResponse.getEntity());
-        JsonNode healthCheckData = new ObjectMapper().readTree(healthCheckResponseText);
-        assertNotNull(healthCheckData.get("hostName").asText());
-    }
-
 }

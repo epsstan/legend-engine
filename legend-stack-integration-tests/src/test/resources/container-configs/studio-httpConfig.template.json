@@ -8,8 +8,8 @@
       {
         "org.finos.legend.server.pac4j.gitlab.GitlabClient": {
           "name" : "gitlab",
-          "clientId" : "b94ad538b2992ce7ff9f6b7e76aec5d6164ecbed12f5b44651aed639c00c62ee",
-          "secret": "3e7004cddf40b4d0d8d83b66eb218a25c3c4c537bd57221287238744a19570c2",
+          "clientId" : "__GITLAB_CLIENTID__",
+          "secret": "__GITLAB_CLIENTID_SECRET__",
           "discoveryUri": "https://gitlab.com/.well-known/openid-configuration",
           "scope": "openid profile api"
         }
