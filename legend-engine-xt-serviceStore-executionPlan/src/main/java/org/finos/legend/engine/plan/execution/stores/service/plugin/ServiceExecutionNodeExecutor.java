@@ -93,7 +93,7 @@ public class ServiceExecutionNodeExecutor implements ExecutionNodeVisitor<Result
                 String processedUrl = ServiceExecutor.getProcessedUrl(node.url, node.params, mappedParameters, this.executionState);
                 List<Header> headers = ServiceExecutor.getProcessedHeaders(node.params, mappedParameters, this.executionState);
                 StringEntity requestBodyEntity = ServiceExecutor.getRequestBodyEntity(node.requestBodyDescription, this.executionState);
-                return ServiceExecutor.executeHttpService(processedUrl, headers, requestBodyEntity, node.method, node.mimeType, node.securitySchemes, this.profiles);
+                return ServiceExecutor.executeHttpService(processedUrl, headers, requestBodyEntity, node.method, node.mimeType, node.securitySchemes, node.authSpecs,this.profiles);
             }
         }
         else if (executionNode instanceof ServiceParametersResolutionExecutionNode)

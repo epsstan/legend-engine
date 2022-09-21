@@ -34,6 +34,7 @@ import org.eclipse.collections.api.block.function.Function3;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.factory.Lists;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.engine.plan.execution.nodes.helpers.freemarker.FreeMarkerExecutor;
 import org.finos.legend.engine.plan.execution.nodes.state.ExecutionState;
@@ -49,6 +50,16 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.s
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ServiceParameter;
 import org.pac4j.core.profile.CommonProfile;
+import org.finos.legend.engine.plan.execution.authentication.AuthenticationMethod;
+import org.finos.legend.engine.plan.execution.authentication.IntermediationRule;
+import org.finos.legend.engine.plan.execution.authentication.connection.HttpConnectionProvider;
+import org.finos.legend.engine.plan.execution.authentication.connection.HttpConnectionSpec;
+import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreAuthenticationSpec;
+import org.finos.legend.engine.plan.execution.authentication.provider.AuthenticationMethodProvider;
+import org.finos.legend.engine.plan.execution.authentication.provider.IntermediationRuleProvider;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
+import org.finos.legend.engine.shared.core.identity.factory.IdentityFactoryProvider;
+import java.net.HttpURLConnection;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -56,14 +67,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ServiceExecutor
 {
-    public static InputStreamResult executeHttpService(String url, List<Header> headers, StringEntity requestBodyEntity, HttpMethod httpMethod, String mimeType, List<SecurityScheme> securitySchemes, MutableList<CommonProfile> profiles)
+    public static InputStreamResult executeHttpService(String url, List<Header> headers, StringEntity requestBodyEntity, HttpMethod httpMethod, String mimeType, Map<String,SecurityScheme> securitySchemes, Map<String, AuthenticationSpec> authSpecs, MutableList<CommonProfile> profiles)
     {
         URI uri;
         try
@@ -77,61 +85,45 @@ public class ServiceExecutor
             throw new RuntimeException(errMsg, e);
         }
 
-        InputStream response = executeRequest(httpMethod, uri, headers, requestBodyEntity, mimeType, securitySchemes, profiles);
+        InputStream response = executeRequest(httpMethod, uri, headers, requestBodyEntity, mimeType, securitySchemes,authSpecs, profiles);
         return new InputStreamResult(response, org.eclipse.collections.api.factory.Lists.mutable.with(new ServiceStoreExecutionActivity(url)));
     }
 
-    public static InputStream executeRequest(HttpMethod httpMethod, URI uri, List<Header> headers, StringEntity requestBodyDescription, String mimeType, List<SecurityScheme> securitySchemes, MutableList<CommonProfile> profiles)
+    public static InputStream executeRequest(HttpMethod httpMethod, URI uri, List<Header> headers, StringEntity requestBodyDescription, String mimeType, Map<String,SecurityScheme> securitySchemes, Map<String, AuthenticationSpec> authSpecs, MutableList<CommonProfile> profiles)
     {
         Span span = GlobalTracer.get().activeSpan();
 
-        HttpUriRequest request;
-        switch (httpMethod)
-        {
-            case GET:
-                request = new HttpGet(uri);
-                break;
-            case POST:
-                HttpPost postRequest = new HttpPost(uri);
-                postRequest.setEntity(requestBodyDescription);
-                request = postRequest;
-                break;
-            default:
-                throw new UnsupportedOperationException("The HTTP method " + httpMethod + " is not supported");
-        }
-        ListIterate.forEach(headers, header -> request.addHeader(header));
-
         try
         {
-            HttpClientBuilder clientBuilder = HttpClients.custom();
+            FastList<AuthenticationMethod> allMethods = FastList.newList(ServiceLoader.load(AuthenticationMethod.class));
+            FastList<IntermediationRule> allRules = FastList.newList(ServiceLoader.load(IntermediationRule.class));
+            AuthenticationMethodProvider authenticationMethodProvider = new AuthenticationMethodProvider(allMethods,new IntermediationRuleProvider(allRules));
+            HttpURLConnection connection = new HttpConnectionProvider(authenticationMethodProvider).makeConnection(new HttpConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType),new ServiceStoreAuthenticationSpec(securitySchemes,authSpecs), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
 
-            if (securitySchemes != null)
-            {
-                securitySchemes.forEach(securityScheme -> processSecurityScheme(clientBuilder, profiles, securityScheme));
-            }
+            InputStream responseStream = connection.getInputStream();
 
-            CloseableHttpClient httpClient = clientBuilder.build();
-            CloseableHttpResponse httpResponse = httpClient.execute(request);
-
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-
-            if (span != null)
-            {
-                span.setTag("Status code", statusCode);
-            }
-
-            if (statusCode != HttpStatus.SC_OK)
-            {
-                String explanation = httpResponse.getEntity() == null ? "" : EntityUtils.toString(httpResponse.getEntity());
-
-                if (span != null)
-                {
-                    span.setTag("Failure message", explanation);
-                }
-                throw new RuntimeException("HTTP request [" + request.toString() + "] failed with error - " + explanation);
-            }
-
-            return httpResponse.getEntity().getContent();
+            //TODO: FIX
+//            ObjectMapper mapper = new ObjectMapper();
+//            int statusCode = 200;// httpResponse.getStatusLine().getStatusCode();
+//
+//            if (span != null)
+//            {
+//                span.setTag("Status code", statusCode);
+//            }
+//
+//            if (statusCode != HttpStatus.SC_OK)
+//            {
+//                String explanation = httpResponse.getEntity() == null ? "" : EntityUtils.toString(httpResponse.getEntity());
+//
+//                if (span != null)
+//                {
+//                    span.setTag("Failure message", explanation);
+//                }
+//                throw new RuntimeException("HTTP request [" + request.toString() + "] failed with error - " + explanation);
+//            }
+//
+//            return httpResponse.getEntity().getContent();
+            return responseStream;
         }
         catch (RuntimeException e)
         {
@@ -228,16 +220,6 @@ public class ServiceExecutor
             return Collections.emptyList();
         }
         return ListIterate.collectIf(headerParams, param -> (mappedParameters.contains(param.name) && state.getResult(param.name) != null), param -> new BasicHeader(param.name, serializeHeaderParameter(((ConstantResult) state.getResult(param.name)).getValue(), param)));
-    }
-
-    private static void processSecurityScheme(HttpClientBuilder httpClientBuilder, MutableList<CommonProfile> profiles, SecurityScheme securityScheme)
-    {
-        List<Function3<SecurityScheme, HttpClientBuilder, MutableList<CommonProfile>, Boolean>> processors = ListIterate.flatCollect(IServiceStoreExecutionExtension.getExtensions(), ext -> ext.getExtraSecuritySchemeProcessors());
-
-        ListIterate.collect(processors, processor -> processor.value(securityScheme, httpClientBuilder, profiles))
-                .select(Objects::nonNull)
-                .getFirstOptional()
-                .orElseThrow(() -> new RuntimeException("No processor found for given security scheme. Unsupported SecurityScheme - " + securityScheme.getClass().getSimpleName()));
     }
 
     private static String serializePathParameter(Object value, ServiceParameter parameter)
