@@ -20,12 +20,11 @@ import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.engine.language.pure.grammar.from.ParseTreeWalkerSourceInformation;
 import org.finos.legend.engine.language.pure.grammar.from.PureGrammarParserUtility;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.connection.ServiceStoreConnectionParserGrammar;
-import org.finos.legend.engine.language.pure.grammar.from.extensions.IServiceStoreGrammarParserExtension;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.connection.ServiceStoreConnection;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.Authentication;
 import org.finos.legend.engine.language.pure.grammar.from.authentication.AuthenticationSourceCode;
 import org.finos.legend.engine.language.pure.grammar.from.extensions.IAuthenticationGrammarParserExtension;
 
@@ -70,7 +69,7 @@ public class ServiceStoreConnectionParseTreeWalker
         }
     }
 
-    private Pair<String, Authentication> visitAuthentication(ServiceStoreConnectionParserGrammar.AuthSpecificationObjectContext ctx)
+    private Pair<String, AuthenticationSpec> visitAuthentication(ServiceStoreConnectionParserGrammar.AuthSpecificationObjectContext ctx)
     {
         SourceInformation sourceInformation = walkerSourceInformation.getSourceInformation(ctx);
 
@@ -84,7 +83,7 @@ public class ServiceStoreConnectionParseTreeWalker
 
 
         List<IAuthenticationGrammarParserExtension> extensions = IAuthenticationGrammarParserExtension.getExtensions();
-        Authentication spec = IAuthenticationGrammarParserExtension.process(code, ListIterate.flatCollect(extensions, IAuthenticationGrammarParserExtension::getExtraAuthenticationParsers));
+        AuthenticationSpec spec = IAuthenticationGrammarParserExtension.process(code, ListIterate.flatCollect(extensions, IAuthenticationGrammarParserExtension::getExtraAuthenticationParsers));
 
         if (spec == null)
         {

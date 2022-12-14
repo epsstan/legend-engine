@@ -17,8 +17,6 @@ package org.finos.legend.engine.language.pure.grammar.from;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.eclipse.collections.api.factory.Lists;
 import org.finos.legend.engine.language.pure.grammar.from.extensions.IAuthenticationGrammarParserExtension;
 import org.finos.legend.engine.language.pure.grammar.from.authentication.AuthenticationParseTreeWalker;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.AuthenticationLexerGrammar;
@@ -26,10 +24,9 @@ import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.CredentialLexerGrammar;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.CredentialParserGrammar;
 import org.finos.legend.engine.language.pure.grammar.from.authentication.AuthenticationSourceCode;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.Authentication;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.Credential;
 import org.finos.legend.engine.language.pure.grammar.from.authentication.CredentialParseTreeWalker;
-import org.finos.legend.engine.language.pure.grammar.from.authentication.AuthenticationSourceCode;
 import org.finos.legend.engine.language.pure.grammar.from.authentication.CredentialSourceCode;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +36,7 @@ public class AuthenticationGrammarParserExtension implements IAuthenticationGram
 {
     public static final String NAME = "Authentication";
 
-    public List<Function<AuthenticationSourceCode, Authentication>> getExtraAuthenticationParsers()
+    public List<Function<AuthenticationSourceCode, AuthenticationSpec>> getExtraAuthenticationParsers()
     {
         return Collections.singletonList(code ->
         {
@@ -48,11 +45,11 @@ public class AuthenticationGrammarParserExtension implements IAuthenticationGram
             switch (code.getType())
             {
                 case "ApiKeyAuthentication":
-                    return parseAuthentication(code, p -> walker.visitApiKeyAuthentication(code,p.apiKeyAuthentication()));
+                    return parseAuthenticationSpec(code, p -> walker.visitApiKeyAuthenticationSpec(code,p.apiKeyAuthentication()));
                 case "UsernamePasswordAuthentication":
-                    return parseAuthentication(code, p -> walker.visitUsernamePasswordAuthentication(code, p.basicAuthentication()));
+                    return parseAuthenticationSpec(code, p -> walker.visitUsernamePasswordAuthenticationSpec(code, p.basicAuthentication()));
                 case "OauthAuthentication":
-                    return parseAuthentication(code, p -> walker.visitOAuthAuthentication(code, p.oauthAuthentication()));
+                    return parseAuthenticationSpec(code, p -> walker.visitOAuthAuthenticationSpec(code, p.oauthAuthentication()));
                 default:
                     return null;
             }
@@ -77,7 +74,7 @@ public class AuthenticationGrammarParserExtension implements IAuthenticationGram
         });
     }
 
-    private Authentication parseAuthentication(AuthenticationSourceCode code, Function<AuthenticationParserGrammar, Authentication> func)
+    private AuthenticationSpec parseAuthenticationSpec(AuthenticationSourceCode code, Function<AuthenticationParserGrammar, AuthenticationSpec> func)
     {
         CharStream input = CharStreams.fromString(code.getCode());
         ParserErrorListener errorListener = new ParserErrorListener(code.getWalkerSourceInformation());

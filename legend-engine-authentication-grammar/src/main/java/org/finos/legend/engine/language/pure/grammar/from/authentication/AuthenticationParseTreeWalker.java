@@ -17,13 +17,10 @@ package org.finos.legend.engine.language.pure.grammar.from.authentication;
 import org.finos.legend.engine.language.pure.grammar.from.PureGrammarParserUtility;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.AuthenticationParserGrammar;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.CredentialParserGrammar;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.Authentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.UsernamePasswordAuthentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.ApiKeyAuthentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.OAuthAuthentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.OauthCredential;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.VaultCredential;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.Credential;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.apiKey.ApiKeyAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.usernamePassword.UsernamePasswordAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.*;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.OAuthAuthenticationSpec;
 import org.finos.legend.engine.language.pure.grammar.from.ParseTreeWalkerSourceInformation;
 import org.finos.legend.engine.language.pure.grammar.from.extensions.IAuthenticationGrammarParserExtension;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
@@ -42,9 +39,9 @@ public class AuthenticationParseTreeWalker
         this.walkerSourceInformation = walkerSourceInformation;
     }
 
-    public UsernamePasswordAuthentication visitUsernamePasswordAuthentication(AuthenticationSourceCode code, AuthenticationParserGrammar.BasicAuthenticationContext ctx)
+    public UsernamePasswordAuthenticationSpec visitUsernamePasswordAuthenticationSpec(AuthenticationSourceCode code, AuthenticationParserGrammar.BasicAuthenticationContext ctx)
     {
-        UsernamePasswordAuthentication u = new UsernamePasswordAuthentication();
+        UsernamePasswordAuthenticationSpec u = new UsernamePasswordAuthenticationSpec();
         u.sourceInformation = code.getSourceInformation();
 
         AuthenticationParserGrammar.UsernameContext usernameContext = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.username(),"username", u.sourceInformation);
@@ -59,9 +56,9 @@ public class AuthenticationParseTreeWalker
         return u;
     }
 
-    public ApiKeyAuthentication visitApiKeyAuthentication(AuthenticationSourceCode code, AuthenticationParserGrammar.ApiKeyAuthenticationContext ctx)
+    public ApiKeyAuthenticationSpec visitApiKeyAuthenticationSpec(AuthenticationSourceCode code, AuthenticationParserGrammar.ApiKeyAuthenticationContext ctx)
     {
-        ApiKeyAuthentication u = new ApiKeyAuthentication();
+        ApiKeyAuthenticationSpec u = new ApiKeyAuthenticationSpec();
         u.sourceInformation = code.getSourceInformation();
 
         AuthenticationParserGrammar.ValueContext valueContext = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.value(),"value", u.sourceInformation);
@@ -70,9 +67,9 @@ public class AuthenticationParseTreeWalker
         return u;
     }
 
-    public OAuthAuthentication visitOAuthAuthentication(AuthenticationSourceCode code, AuthenticationParserGrammar.OauthAuthenticationContext ctx)
+    public OAuthAuthenticationSpec visitOAuthAuthenticationSpec(AuthenticationSourceCode code, AuthenticationParserGrammar.OauthAuthenticationContext ctx)
     {
-        OAuthAuthentication oAuthAuthentication = new OAuthAuthentication();
+        OAuthAuthenticationSpec oAuthAuthentication = new OAuthAuthenticationSpec();
         oAuthAuthentication.sourceInformation = code.getSourceInformation();
 
         AuthenticationParserGrammar.TokenContext tokenContext = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.token(),"token", oAuthAuthentication.sourceInformation);

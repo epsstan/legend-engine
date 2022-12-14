@@ -22,5 +22,5 @@ Class meta::external::store::service::metamodel::runtime::ServiceStoreConnection
 ]
 {
    baseUrl: String[1];
-   authSpecs: Map<String,Authentication>[0..1];
+   authSpecs: Map<String,AuthenticationSpec>[0..1];
 }

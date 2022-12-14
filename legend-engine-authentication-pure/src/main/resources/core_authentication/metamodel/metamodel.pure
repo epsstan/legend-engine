@@ -14,24 +14,32 @@
 
 import meta::pure::authentication::*;
 
-Class <<typemodifiers.abstract>> meta::pure::authentication::Authentication
+Class <<typemodifiers.abstract>> meta::pure::authentication::AuthenticationSpec
 {
 
 }
 
-Class meta::pure::authentication::OauthAuthentication extends meta::pure::authentication::Authentication
+Class meta::pure::authentication::OauthAuthenticationSpec extends meta::pure::authentication::AuthenticationSpec
 {
    credential: OauthCredential[1];
 }
 
-Class meta::pure::authentication::UsernamePasswordAuthentication extends meta::pure::authentication::Authentication
+Class meta::pure::authentication::UsernamePasswordAuthenticationSpec extends meta::pure::authentication::AuthenticationSpec
 {
    username: String[1];
    password: VaultCredential[1];
 }
 
-Class meta::pure::authentication::ApiKeyAuthentication extends meta::pure::authentication::Authentication
+Enum meta::pure::authentication::Location
 {
+  header,
+  cookie
+}
+
+Class meta::pure::authentication::ApiKeyAuthenticationSpec extends meta::pure::authentication::AuthenticationSpec
+{
+   location: Location[1];
+   keyName: String[1];
    value: String[1];
 }
 

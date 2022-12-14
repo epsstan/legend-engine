@@ -13,14 +13,13 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.factory.Lists;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.apiKey.ApiKeyAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.usernamePassword.UsernamePasswordAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.*;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.*;
 import org.finos.legend.engine.shared.core.vault.Vault;
 import org.pac4j.core.profile.CommonProfile;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.Authentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.VaultCredential;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.UsernamePasswordAuthentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.ApiKeyAuthentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.OAuthAuthentication;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -30,11 +29,11 @@ import java.util.Map;
 public class SecuritySchemeProcessor
 {
     private HttpClientBuilder httpClientBuilder;
-    private Authentication authSpecification;
+    private AuthenticationSpec authSpecification;
     private RequestBuilder requestBuilder;
     private MutableList<CommonProfile> profiles;
 
-    public SecuritySchemeProcessor(Authentication authSpecification, HttpClientBuilder httpClientBuilder, RequestBuilder requestBuilder, MutableList<CommonProfile> profiles)
+    public SecuritySchemeProcessor(AuthenticationSpec authSpecification, HttpClientBuilder httpClientBuilder, RequestBuilder requestBuilder, MutableList<CommonProfile> profiles)
     {
         this.authSpecification = authSpecification;
         this.httpClientBuilder = httpClientBuilder;
@@ -48,15 +47,16 @@ public class SecuritySchemeProcessor
         {
             if (securityScheme instanceof SimpleHttpSecurityScheme)
            {
-                UsernamePasswordAuthentication spec = (UsernamePasswordAuthentication) this.authSpecification;
-                String password = Vault.INSTANCE.getValue(((VaultCredential)spec.password).vaultReference);
+                UsernamePasswordAuthenticationSpec spec = (UsernamePasswordAuthenticationSpec) this.authSpecification;
+                //String password = Vault.INSTANCE.getValue(((VaultCredential)spec.password).vaultReference);
+                String password = "password";
                 String encoding = Base64.encodeBase64String((spec.username+ ":" + password).getBytes());
                 requestBuilder.addHeader("Authorization", "Basic " + encoding);
                 return true;
             }
             else if (securityScheme instanceof OauthSecurityScheme)
             {
-                OAuthAuthentication spec = (OAuthAuthentication) this.authSpecification;
+                OAuthAuthenticationSpec spec = (OAuthAuthenticationSpec) this.authSpecification;
                 //TODO: get token of valid scopes
                 String oauthToken = getOAuthToken(spec.credential.grantType,spec.credential.clientId,spec.credential.clientSecretVaultReference,spec.credential.authServerUrl);
                 requestBuilder.addHeader("Authorization", "Bearer " + oauthToken);
@@ -65,7 +65,7 @@ public class SecuritySchemeProcessor
             else if (securityScheme instanceof ApiKeySecurityScheme)
             {
                 ApiKeySecurityScheme scheme = (ApiKeySecurityScheme) securityScheme;
-                ApiKeyAuthentication spec = (ApiKeyAuthentication) this.authSpecification;
+                ApiKeyAuthenticationSpec spec = (ApiKeyAuthenticationSpec) this.authSpecification;
                 if (scheme.location.equals("Header"))
                 {
                     //TODO
@@ -77,8 +77,8 @@ public class SecuritySchemeProcessor
                 else if (scheme.location.equals("QueryParam"))
                 {
                     //TODO: does this conflict with service parameters ?
-                    URI updatedUri = new URI(requestBuilder.getUri()+"?"+scheme.keyName+"="+spec.value);
-                    requestBuilder.setUri(updatedUri);
+                    //URI updatedUri = new URI(requestBuilder.getUri()+"?"+scheme.keyName+"="+spec.value);
+                    //requestBuilder.setUri(updatedUri);
                 }
                 throw new RuntimeException(String.format("ApiKey location %s not supported",scheme.location));
             }

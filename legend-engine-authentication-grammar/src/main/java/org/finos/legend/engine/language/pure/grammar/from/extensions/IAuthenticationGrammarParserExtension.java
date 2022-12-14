@@ -29,8 +29,7 @@ import org.finos.legend.engine.language.pure.grammar.from.authentication.Credent
 import org.finos.legend.engine.language.pure.grammar.from.extension.PureGrammarParserExtension;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
-import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.Authentication;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.Credential;
 
 import java.util.Collections;
@@ -46,7 +45,7 @@ public interface IAuthenticationGrammarParserExtension extends PureGrammarParser
         return Lists.mutable.withAll(ServiceLoader.load(IAuthenticationGrammarParserExtension.class));
     }
 
-    static Authentication process(AuthenticationSourceCode code, List<Function<AuthenticationSourceCode, Authentication>> processors)
+    static AuthenticationSpec process(AuthenticationSourceCode code, List<Function<AuthenticationSourceCode, AuthenticationSpec>> processors)
     {
         return process(code, processors, "Authentication");
     }
@@ -56,7 +55,7 @@ public interface IAuthenticationGrammarParserExtension extends PureGrammarParser
         return process(code, processors, "Credential");
     }
 
-    default List<Function<AuthenticationSourceCode, Authentication>> getExtraAuthenticationParsers()
+    default List<Function<AuthenticationSourceCode, AuthenticationSpec>> getExtraAuthenticationParsers()
     {
         return Collections.emptyList();
     }

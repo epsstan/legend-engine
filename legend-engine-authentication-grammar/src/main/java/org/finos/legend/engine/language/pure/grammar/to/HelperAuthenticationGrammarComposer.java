@@ -14,23 +14,23 @@
 
 package org.finos.legend.engine.language.pure.grammar.to;
 
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.Authentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.UsernamePasswordAuthentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.ApiKeyAuthentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.OAuthAuthentication;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.apiKey.ApiKeyAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.usernamePassword.UsernamePasswordAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.OAuthAuthenticationSpec;
 
 import static org.finos.legend.engine.language.pure.grammar.to.PureGrammarComposerUtility.convertString;
 import static org.finos.legend.engine.language.pure.grammar.to.PureGrammarComposerUtility.getTabString;
 
 public class HelperAuthenticationGrammarComposer
 {
-    public static String renderAuthentication(String securityScheme, Authentication a, int baseIndentation)
+    public static String renderAuthenticationSpec(String securityScheme, AuthenticationSpec a, int baseIndentation)
     {
-        if (a instanceof OAuthAuthentication)
+        if (a instanceof OAuthAuthenticationSpec)
         {
-            OAuthAuthentication spec = (OAuthAuthentication) a;
+            OAuthAuthenticationSpec spec = (OAuthAuthenticationSpec) a;
             return getTabString(baseIndentation) + securityScheme +
-                    " : OauthAuthentication\n" +
+                    " : OauthAuthenticationSpec\n" +
                     getTabString(baseIndentation) + "{\n" +
                     getTabString(baseIndentation+1) + "token : OauthCredential\n" +
                     getTabString(baseIndentation+1) + "(\n" +
@@ -41,11 +41,11 @@ public class HelperAuthenticationGrammarComposer
                     getTabString(baseIndentation + 1) + ");\n" +
                     getTabString(baseIndentation) + "}";
         }
-        else if (a instanceof UsernamePasswordAuthentication)
+        else if (a instanceof UsernamePasswordAuthenticationSpec)
         {
-            UsernamePasswordAuthentication spec = (UsernamePasswordAuthentication) a;
+            UsernamePasswordAuthenticationSpec spec = (UsernamePasswordAuthenticationSpec) a;
             return  getTabString(baseIndentation) + securityScheme +
-                    " : UsernamePasswordAuthentication\n" +
+                    " : UsernamePasswordAuthenticationSpec\n" +
                     getTabString(baseIndentation) + "{\n" +
                     getTabString(baseIndentation + 1) + "username : " + convertString(spec.username.toString(), true) + ";\n" +
                     getTabString(baseIndentation + 1) + "password : VaultCredential" +
@@ -54,12 +54,14 @@ public class HelperAuthenticationGrammarComposer
                     getTabString(baseIndentation + 1) + ");\n" +
                     getTabString(baseIndentation) + "}";
         }
-        else if (a instanceof ApiKeyAuthentication)
+        else if (a instanceof ApiKeyAuthenticationSpec)
         {
-            ApiKeyAuthentication spec = (ApiKeyAuthentication) a;
+            ApiKeyAuthenticationSpec spec = (ApiKeyAuthenticationSpec) a;
             return  getTabString(baseIndentation) + securityScheme +
-                    " : ApiKeyAuthentication\n" +
+                    " : ApiKeyAuthenticationSpec\n" +
                     getTabString(baseIndentation) + "{\n" +
+                    getTabString(baseIndentation + 1) + "location : " + convertString(spec.value.toString(), true) + ";\n" +
+                    getTabString(baseIndentation + 1) + "keyName : " + convertString(spec.value.toString(), true) + ";\n" +
                     getTabString(baseIndentation + 1) + "value : " + convertString(spec.value.toString(), true) + ";\n" +
                     getTabString(baseIndentation) + "}";
         }

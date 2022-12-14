@@ -16,13 +16,13 @@ identifier:                             VALID_STRING | STRING | STORE | BASE_URL
 
 // -------------------------------------- DEFINITION -------------------------------------
 
-definition:                             (connectionStore | authentication | baseUrl)*
+definition:                             (connectionStore | authenticationSpec | baseUrl)*
                                         EOF
 ;
 connectionStore:                        STORE COLON qualifiedName SEMI_COLON
 ;
 
-authentication:                         AUTH_SPECS COLON
+authenticationSpec:                         AUTH_SPECS COLON
                                         BRACKET_OPEN
                                                 ( authSpecificationObject ( COMMA authSpecificationObject )* )?
                                         BRACKET_CLOSE

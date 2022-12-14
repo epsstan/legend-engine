@@ -30,10 +30,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.s
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.mapping.ServiceRequestParametersBuildInfo;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.*;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.Authentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.UsernamePasswordAuthentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.ApiKeyAuthentication;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.OAuthAuthentication;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -78,7 +75,7 @@ public class HelperServiceStoreGrammarComposer
         {
             return "\n" + context.getIndentationString() + getTabString() + "auth: [\n" +
                     serviceStoreConnection. authSpecs.entrySet().stream().map(entry
-                            -> HelperAuthenticationGrammarComposer.renderAuthentication(entry.getKey(), entry.getValue(), 2))
+                            -> HelperAuthenticationGrammarComposer.renderAuthenticationSpec(entry.getKey(), entry.getValue(), 2))
                             .collect (Collectors. joining(",\n")) +
                           "\n" + context.getIndentationString() + getTabString() + "];";
         }

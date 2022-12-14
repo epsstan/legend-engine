@@ -38,9 +38,16 @@ password:                                  PASSWORD COLON credential SEMI_COLON
 apiKeyAuthentication:                      API_KEY_AUTHENTICATION
                                            BRACE_OPEN
                                            (
-                                               value
+                                               location
+                                               | keyName
+                                               | value
                                            )*
                                            BRACE_CLOSE
+;
+location:                                  LOCATION VALUE STRING SEMI_COLON
+;
+
+keyName:                                   KEYNAME VALUE STRING SEMI_COLON
 ;
 
 value:                                     VALUE COLON STRING SEMI_COLON

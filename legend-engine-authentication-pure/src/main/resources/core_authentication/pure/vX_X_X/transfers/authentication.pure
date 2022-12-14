@@ -18,11 +18,11 @@ import meta::pure::functions::collection::*;
 import meta::pure::authentication::*;
 import meta::protocols::pure::vX_X_X::extension::authentication::*;
 
-function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::authentication::transformAuthentication(a:meta::pure::authentication::Authentication[1], extensions:Extension[*]):meta::protocols::pure::vX_X_X::metamodel::authentication::Authentication[1]
+function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::authentication::transformAuthenticationSpec(a:meta::pure::authentication::AuthenticationSpec[1], extensions:Extension[*]):meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec[1]
 {
-   $a->match($extensions.serializerExtension('vX_X_X')->cast(@meta::protocols::pure::vX_X_X::extension::SerializerExtension_vX_X_X).moduleSerializerExtension('authentication')->cast(@meta::protocols::pure::vX_X_X::extension::authentication::AuthenticationModuleSerializerExtension).transfers_authentication_transformAuthentication->concatenate([
-      o:meta::pure::authentication::OauthAuthentication [1] |
-        ^meta::protocols::pure::vX_X_X::metamodel::authentication::OauthAuthentication(
+   $a->match($extensions.serializerExtension('vX_X_X')->cast(@meta::protocols::pure::vX_X_X::extension::SerializerExtension_vX_X_X).moduleSerializerExtension('authenticationSpec')->cast(@meta::protocols::pure::vX_X_X::extension::authentication::AuthenticationModuleSerializerExtension).transfers_authentication_transformAuthenticationSpec->concatenate([
+      o:meta::pure::authentication::OauthAuthenticationSpec [1] |
+        ^meta::protocols::pure::vX_X_X::metamodel::authentication::OauthAuthenticationSpec(
             _type = 'oauth',
             credential = ^meta::protocols::pure::vX_X_X::metamodel::authentication::OauthCredential(
             _type = 'oauth',
@@ -33,8 +33,8 @@ function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::authentic
             authServerUrl = $o.credential.authServerUrl
             )
         ),
-      u:meta::pure::authentication::UsernamePasswordAuthentication [1] |
-                ^meta::protocols::pure::vX_X_X::metamodel::authentication::UsernamePasswordAuthentication(
+      u:meta::pure::authentication::UsernamePasswordAuthenticationSpec [1] |
+                ^meta::protocols::pure::vX_X_X::metamodel::authentication::UsernamePasswordAuthenticationSpec(
                     _type = 'basic',
                     //associatedSecurityScheme = $u.associatedSecurityScheme,
                     username = $u.username,
@@ -44,14 +44,16 @@ function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::authentic
                                            vaultReference = $u.password.vaultReference
                                            )
                 ),
-      a:meta::pure::authentication::ApiKeyAuthentication [1] |
-                ^meta::protocols::pure::vX_X_X::metamodel::authentication::ApiKeyAuthentication(
+      a:meta::pure::authentication::ApiKeyAuthenticationSpec [1] |
+                ^meta::protocols::pure::vX_X_X::metamodel::authentication::ApiKeyAuthenticationSpec(
                       _type = 'apiKey',
                       //associatedSecurityScheme = $u.associatedSecurityScheme,
+                      location = $a.location->toString(),
+                      keyName = $a.keyName,
                       value = $a.value
                 ),
-      other: meta::pure::authentication::Authentication[1] |
-         ^meta::protocols::pure::vX_X_X::metamodel::authentication::Authentication(
+      other: meta::pure::authentication::AuthenticationSpec[1] |
+         ^meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec(
             //associatedSecurityScheme = 'unknown',
             _type = 'unknown'
          )

@@ -13,18 +13,18 @@
 // limitations under the License.
 import meta::protocols::pure::vX_X_X::metamodel::authentication::*;
 
-Class <<typemodifiers.abstract>> meta::protocols::pure::vX_X_X::metamodel::authentication::Authentication
+Class <<typemodifiers.abstract>> meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
 {
     _type    : String[1];
     //associatedSecurityScheme : String[1];
 }
 
-Class meta::protocols::pure::vX_X_X::metamodel::authentication::OauthAuthentication extends meta::protocols::pure::vX_X_X::metamodel::authentication::Authentication
+Class meta::protocols::pure::vX_X_X::metamodel::authentication::OauthAuthenticationSpec extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
 {
   credential: OauthCredential[1];
 }
 
-Class meta::protocols::pure::vX_X_X::metamodel::authentication::OauthCredential extends meta::protocols::pure::vX_X_X::metamodel::authentication::Authentication
+Class meta::protocols::pure::vX_X_X::metamodel::authentication::OauthCredential extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
 {
    grantType: String[1];
    clientId: String[1];
@@ -32,18 +32,20 @@ Class meta::protocols::pure::vX_X_X::metamodel::authentication::OauthCredential 
    authServerUrl: String[1];
 }
 
-Class meta::protocols::pure::vX_X_X::metamodel::authentication::VaultCredential extends meta::protocols::pure::vX_X_X::metamodel::authentication::Authentication
+Class meta::protocols::pure::vX_X_X::metamodel::authentication::VaultCredential extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
 {
    vaultReference: String[1];
 }
 
-Class meta::protocols::pure::vX_X_X::metamodel::authentication::UsernamePasswordAuthentication extends meta::protocols::pure::vX_X_X::metamodel::authentication::Authentication
+Class meta::protocols::pure::vX_X_X::metamodel::authentication::UsernamePasswordAuthenticationSpec extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
 {
    username: String[1];
    password: VaultCredential[1];
 }
 
-Class meta::protocols::pure::vX_X_X::metamodel::authentication::ApiKeyAuthentication extends meta::protocols::pure::vX_X_X::metamodel::authentication::Authentication
+Class meta::protocols::pure::vX_X_X::metamodel::authentication::ApiKeyAuthenticationSpec extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
 {
+   location: String[1];
+   keyName: String[1];
    value: String[1];
 }
