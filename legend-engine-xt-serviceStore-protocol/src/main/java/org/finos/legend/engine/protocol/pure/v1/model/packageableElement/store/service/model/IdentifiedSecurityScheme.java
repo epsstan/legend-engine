@@ -2,7 +2,7 @@ package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.
 
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 
-public class IdentifiedSecurityScheme extends SecurityScheme{
+public class IdentifiedSecurityScheme extends SecurityScheme {
 
     //TODO: Refactor
     public String id;

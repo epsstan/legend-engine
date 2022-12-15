@@ -46,6 +46,11 @@
         </dependency>
         <!-- JACKSON -->
 
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+        </dependency>
+
         <!-- Eclipse -->
         <dependency>
             <groupId>org.eclipse.collections</groupId>

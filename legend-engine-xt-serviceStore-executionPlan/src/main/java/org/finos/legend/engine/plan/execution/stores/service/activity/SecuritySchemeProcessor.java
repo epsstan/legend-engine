@@ -9,18 +9,18 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.ClientCredentialsGrant;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.factory.Lists;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.apiKey.ApiKeyAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ApiKeySecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.usernamePassword.UsernamePasswordAuthenticationSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.*;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.*;
-import org.finos.legend.engine.shared.core.vault.Vault;
 import org.pac4j.core.profile.CommonProfile;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -28,17 +28,14 @@ import java.util.Map;
 
 public class SecuritySchemeProcessor
 {
-    private HttpClientBuilder httpClientBuilder;
+    private HttpURLConnection httpURLConnection;
     private AuthenticationSpec authSpecification;
-    private RequestBuilder requestBuilder;
     private MutableList<CommonProfile> profiles;
 
-    public SecuritySchemeProcessor(AuthenticationSpec authSpecification, HttpClientBuilder httpClientBuilder, RequestBuilder requestBuilder, MutableList<CommonProfile> profiles)
+    public SecuritySchemeProcessor(AuthenticationSpec authSpecification, HttpURLConnection httpURLConnection)
     {
         this.authSpecification = authSpecification;
-        this.httpClientBuilder = httpClientBuilder;
-        this.requestBuilder = requestBuilder;
-        this.profiles = profiles;
+        this.httpURLConnection = httpURLConnection;
     }
 
     public Boolean visit(SecurityScheme securityScheme)

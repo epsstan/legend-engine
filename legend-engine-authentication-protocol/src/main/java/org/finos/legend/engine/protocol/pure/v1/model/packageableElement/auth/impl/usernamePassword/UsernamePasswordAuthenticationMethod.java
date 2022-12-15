@@ -6,10 +6,11 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.In
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.credential.PlainTextCredential;
 import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.identity.Identity;
+import org.finos.legend.engine.shared.core.identity.credential.PlaintextUserPasswordCredential;
 
-public class UsernamePasswordAuthenticationMethod extends AuthenticationMethod<UsernamePasswordAuthenticationSpec, PlainTextCredential> {
+public class UsernamePasswordAuthenticationMethod extends AuthenticationMethod<UsernamePasswordAuthenticationSpec, PlaintextUserPasswordCredential> {
     @Override
-    public PlainTextCredential makeCredential(UsernamePasswordAuthenticationSpec spec, Identity identity) throws Exception {
+    public PlaintextUserPasswordCredential makeCredential(UsernamePasswordAuthenticationSpec spec, Identity identity) throws Exception {
 
         if (!this.intermediationRules.isEmpty())
         {
@@ -19,7 +20,7 @@ public class UsernamePasswordAuthenticationMethod extends AuthenticationMethod<U
                 if (!matchingRules.isEmpty())
                 {
                     IntermediationRule intermediationRule = matchingRules.get(0);
-                    return (PlainTextCredential) intermediationRule.makeCredential(spec,credential);
+                    return (PlaintextUserPasswordCredential) intermediationRule.makeCredential(spec,credential);
                 }
             }
         }

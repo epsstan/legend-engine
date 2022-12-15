@@ -62,7 +62,7 @@ public class ServiceStoreConnectionParseTreeWalker
 
         validateUrl(connectionValue.baseUrl, this.walkerSourceInformation.getSourceInformation(baseUrlCtx));
 
-        ServiceStoreConnectionParserGrammar.AuthenticationContext authContext = PureGrammarParserUtility.validateAndExtractOptionalField(ctx.authentication(), "authentication", connectionValue.sourceInformation);
+        ServiceStoreConnectionParserGrammar.AuthenticationSpecContext authContext = PureGrammarParserUtility.validateAndExtractOptionalField(ctx.authenticationSpec(), "authentication", connectionValue.sourceInformation);
         if (authContext!=null)
         {
             connectionValue.authSpecs = ListIterate.collect(authContext.authSpecificationObject(), this::visitAuthentication).stream().collect(Collectors.toMap(Pair::getOne, Pair::getTwo, (u, v) -> u, LinkedHashMap::new));

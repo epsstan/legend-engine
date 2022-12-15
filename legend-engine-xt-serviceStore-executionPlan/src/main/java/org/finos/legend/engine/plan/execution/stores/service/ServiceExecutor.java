@@ -25,9 +25,6 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.collections.api.block.function.Function3;
@@ -45,10 +42,15 @@ import org.finos.legend.engine.plan.execution.result.StreamingResult;
 import org.finos.legend.engine.plan.execution.result.serialization.SerializationFormat;
 import org.finos.legend.engine.plan.execution.stores.service.activity.ServiceStoreExecutionActivity;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.RequestBodyDescription;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.auth.HttpConnectionProvider;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.connection.HttpConnectionSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.auth.ServiceStoreAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.HttpMethod;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.Location;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ServiceParameter;
+import org.finos.legend.engine.shared.core.identity.factory.IdentityFactoryProvider;
 import org.pac4j.core.profile.CommonProfile;
 import org.finos.legend.engine.plan.execution.authentication.AuthenticationMethod;
 import org.finos.legend.engine.plan.execution.authentication.IntermediationRule;
@@ -63,11 +65,15 @@ import java.net.HttpURLConnection;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class ServiceExecutor
 {
@@ -136,6 +142,7 @@ public class ServiceExecutor
     }
 
     public static String getProcessedUrl(String url, List<ServiceParameter> params, List<String> mappedParameters, ExecutionState state)
+    public InputStreamResult executeHttpService(String url, List<ServiceParameter> params, RequestBodyDescription requestBodyDescription, HttpMethod httpMethod, String mimeType, List<SecurityScheme> securitySchemes, Map<String, AuthenticationSpec> authSpecs, ExecutionState state, MutableList<CommonProfile> profiles)
     {
         Span span = GlobalTracer.get().activeSpan();
 
@@ -204,22 +211,33 @@ public class ServiceExecutor
         return FreeMarkerExecutor.processRecursively(url, pathVarValueMap, "");
     }
 
-    private static String processUrlWithQueryParams(String url, List<ServiceParameter> queryParams, List<String> mappedParameters, ExecutionState state)
+    private static String processUrlWithQueryParams(String url, List<ServiceParameter> queryParams, ExecutionState state)
     {
         if (queryParams == null || queryParams.isEmpty())
         {
             return url;
         }
-        return url + "?" + String.join("&", ListIterate.collectIf(queryParams, param -> (mappedParameters.contains(param.name) && state.getResult(param.name) != null), param -> serializeQueryParameter(((ConstantResult) state.getResult(param.name)).getValue(), param)));
+        return url + "?" + String.join("&", ListIterate.collectIf(queryParams, param -> (state.getResult(param.name) != null), param -> serializeQueryParameter(((ConstantResult) state.getResult(param.name)).getValue(), param)));
     }
 
-    private static List<Header> processHeaderParams(List<ServiceParameter> headerParams, List<String> mappedParameters, ExecutionState state)
+    private static List<Header> processHeaderParams(List<ServiceParameter> headerParams, ExecutionState state)
     {
         if (headerParams == null || headerParams.isEmpty())
         {
             return Collections.emptyList();
         }
         return ListIterate.collectIf(headerParams, param -> (mappedParameters.contains(param.name) && state.getResult(param.name) != null), param -> new BasicHeader(param.name, serializeHeaderParameter(((ConstantResult) state.getResult(param.name)).getValue(), param)));
+        return ListIterate.collectIf(headerParams, param -> (state.getResult(param.name) != null), param -> new BasicHeader(param.name, serializeHeaderParameter(((ConstantResult) state.getResult(param.name)).getValue(), param)));
+    }
+
+    private static void processSecurityScheme(HttpURLConnection connection,SecurityScheme securityScheme, AuthenticationSpec authenticationSpec)
+    {
+        List<Function3<SecurityScheme, AuthenticationSpec, HttpURLConnection, Boolean>> processors = ListIterate.flatCollect(IServiceStoreExecutionExtension.getExtensions(), ext -> ext.getExtraSecuritySchemeProcessors());
+
+        ListIterate.collect(processors, processor -> processor.value(securityScheme, authenticationSpec, connection))
+                .select(Objects::nonNull)
+                .getFirstOptional()
+                .orElseThrow(() -> new RuntimeException("No processor found for given security scheme. Unsupported SecurityScheme - " + securityScheme.getClass().getSimpleName()));
     }
 
     private static String serializePathParameter(Object value, ServiceParameter parameter)

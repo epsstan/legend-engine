@@ -22,7 +22,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.s
 import java.util.Collections;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.function.Function;
 
 public interface IServiceStoreGrammarComposerExtension extends PureGrammarComposerExtension
 {
