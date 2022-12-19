@@ -27,19 +27,15 @@ public class TestBasicAuthWithServiceStore extends ServiceStoreTestSuite
                         "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                         "    baseUrl : 'http://127.0.0.1:" + getPort() + "';\n" +
                         "    auth: [\n" +
-                        "        oauth     : OauthAuthentication\n" +
-                        "              {\n" +
-                        "                   grantType                   : 'client_credentials';\n"+
-                        "                   clientId                    : 'testClientID';\n" +
-                        "                   clientSecretVaultReference  : 'ref';\n" +
-                        "                   authorizationServerUrl      : 'dummy.com';\n" +
-                        "              },\n" +
-                        "       http : UsernamePasswordAuthentication\n" +
+                        "       http : UsernamePasswordAuthenticationSpec\n" +
                         "             {\n" +
                         "                   username : 'username';\n" +
-                        "                   password : 'password';\n" +
+                        "                   password : VaultCredential" +
+                        "                              (" +
+                        "                                   vaultReference : 'ref1'; " +
+                        "                              );\n" +
                         "             },\n" +
-                        "       api : ApiKeyAuthentication\n" +
+                        "       api : ApiKeyAuthenticationSpec\n" +
                         "             {\n" +
                         "                   value : 'value1';\n" +
                         "             }\n" +

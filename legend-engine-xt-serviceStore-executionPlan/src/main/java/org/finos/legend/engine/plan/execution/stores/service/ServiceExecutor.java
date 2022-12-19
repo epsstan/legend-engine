@@ -26,7 +26,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.util.EntityUtils;
 import org.eclipse.collections.api.block.function.Function3;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.MutableList;
@@ -42,7 +41,7 @@ import org.finos.legend.engine.plan.execution.result.StreamingResult;
 import org.finos.legend.engine.plan.execution.result.serialization.SerializationFormat;
 import org.finos.legend.engine.plan.execution.stores.service.activity.ServiceStoreExecutionActivity;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.RequestBodyDescription;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.auth.HttpConnectionProvider;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.connection.HttpConnectionProvider;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.connection.HttpConnectionSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.auth.ServiceStoreAuthenticationSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
@@ -143,6 +142,7 @@ public class ServiceExecutor
 
     public static String getProcessedUrl(String url, List<ServiceParameter> params, List<String> mappedParameters, ExecutionState state)
     public InputStreamResult executeHttpService(String url, List<ServiceParameter> params, RequestBodyDescription requestBodyDescription, HttpMethod httpMethod, String mimeType, List<SecurityScheme> securitySchemes, Map<String, AuthenticationSpec> authSpecs, ExecutionState state, MutableList<CommonProfile> profiles)
+    public static InputStreamResult executeHttpService(String url, List<ServiceParameter> params, RequestBodyDescription requestBodyDescription, HttpMethod httpMethod, String mimeType, List<SecurityScheme> securitySchemes, Map<String, AuthenticationSpec> authSpecs, ExecutionState state, MutableList<CommonProfile> profiles)
     {
         Span span = GlobalTracer.get().activeSpan();
 
@@ -187,6 +187,51 @@ public class ServiceExecutor
         return requestBodyEntity;
     }
 
+    public static InputStream executeRequest(HttpMethod httpMethod, URI uri, List<Header> headers, StringEntity requestBodyDescription, String mimeType, List<SecurityScheme> securitySchemes, Map<String, AuthenticationSpec> authSpecs, MutableList<CommonProfile> profiles)
+    {
+        Span span = GlobalTracer.get().activeSpan();
+
+        try
+        {
+            HttpURLConnection connection = HttpConnectionProvider.makeConnection(new HttpConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType, HttpConnectionSpec.StoreType.SERVICE_STORE),new ServiceStoreAuthenticationSpec(), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
+            if (securitySchemes != null)
+            {
+                securitySchemes.forEach(securityScheme -> processSecurityScheme(connection, securityScheme,authSpecs.get(securityScheme.id)));
+            }
+
+            InputStream responseStream = connection.getInputStream();
+
+//            ObjectMapper mapper = new ObjectMapper();
+//            int statusCode = 200;// httpResponse.getStatusLine().getStatusCode();
+//
+//            if (span != null)
+//            {
+//                span.setTag("Status code", statusCode);
+//            }
+//
+//            if (statusCode != HttpStatus.SC_OK)
+//            {
+//                String explanation = httpResponse.getEntity() == null ? "" : EntityUtils.toString(httpResponse.getEntity());
+//
+//                if (span != null)
+//                {
+//                    span.setTag("Failure message", explanation);
+//                }
+//                throw new RuntimeException("HTTP request [" + request.toString() + "] failed with error - " + explanation);
+//            }
+//
+//            return httpResponse.getEntity().getContent();
+            return responseStream;
+        }
+        catch (RuntimeException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static String processUrlWithPathParams(String url, List<ServiceParameter> pathParams, ExecutionState state)
     {

@@ -1,7 +1,8 @@
-package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.auth;
+package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.connection;
 
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.ConnectionProvider;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.connection.HttpConnectionSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.provider.AuthenticationMethodProvider;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.Identity;
 
@@ -10,6 +11,12 @@ import java.net.URL;
 
 public class HttpConnectionProvider //extends ConnectionProvider<HttpURLConnection>
 {
+    private static AuthenticationMethodProvider authenticationMethodProvider;
+
+    public HttpConnectionProvider(AuthenticationMethodProvider authenticationMethodProvider) {
+        this.authenticationMethodProvider = authenticationMethodProvider;
+    }
+
     public static HttpURLConnection makeConnection(Object connectionSpec, AuthenticationSpec authenticationSpec, Identity identity) throws Exception {
 
         assert(connectionSpec instanceof HttpConnectionSpec);

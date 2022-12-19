@@ -41,10 +41,6 @@
             <groupId>org.finos.legend.engine</groupId>
             <artifactId>legend-engine-authentication-protocol</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-shared-core</artifactId>
-        </dependency>
         <!-- ENGINE -->
 
         <!-- JACKSON -->
@@ -54,10 +50,6 @@
         </dependency>
         <!-- JACKSON -->
 
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-        </dependency>
         <!-- ECLIPSE COLLECTIONS -->
         <dependency>
             <groupId>org.eclipse.collections</groupId>

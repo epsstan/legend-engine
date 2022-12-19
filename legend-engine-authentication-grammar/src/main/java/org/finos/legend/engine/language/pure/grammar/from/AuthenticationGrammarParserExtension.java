@@ -44,11 +44,11 @@ public class AuthenticationGrammarParserExtension implements IAuthenticationGram
             AuthenticationParseTreeWalker walker = new AuthenticationParseTreeWalker(parserInfo.walkerSourceInformation);
             switch (code.getType())
             {
-                case "ApiKeyAuthentication":
+                case "ApiKeyAuthenticationSpec":
                     return parseAuthenticationSpec(code, p -> walker.visitApiKeyAuthenticationSpec(code,p.apiKeyAuthentication()));
-                case "UsernamePasswordAuthentication":
+                case "UsernamePasswordAuthenticationSpec":
                     return parseAuthenticationSpec(code, p -> walker.visitUsernamePasswordAuthenticationSpec(code, p.basicAuthentication()));
-                case "OauthAuthentication":
+                case "OauthAuthenticationSped":
                     return parseAuthenticationSpec(code, p -> walker.visitOAuthAuthenticationSpec(code, p.oauthAuthentication()));
                 default:
                     return null;

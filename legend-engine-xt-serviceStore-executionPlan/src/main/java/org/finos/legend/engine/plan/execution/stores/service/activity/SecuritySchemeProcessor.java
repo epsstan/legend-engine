@@ -48,7 +48,7 @@ public class SecuritySchemeProcessor
                 //String password = Vault.INSTANCE.getValue(((VaultCredential)spec.password).vaultReference);
                 String password = "password";
                 String encoding = Base64.encodeBase64String((spec.username+ ":" + password).getBytes());
-                requestBuilder.addHeader("Authorization", "Basic " + encoding);
+                httpURLConnection.setRequestProperty("Authorization", "Basic " + encoding);
                 return true;
             }
             else if (securityScheme instanceof OauthSecurityScheme)
@@ -56,7 +56,7 @@ public class SecuritySchemeProcessor
                 OAuthAuthenticationSpec spec = (OAuthAuthenticationSpec) this.authSpecification;
                 //TODO: get token of valid scopes
                 String oauthToken = getOAuthToken(spec.credential.grantType,spec.credential.clientId,spec.credential.clientSecretVaultReference,spec.credential.authServerUrl);
-                requestBuilder.addHeader("Authorization", "Bearer " + oauthToken);
+                //requestBuilder.addHeader("Authorization", "Bearer " + oauthToken);
                 return true;
             }
             else if (securityScheme instanceof ApiKeySecurityScheme)
