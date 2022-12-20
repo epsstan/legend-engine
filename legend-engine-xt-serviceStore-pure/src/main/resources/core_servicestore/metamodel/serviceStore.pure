@@ -72,7 +72,7 @@ Class meta::external::store::service::metamodel::Service extends ServiceStoreEle
    method      : HTTPMethod[1];
    parameters  : ServiceParameter[*];
    response    : ComplexTypeReference[1];
-   security    : SecurityScheme[*];
+   security    : Map<String,SecurityScheme>[0..1];
 }
 
 function meta::external::store::service::metamodel::supportedServiceMethods():HTTPMethod[*]
@@ -128,7 +128,7 @@ Class meta::external::store::service::metamodel::ComplexTypeReference extends me
 
 Class <<typemodifiers.abstract>> meta::external::store::service::metamodel::SecurityScheme
 {
-    id : String[1];
+
 }
 
 Class meta::external::store::service::metamodel::SimpleHttpSecurityScheme extends meta::external::store::service::metamodel::SecurityScheme

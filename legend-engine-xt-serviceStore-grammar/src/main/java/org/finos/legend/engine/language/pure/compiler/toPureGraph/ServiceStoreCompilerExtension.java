@@ -22,6 +22,8 @@ import org.eclipse.collections.api.block.procedure.Procedure2;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.data.ServiceStoreEmbeddedDataCompiler;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.extension.Processor;
 import org.finos.legend.engine.protocol.pure.PureClientVersions;
@@ -31,16 +33,13 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.externa
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.mapping.ClassMapping;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.connection.ServiceStoreConnection;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.mapping.RootServiceStoreClassMapping;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.IdentifiedSecurityScheme;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ServiceStore;
+import org.finos.legend.pure.generated.*;
 import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_ApiKeySecurityScheme_Impl;
 import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_OauthSecurityScheme_Impl;
-import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_ServiceStore;
-import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_ServiceStore_Impl;
 import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_SimpleHttpSecurityScheme_Impl;
-import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_runtime_ServiceStoreConnection;
-import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_runtime_ServiceStoreConnection_Impl;
-import org.finos.legend.pure.generated.Root_meta_pure_data_EmbeddedData;
-import org.finos.legend.pure.generated.Root_meta_pure_metamodel_type_generics_GenericType_Impl;
 import org.finos.legend.pure.m3.coreinstance.meta.pure.mapping.EmbeddedSetImplementation;
 import org.finos.legend.pure.m3.coreinstance.meta.pure.mapping.Mapping;
 import org.finos.legend.pure.m3.coreinstance.meta.pure.mapping.SetImplementation;
@@ -139,6 +138,19 @@ public class ServiceStoreCompilerExtension implements IServiceStoreCompilerExten
     public List<Function3<EmbeddedData, CompileContext, ProcessingContext, Root_meta_pure_data_EmbeddedData>> getExtraEmbeddedDataProcessors()
     {
         return Collections.singletonList(ServiceStoreEmbeddedDataCompiler::compileServiceStoreEmbeddedDataCompiler);
+    }
+
+    @Override
+    public List<Function3<SecurityScheme, CompileContext, Root_meta_external_store_service_metamodel_ServiceStore, Pair<String, Root_meta_external_store_service_metamodel_SecurityScheme>>> getExtraSecuritySchemeProcessors()
+    {
+        return Lists.mutable.with(
+                (securityScheme,context,owner) ->
+                {
+                    String identifier = ((IdentifiedSecurityScheme)securityScheme).id;
+                    Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes.getMap().get(identifier);
+                    return Tuples.pair(identifier,scheme);
+                }
+        );
     }
 
 }

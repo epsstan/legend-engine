@@ -39,7 +39,7 @@ Class meta::protocols::pure::vX_X_X::metamodel::store::service::Service extends 
    method      : String[1];
    parameters  : ServiceParameter[*];
    response    : ComplexTypeReference[1];
-   security    : SecurityScheme[*];
+   security    : Map<String,SecurityScheme>[0..1];
 }
 
 Class meta::protocols::pure::vX_X_X::metamodel::store::service::ServiceParameter
@@ -92,7 +92,6 @@ Class meta::protocols::pure::vX_X_X::metamodel::store::service::SerializationFor
 Class <<typemodifiers.abstract>> meta::protocols::pure::vX_X_X::metamodel::store::service::SecurityScheme
 {
    _type    : String[1];
-   id       : String[1];
 }
 
 Class meta::protocols::pure::vX_X_X::metamodel::store::service::SimpleHttpSecurityScheme extends meta::protocols::pure::vX_X_X::metamodel::store::service::SecurityScheme

@@ -160,8 +160,7 @@ public class HelperServiceStoreBuilder
                 SimpleHttpSecurityScheme simpleHttpSecurityScheme = (SimpleHttpSecurityScheme) scheme;
                 return Tuples.pair(simpleHttpSecurityScheme.id,
                         new Root_meta_external_store_service_metamodel_SimpleHttpSecurityScheme_Impl(simpleHttpSecurityScheme.id,null, context.pureModel.getClass("meta::external::store::service::metamodel::SimpleHttpSecurityScheme"))
-                           ._scheme(simpleHttpSecurityScheme.scheme)
-                           ._id(simpleHttpSecurityScheme.id));
+                           ._scheme(simpleHttpSecurityScheme.scheme));
 
             }
             else if (scheme instanceof ApiKeySecurityScheme)
@@ -170,16 +169,14 @@ public class HelperServiceStoreBuilder
                 return Tuples.pair(apiKeySecurityScheme.id,
                         new Root_meta_external_store_service_metamodel_ApiKeySecurityScheme_Impl(apiKeySecurityScheme.id, null, context.pureModel.getClass("meta::external::store::service::metamodel::ApiKeySecurityScheme"))
                            ._location(apiKeySecurityScheme.location)
-                           ._keyName(apiKeySecurityScheme.keyName)
-                           ._id(apiKeySecurityScheme.id));
+                           ._keyName(apiKeySecurityScheme.keyName));
             }
             else if (scheme instanceof OauthSecurityScheme)
             {
                 OauthSecurityScheme oauthSecurityScheme = (OauthSecurityScheme) scheme;
                 return Tuples.pair(oauthSecurityScheme.id,
                         new Root_meta_external_store_service_metamodel_OauthSecurityScheme_Impl(oauthSecurityScheme.id, null, context.pureModel.getClass("meta::external::store::service::metamodel::OauthSecurityScheme"))
-                           ._scopesAddAll(Lists.mutable.withAll(oauthSecurityScheme.scopes))
-                           ._id(oauthSecurityScheme.id));
+                           ._scopesAddAll(Lists.mutable.withAll(oauthSecurityScheme.scopes)));
             }
             else
             {
@@ -229,7 +226,7 @@ public class HelperServiceStoreBuilder
             pureService._parameters(ListIterate.collect(service.parameters, param -> compileServiceParameter(param, context)));
         }
         pureService._response((Root_meta_external_store_service_metamodel_ComplexTypeReference) compileTypeReference(service.response, context));
-        pureService._security(ListIterate.collect(service.security, scheme -> compileSecurityScheme(scheme,scheme.sourceInformation,context,owner)));
+        pureService._security(new PureMap(ListIterate.collect(service.security, scheme -> compileSecurityScheme(scheme,scheme.sourceInformation,context,owner)).stream().collect(Pair::getOne,Pair::getTwo)));
 
         RichIterable<String> parameters = pureService._parameters().collect(param -> param._name());
         List<String> parametersDefinedMoreThanOnce = parameters.select(e -> Collections.frequency(parameters.toList(), e) > 1).toSet().toList();
@@ -341,9 +338,9 @@ public class HelperServiceStoreBuilder
         return pureTypeReference;
     }
 
-    private static Root_meta_external_store_service_metamodel_SecurityScheme compileSecurityScheme(SecurityScheme securityScheme, SourceInformation info, CompileContext context, Root_meta_external_store_service_metamodel_ServiceStore owner)
+    private static Pair<String,Root_meta_external_store_service_metamodel_SecurityScheme> compileSecurityScheme(SecurityScheme securityScheme, SourceInformation info, CompileContext context, Root_meta_external_store_service_metamodel_ServiceStore owner)
     {
-       List<Function3<SecurityScheme,CompileContext,Root_meta_external_store_service_metamodel_ServiceStore,Root_meta_external_store_service_metamodel_SecurityScheme>> processors = ListIterate.flatCollect(IServiceStoreCompilerExtension.getExtensions(), ext -> ext.getExtraSecuritySchemeProcessors());
+       List<Function3<SecurityScheme,CompileContext,Root_meta_external_store_service_metamodel_ServiceStore,Pair<String,Root_meta_external_store_service_metamodel_SecurityScheme>>> processors = ListIterate.flatCollect(IServiceStoreCompilerExtension.getExtensions(), ext -> ext.getExtraSecuritySchemeProcessors());
 
        return ListIterate
                .collect(processors,processor -> processor.value(securityScheme,context,owner))

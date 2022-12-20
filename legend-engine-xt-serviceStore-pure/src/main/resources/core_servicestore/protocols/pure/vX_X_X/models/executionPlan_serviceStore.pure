@@ -26,7 +26,7 @@ Class meta::protocols::pure::vX_X_X::metamodel::executionPlan::store::service::R
    mimeType        : String[1];
    params          : ServiceParameter[*];
    requestBodyDescription : RequestBodyDescription[0..1];
-   securitySchemes : SecurityScheme[*];
+   securitySchemes : Map<String,SecurityScheme>[0..1];
    authSpecs       : Map<String,AuthenticationSpec>[0..1];
 }
 
