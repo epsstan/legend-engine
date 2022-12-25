@@ -14,19 +14,12 @@ public class HttpConnectionSpec {
     public List<Header> headers;
     public StringEntity requestBodyDescription;
     public String mimeType;
-    public StoreType storeType;
 
-    public static enum StoreType
-    {
-        SERVICE_STORE
-    }
-
-    public HttpConnectionSpec(URI uri, String httpMethod, List<Header> headers, StringEntity requestBodyDescription, String mimeType, StoreType storeType) {
+    public HttpConnectionSpec(URI uri, String httpMethod, List<Header> headers, StringEntity requestBodyDescription, String mimeType) {
         this.uri = uri;
         this.httpMethod = httpMethod;
         this.headers = headers;
         this.requestBodyDescription = requestBodyDescription;
         this.mimeType = mimeType;
-        this.storeType = storeType;
     }
 }

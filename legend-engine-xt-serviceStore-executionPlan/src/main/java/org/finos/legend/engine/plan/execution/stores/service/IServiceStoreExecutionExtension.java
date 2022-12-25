@@ -14,7 +14,7 @@
 
 package org.finos.legend.engine.plan.execution.stores.service;
 
-import org.eclipse.collections.api.block.function.Function3;
+import org.eclipse.collections.api.block.function.Function2;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.finos.legend.engine.plan.execution.extension.ExecutionExtension;
@@ -25,15 +25,9 @@ import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.ServiceLoader;
 
-public interface IServiceStoreExecutionExtension extends ExecutionExtension
-{
-    static List<IServiceStoreExecutionExtension> getExtensions()
-    {
+public interface IServiceStoreExecutionExtension extends ExecutionExtension {
+    static List<IServiceStoreExecutionExtension> getExtensions() {
         return Lists.mutable.withAll(ServiceLoader.load(IServiceStoreExecutionExtension.class));
     }
 
-    default List<Function3<SecurityScheme, AuthenticationSpec, HttpURLConnection, Boolean>> getExtraSecuritySchemeProcessors()
-    {
-        return FastList.newList();
-    }
 }

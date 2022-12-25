@@ -226,7 +226,7 @@ public class HelperServiceStoreBuilder
             pureService._parameters(ListIterate.collect(service.parameters, param -> compileServiceParameter(param, context)));
         }
         pureService._response((Root_meta_external_store_service_metamodel_ComplexTypeReference) compileTypeReference(service.response, context));
-        pureService._security(new PureMap(ListIterate.collect(service.security, scheme -> compileSecurityScheme(scheme,scheme.sourceInformation,context,owner)).stream().collect(Pair::getOne,Pair::getTwo)));
+        pureService._security(new PureMap(ListIterate.collect(service.security, scheme -> compileSecurityScheme(scheme,scheme.sourceInformation,context,owner)).stream().collect(Collectors.toMap(Pair::getOne,Pair::getTwo))));
 
         RichIterable<String> parameters = pureService._parameters().collect(param -> param._name());
         List<String> parametersDefinedMoreThanOnce = parameters.select(e -> Collections.frequency(parameters.toList(), e) > 1).toSet().toList();

@@ -41,9 +41,13 @@ import org.finos.legend.engine.plan.execution.result.StreamingResult;
 import org.finos.legend.engine.plan.execution.result.serialization.SerializationFormat;
 import org.finos.legend.engine.plan.execution.stores.service.activity.ServiceStoreExecutionActivity;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.RequestBodyDescription;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.AuthenticationMethod;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.IntermediationRule;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.connection.HttpConnectionProvider;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.connection.HttpConnectionSpec;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.auth.ServiceStoreAuthenticationSpec;
+import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.provider.AuthenticationMethodProvider;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.provider.IntermediationRuleProvider;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.HttpMethod;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.Location;
@@ -69,10 +73,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ServiceExecutor
 {
@@ -193,11 +194,10 @@ public class ServiceExecutor
 
         try
         {
-            HttpURLConnection connection = HttpConnectionProvider.makeConnection(new HttpConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType, HttpConnectionSpec.StoreType.SERVICE_STORE),new ServiceStoreAuthenticationSpec(), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
-            if (securitySchemes != null)
-            {
-                securitySchemes.forEach(securityScheme -> processSecurityScheme(connection, securityScheme,authSpecs.get(securityScheme.id)));
-            }
+            FastList<AuthenticationMethod> allMethods = FastList.newList(ServiceLoader.load(AuthenticationMethod.class));
+            FastList<IntermediationRule> allRules = FastList.newList(ServiceLoader.load(IntermediationRule.class));
+            AuthenticationMethodProvider authenticationMethodProvider = new AuthenticationMethodProvider(allMethods,new IntermediationRuleProvider(allRules));
+            HttpURLConnection connection = new HttpConnectionProvider(authenticationMethodProvider).makeConnection(new HttpConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType),new ServiceStoreAuthenticationSpec(securitySchemes,authSpecs), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
 
             InputStream responseStream = connection.getInputStream();
 
@@ -275,15 +275,7 @@ public class ServiceExecutor
         return ListIterate.collectIf(headerParams, param -> (state.getResult(param.name) != null), param -> new BasicHeader(param.name, serializeHeaderParameter(((ConstantResult) state.getResult(param.name)).getValue(), param)));
     }
 
-    private static void processSecurityScheme(HttpURLConnection connection,SecurityScheme securityScheme, AuthenticationSpec authenticationSpec)
-    {
-        List<Function3<SecurityScheme, AuthenticationSpec, HttpURLConnection, Boolean>> processors = ListIterate.flatCollect(IServiceStoreExecutionExtension.getExtensions(), ext -> ext.getExtraSecuritySchemeProcessors());
 
-        ListIterate.collect(processors, processor -> processor.value(securityScheme, authenticationSpec, connection))
-                .select(Objects::nonNull)
-                .getFirstOptional()
-                .orElseThrow(() -> new RuntimeException("No processor found for given security scheme. Unsupported SecurityScheme - " + securityScheme.getClass().getSimpleName()));
-    }
 
     private static String serializePathParameter(Object value, ServiceParameter parameter)
     {

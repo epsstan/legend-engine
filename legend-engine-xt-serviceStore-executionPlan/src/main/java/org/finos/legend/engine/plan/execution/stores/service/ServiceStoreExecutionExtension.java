@@ -14,12 +14,12 @@
 
 package org.finos.legend.engine.plan.execution.stores.service;
 
+import org.eclipse.collections.api.block.function.Function2;
 import org.eclipse.collections.api.block.function.Function3;
 import org.eclipse.collections.api.list.MutableList;
 import org.finos.legend.engine.plan.execution.nodes.state.ExecutionState;
 import org.finos.legend.engine.plan.execution.result.Result;
 import org.finos.legend.engine.plan.execution.stores.StoreType;
-import org.finos.legend.engine.plan.execution.stores.service.activity.SecuritySchemeProcessor;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.ExecutionNode;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.LimitExecutionNode;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.RestServiceExecutionNode;
@@ -28,7 +28,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authent
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.pac4j.core.profile.CommonProfile;
 
-import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,15 +43,6 @@ public class ServiceStoreExecutionExtension implements IServiceStoreExecutionExt
                 return executionNode.accept(executionState.getStoreExecutionState(StoreType.Service).getVisitor(profiles, executionState));
             }
             return null;
-        }));
-    }
-
-    public List<Function3<SecurityScheme, AuthenticationSpec, HttpURLConnection, Boolean>> getExtraSecuritySchemeProcessors()
-    {
-        return Collections.singletonList(((securityScheme, authenticationSpec, connection) ->
-        {
-            SecuritySchemeProcessor securitySchemeProcessor = new SecuritySchemeProcessor(authenticationSpec,connection);
-            return securitySchemeProcessor.visit(securityScheme);
         }));
     }
 }

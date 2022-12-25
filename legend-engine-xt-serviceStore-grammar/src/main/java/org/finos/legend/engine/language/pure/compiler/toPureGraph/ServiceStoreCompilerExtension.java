@@ -147,7 +147,7 @@ public class ServiceStoreCompilerExtension implements IServiceStoreCompilerExten
                 (securityScheme,context,owner) ->
                 {
                     String identifier = ((IdentifiedSecurityScheme)securityScheme).id;
-                    Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes.getMap().get(identifier);
+                    Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes().getMap().get(identifier);
                     return Tuples.pair(identifier,scheme);
                 }
         );
