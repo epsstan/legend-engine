@@ -20,12 +20,13 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.S
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class ServiceStore extends Store
 {
     @JsonAlias({"description", "docLink"})
     public String description;
-    public List<SecurityScheme> securitySchemes = Collections.emptyList();
+    public Map<String,SecurityScheme> securitySchemes = Collections.emptyMap());
     public List<ServiceStoreElement> elements = Collections.emptyList();
 
     @Override

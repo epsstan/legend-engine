@@ -8,6 +8,8 @@ import org.finos.legend.engine.shared.core.identity.credential.PlaintextUserPass
 public class AnyToPlainUsernamePasswordTextIntermediationRule extends IntermediationRule<UsernamePasswordAuthenticationSpec,Credential, PlaintextUserPasswordCredential> {
     @Override
     public PlaintextUserPasswordCredential makeCredential(UsernamePasswordAuthenticationSpec spec, Credential credential) throws Exception {
-        return new PlaintextUserPasswordCredential(spec.username,spec.password.vaultReference);// TODO: add vaultImplementations
+
+        // TODO: Resolve Vault reference to return actual password 
+        return new PlaintextUserPasswordCredential(spec.username,spec.password.vaultReference);
     }
 }

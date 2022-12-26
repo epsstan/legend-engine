@@ -24,37 +24,29 @@ function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::authentic
       o:meta::pure::authentication::OauthAuthenticationSpec [1] |
         ^meta::protocols::pure::vX_X_X::metamodel::authentication::OauthAuthenticationSpec(
             _type = 'oauth',
-            credential = ^meta::protocols::pure::vX_X_X::metamodel::authentication::OauthCredential(
-            _type = 'oauth',
-            //associatedSecurityScheme = $o.associatedSecurityScheme,
             grantType = $o.credential.grantType->toString(),
             clientId = $o.credential.clientId,
             clientSecretVaultReference = $o.credential.clientSecretVaultReference,
             authServerUrl = $o.credential.authServerUrl
-            )
         ),
       u:meta::pure::authentication::UsernamePasswordAuthenticationSpec [1] |
                 ^meta::protocols::pure::vX_X_X::metamodel::authentication::UsernamePasswordAuthenticationSpec(
                     _type = 'basic',
-                    //associatedSecurityScheme = $u.associatedSecurityScheme,
                     username = $u.username,
                     password = ^meta::protocols::pure::vX_X_X::metamodel::authentication::VaultCredential(
                                            _type = 'vault',
-                                           //associatedSecurityScheme = $o.associatedSecurityScheme,
                                            vaultReference = $u.password.vaultReference
                                            )
                 ),
       a:meta::pure::authentication::ApiKeyAuthenticationSpec [1] |
                 ^meta::protocols::pure::vX_X_X::metamodel::authentication::ApiKeyAuthenticationSpec(
                       _type = 'apiKey',
-                      //associatedSecurityScheme = $u.associatedSecurityScheme,
                       location = $a.location->toString(),
                       keyName = $a.keyName,
                       value = $a.value
                 ),
       other: meta::pure::authentication::AuthenticationSpec[1] |
          ^meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec(
-            //associatedSecurityScheme = 'unknown',
             _type = 'unknown'
          )
    ])->toOneMany())

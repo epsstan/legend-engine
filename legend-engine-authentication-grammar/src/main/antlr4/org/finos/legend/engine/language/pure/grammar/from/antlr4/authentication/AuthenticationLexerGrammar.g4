@@ -3,7 +3,10 @@ lexer grammar AuthenticationLexerGrammar;
 import CoreLexerGrammar;
 
 OAUTH_AUTHENTICATION:                                       'OauthAuthenticationSpec';
-TOKEN:                                                      'token';
+GRANT_TYPE:                                                 'grantType';
+CLIENT_ID:                                                  'clientId';
+CLIENT_SECRET_VAULT_REFERENCE:                              'clientSecretVaultReference';
+AUTH_SERVER_URL:                                            'authorizationServerUrl';
 
 BASIC_AUTHENTICATION:                                       'UsernamePasswordAuthenticationSpec';
 USERNAME:                                                   'username';

@@ -3,6 +3,10 @@ package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authen
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 public class OAuthAuthenticationSpec extends AuthenticationSpec
 {
-    public OauthCredential credential;
+    public String grantType;
+    public String clientId;
+    public String clientSecretVaultReference;
+    public String authServerUrl;
+
     public SourceInformation sourceInformation;
 }

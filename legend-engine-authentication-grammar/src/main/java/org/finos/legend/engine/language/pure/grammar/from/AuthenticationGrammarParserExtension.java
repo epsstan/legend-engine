@@ -64,8 +64,6 @@ public class AuthenticationGrammarParserExtension implements IAuthenticationGram
             CredentialParseTreeWalker walker = new CredentialParseTreeWalker(parserInfo.walkerSourceInformation);
             switch (code.getType())
             {
-                case "OauthCredential":
-                    return parseCredential(code, p -> walker.visitOauthCredential(code,p.oauthCredential()));
                 case "VaultCredential":
                     return parseCredential(code, p -> walker.visitVaultCredential(code,p.vaultCredential()));
                default:

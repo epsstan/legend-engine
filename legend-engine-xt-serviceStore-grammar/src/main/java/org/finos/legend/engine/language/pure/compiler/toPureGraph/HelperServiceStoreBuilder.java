@@ -33,6 +33,7 @@ import org.finos.legend.pure.runtime.java.compiled.generation.processors.support
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -151,7 +152,7 @@ public class HelperServiceStoreBuilder
         });
     }
 
-    private static List<Pair<String,Root_meta_external_store_service_metamodel_SecurityScheme>> compileServiceStoreSecuritySchemes(List<SecurityScheme> securitySchemes, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, Root_meta_external_store_service_metamodel_ServiceGroup parent, CompileContext context)
+    private static List<Pair<String,Root_meta_external_store_service_metamodel_SecurityScheme>> compileServiceStoreSecuritySchemes(Map<String,SecurityScheme> securitySchemes, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, Root_meta_external_store_service_metamodel_ServiceGroup parent, CompileContext context)
     {
         return ListIterate.collect(securitySchemes, scheme ->
         {

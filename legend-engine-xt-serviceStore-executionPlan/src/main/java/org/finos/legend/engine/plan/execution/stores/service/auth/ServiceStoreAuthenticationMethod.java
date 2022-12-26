@@ -16,6 +16,7 @@ import org.finos.legend.engine.shared.core.identity.Identity;
 
 import java.net.HttpURLConnection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
 
@@ -24,11 +25,13 @@ public class ServiceStoreAuthenticationMethod extends AuthenticationMethod<Servi
     @Override
     public Credential makeCredential(ServiceStoreAuthenticationSpec serviceStoreAuthenticationSpec, Identity identity) throws Exception
     {
-        if (serviceStoreAuthenticationSpec.securitySchemes != null)
+        if (!serviceStoreAuthenticationSpec.securitySchemes.isEmpty())
         {
             //TODO: Process all the security schemes
-            SecurityScheme scheme = serviceStoreAuthenticationSpec.securitySchemes.get(0);
-            return processSecurityScheme(scheme,serviceStoreAuthenticationSpec.authSpecs.get(scheme.id),identity);
+            Map.Entry<String,SecurityScheme> s = serviceStoreAuthenticationSpec.securitySchemes.entrySet().iterator().next();
+            String id = s.getKey();
+            SecurityScheme scheme = s.getValue();
+            return processSecurityScheme(scheme,serviceStoreAuthenticationSpec.authSpecs.get(id),identity);
         }
 
         return null;

@@ -29,7 +29,7 @@ public class RestServiceExecutionNode extends ExecutionNode
     public String mimeType;
     public List<ServiceParameter> params;
     public RequestBodyDescription requestBodyDescription;
-    public List<SecurityScheme> securitySchemes;
+    public Map<String,SecurityScheme> securitySchemes;
     public Map<String, AuthenticationSpec> authSpecs;
 
     @Override

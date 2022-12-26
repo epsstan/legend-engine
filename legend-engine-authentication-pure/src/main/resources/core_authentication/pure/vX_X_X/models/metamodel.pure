@@ -16,20 +16,14 @@ import meta::protocols::pure::vX_X_X::metamodel::authentication::*;
 Class <<typemodifiers.abstract>> meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
 {
     _type    : String[1];
-    //associatedSecurityScheme : String[1];
 }
 
 Class meta::protocols::pure::vX_X_X::metamodel::authentication::OauthAuthenticationSpec extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
 {
-  credential: OauthCredential[1];
-}
-
-Class meta::protocols::pure::vX_X_X::metamodel::authentication::OauthCredential extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
-{
-   grantType: String[1];
-   clientId: String[1];
-   clientSecretVaultReference: String[0..1];
-   authServerUrl: String[1];
+    grantType: String[1];
+    clientId: String[1];
+    clientSecretVaultReference: String[0..1];
+    authServerUrl: String[1];
 }
 
 Class meta::protocols::pure::vX_X_X::metamodel::authentication::VaultCredential extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec

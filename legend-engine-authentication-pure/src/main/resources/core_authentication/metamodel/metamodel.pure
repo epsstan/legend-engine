@@ -21,7 +21,10 @@ Class <<typemodifiers.abstract>> meta::pure::authentication::AuthenticationSpec
 
 Class meta::pure::authentication::OauthAuthenticationSpec extends meta::pure::authentication::AuthenticationSpec
 {
-   credential: OauthCredential[1];
+    grantType: String[1];
+    clientId: String[1];
+    clientSecretVaultReference: String[0..1];
+    authServerUrl: String[1];
 }
 
 Class meta::pure::authentication::UsernamePasswordAuthenticationSpec extends meta::pure::authentication::AuthenticationSpec
@@ -46,14 +49,6 @@ Class meta::pure::authentication::ApiKeyAuthenticationSpec extends meta::pure::a
 Class <<typemodifiers.abstract>> meta::pure::authentication::Credential
 {
 
-}
-
-Class meta::pure::authentication::OauthCredential extends meta::pure::authentication::Credential
-{
-    grantType: String[1];
-    clientId: String[1];
-    clientSecretVaultReference: String[1];
-    authServerUrl: String[1];
 }
 
 Class meta::pure::authentication::VaultCredential extends meta::pure::authentication::Credential

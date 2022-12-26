@@ -33,6 +33,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.s
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,7 @@ public class HelperServiceStoreGrammarComposer
         return builder.toString();
     }
 
-    public static void renderSecuritySchemes(List<SecurityScheme> securitySchemes, StringBuilder builder, int baseIndentation)
+    public static void renderSecuritySchemes(Map<String,SecurityScheme> securitySchemes, StringBuilder builder, int baseIndentation)
     {
         if (securitySchemes!=null  && !securitySchemes.isEmpty())
         {

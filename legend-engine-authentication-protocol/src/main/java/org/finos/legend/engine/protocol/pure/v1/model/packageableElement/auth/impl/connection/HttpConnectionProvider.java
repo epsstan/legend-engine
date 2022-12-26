@@ -53,12 +53,12 @@ public class HttpConnectionProvider //extends ConnectionProvider<HttpURLConnecti
 
         Credential credential = chosenAuthenticationMethod.makeCredential(authenticationSpec,identity);
 
-//        if (credential instanceof PlaintextUserPasswordCredential)
-//        {
-//            PlaintextUserPasswordCredential cred = (PlaintextUserPasswordCredential)credential;
-//            String encoding = Base64.encodeBase64String((cred.getUser()+ ":" + cred.getPassword()).getBytes());
-//            connection.setRequestProperty("Authorization", "Basic " + encoding);
-//        }
+        if (credential instanceof PlaintextUserPasswordCredential)
+        {
+            PlaintextUserPasswordCredential cred = (PlaintextUserPasswordCredential)credential;
+            String encoding = Base64.encodeBase64String((cred.getUser()+ ":" + cred.getPassword()).getBytes());
+            connection.setRequestProperty("Authorization", "Basic " + encoding);
+        }
 
         return connection;
     }

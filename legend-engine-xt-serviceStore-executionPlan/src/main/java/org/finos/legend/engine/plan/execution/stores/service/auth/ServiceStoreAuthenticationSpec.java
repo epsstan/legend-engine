@@ -8,10 +8,10 @@ import java.util.Map;
 
 public class ServiceStoreAuthenticationSpec extends AuthenticationSpec {
 
-    public List<SecurityScheme> securitySchemes;
+    public Map<String,SecurityScheme> securitySchemes;
     public Map<String, AuthenticationSpec> authSpecs;
 
-    public ServiceStoreAuthenticationSpec(List<SecurityScheme> securitySchemes, Map<String, AuthenticationSpec> authSpecs) {
+    public ServiceStoreAuthenticationSpec(Map<String,SecurityScheme> securitySchemes, Map<String, AuthenticationSpec> authSpecs) {
         this.securitySchemes = securitySchemes;
         this.authSpecs = authSpecs;
     }

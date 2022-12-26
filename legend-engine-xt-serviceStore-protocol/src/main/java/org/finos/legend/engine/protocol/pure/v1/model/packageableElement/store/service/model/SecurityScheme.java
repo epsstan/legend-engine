@@ -33,7 +33,6 @@ import java.util.ListIterator;
 })
 public abstract class SecurityScheme {
 
-    public String id;
     public SourceInformation sourceInformation;
 
     public abstract <T> T accept(SecuritySchemeVisitor<T> securitySchemeVisitor);

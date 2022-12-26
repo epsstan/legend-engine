@@ -13,11 +13,25 @@ identifier:                      VALID_STRING
 
 oauthAuthentication:          OAUTH_AUTHENTICATION
                                             BRACE_OPEN
-                                                (token)*
+                                            (
+                                                grantType
+                                                | clientId
+                                                | clientSecret
+                                                | authServerUrl
+                                            )*
                                             BRACE_CLOSE
 ;
 
-token:                          TOKEN COLON credential SEMI_COLON
+grantType:                                 GRANT_TYPE COLON STRING SEMI_COLON
+;
+
+clientId:                                   CLIENT_ID COLON STRING SEMI_COLON
+;
+
+clientSecret:                               CLIENT_SECRET_VAULT_REFERENCE COLON STRING SEMI_COLON
+;
+
+authServerUrl:                              AUTH_SERVER_URL COLON STRING SEMI_COLON
 ;
 
 basicAuthentication:                        BASIC_AUTHENTICATION
