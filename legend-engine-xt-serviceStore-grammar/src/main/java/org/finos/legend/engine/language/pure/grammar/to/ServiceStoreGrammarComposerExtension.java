@@ -108,14 +108,14 @@ public class ServiceStoreGrammarComposerExtension implements IServiceStoreGramma
     }
 
     @Override
-    public List<Function2<SecurityScheme, Integer, String>> getExtraSecuritySchemesComposers()
+    public List<Function3<String, SecurityScheme, Integer, String>> getExtraSecuritySchemesComposers()
     {
 
-        return Lists.mutable.with( (_scheme,baseIndentation) -> {
+        return Lists.mutable.with( (id,_scheme,baseIndentation) -> {
         if (_scheme instanceof SimpleHttpSecurityScheme)
         {
             SimpleHttpSecurityScheme scheme = (SimpleHttpSecurityScheme) _scheme;
-            return getTabString(baseIndentation) + scheme.id + " : Http\n" +
+            return getTabString(baseIndentation) + id + " : Http\n" +
                     getTabString(baseIndentation) + "{\n" +
                     getTabString(baseIndentation + 1) + "scheme : " + convertString(scheme.scheme, true) + ";\n" +
                     getTabString(baseIndentation) + "}";
@@ -123,7 +123,7 @@ public class ServiceStoreGrammarComposerExtension implements IServiceStoreGramma
         else if (_scheme instanceof ApiKeySecurityScheme)
         {
             ApiKeySecurityScheme scheme = (ApiKeySecurityScheme) _scheme;
-            return getTabString(baseIndentation) + scheme.id + " : ApiKey\n" +
+            return getTabString(baseIndentation) + id + " : ApiKey\n" +
                     getTabString(baseIndentation) + "{\n" +
                     getTabString(baseIndentation + 1) + "location : " + convertString(scheme.location, true) + ";\n" +
                     getTabString(baseIndentation + 1) + "keyName : " + convertString(scheme.keyName, true) + ";\n" +
@@ -132,7 +132,7 @@ public class ServiceStoreGrammarComposerExtension implements IServiceStoreGramma
         else if (_scheme instanceof OauthSecurityScheme)
         {
             OauthSecurityScheme scheme = (OauthSecurityScheme) _scheme;
-            return getTabString(baseIndentation) + scheme.id + " : Oauth\n" +
+            return getTabString(baseIndentation) + id + " : Oauth\n" +
                     getTabString(baseIndentation) + "{\n" +
                     getTabString(baseIndentation + 1) + "scopes : [" + LazyIterate.collect(scheme.scopes, s -> convertString(s, true)).makeString(",") + "];\n" +
                     getTabString(baseIndentation) + "}";

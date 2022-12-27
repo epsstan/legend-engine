@@ -1,0 +1,2 @@
+org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.apiKey.AnyToPlainTextIntermediationRule
+org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.usernamePassword.AnyToPlainUsernamePasswordTextIntermediationRule

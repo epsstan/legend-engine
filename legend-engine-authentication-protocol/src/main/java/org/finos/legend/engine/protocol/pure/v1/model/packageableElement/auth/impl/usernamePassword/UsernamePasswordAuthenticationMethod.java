@@ -16,7 +16,7 @@ public class UsernamePasswordAuthenticationMethod extends AuthenticationMethod<U
         {
             for (Credential credential : identity.getCredentials())
             {
-                FastList<IntermediationRule> matchingRules = FastList.newList(intermediationRules).select(rule -> rule.matchesInputAndOutput(spec.getClass(), credential.getClass(), PlainTextCredential.class));
+                FastList<IntermediationRule> matchingRules = FastList.newList(intermediationRules).select(rule -> rule.matchesOutput(spec.getClass(), PlaintextUserPasswordCredential.class));
                 if (!matchingRules.isEmpty())
                 {
                     IntermediationRule intermediationRule = matchingRules.get(0);

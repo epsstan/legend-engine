@@ -48,7 +48,7 @@ public class AuthenticationGrammarParserExtension implements IAuthenticationGram
                     return parseAuthenticationSpec(code, p -> walker.visitApiKeyAuthenticationSpec(code,p.apiKeyAuthentication()));
                 case "UsernamePasswordAuthenticationSpec":
                     return parseAuthenticationSpec(code, p -> walker.visitUsernamePasswordAuthenticationSpec(code, p.basicAuthentication()));
-                case "OauthAuthenticationSped":
+                case "OauthAuthenticationSpec":
                     return parseAuthenticationSpec(code, p -> walker.visitOAuthAuthenticationSpec(code, p.oauthAuthentication()));
                 default:
                     return null;

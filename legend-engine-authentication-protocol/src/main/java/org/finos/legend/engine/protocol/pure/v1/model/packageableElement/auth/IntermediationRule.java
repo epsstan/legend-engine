@@ -38,4 +38,9 @@ public abstract class IntermediationRule<Spec, InputCred extends Credential, Out
     {
         return this.getAuthenticationSpecClass().equals(authenticationSpecClass) && this.getInputCredentialClass().equals(inputCredentialClass) && this.getOutputCredentialClass().equals(outputCredentialClass);
     }
+
+    public boolean matchesOutput(Class<? extends AuthenticationSpec> authenticationSpecClass, Class<? extends Credential> outputCredentialClass)
+    {
+        return this.getAuthenticationSpecClass().equals(authenticationSpecClass) && this.getOutputCredentialClass().equals(outputCredentialClass);
+    }
 }

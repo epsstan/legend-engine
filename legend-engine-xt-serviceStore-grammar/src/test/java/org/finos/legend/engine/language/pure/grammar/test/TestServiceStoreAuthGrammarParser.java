@@ -96,7 +96,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
                 "    auth: [\n" +
-                "        http     : UsernamePasswordAuthentication\n" +
+                "        http     : UsernamePasswordAuthenticationSpec\n" +
                 "              {\n" +
                 "                   username : 'username';\n" +
                 "                   password : VaultCredential\n" +
@@ -104,15 +104,12 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "                                   vaultReference      : 'ref1';\n" +
                 "                             );\n" +
                 "              },\n" +
-                "        oauth     : OauthAuthentication\n" +
+                "        oauth     : OauthAuthenticationSpec\n" +
                 "              {\n" +
-                "                   token : OauthCredential\n" +
-                "                             (\n" +
                 "                                   grantType                   : 'client_credentials';\n" +
                 "                                   clientId                    : 'testClientID';\n" +
                 "                                   clientSecretVaultReference  : 'ref';\n" +
                 "                                   authorizationServerUrl      : 'dummy.com';\n" +
-                "                             );\n" +
                 "              }\n" +
                 "    ];\n" +
                 "}");
@@ -178,17 +175,14 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
                 "    auth: [\n" +
-                "        oauth1     : OauthAuthentication\n" +
+                "        oauth1     : OauthAuthenticationSpec\n" +
                 "              {\n" +
-                "                   token : OauthCredential\n" +
-                "                             (\n" +
                 "                                    grantType                   : 'client_credentials';\n" +
                 "                                    clientId                    : 'testClientID';\n" +
                 "                                    clientSecretVaultReference  : 'ref';\n" +
                 "                                    authorizationServerUrl      : 'dummy.com';\n" +
-                "                             );\n" +
                 "              }\n" +
-                "        http     : UsernamePasswordAuthentication\n" +
+                "        http     : UsernamePasswordAuthenticationSpec\n" +
                 "              {\n" +
                 "                   username : 'username';\n" +
                 "                   password : VaultCredential\n" +
@@ -196,7 +190,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "                                   vaultReference      : 'ref1';\n" +
                 "                             );\n" +
                 "              },\n" +
-                "       api : ApiKeyAuthentication\n" +
+                "       api : ApiKeyAuthenticationSpec\n" +
                 "             {\n" +
                 "                   value : 'value1';\n" +
                 "             }\n" +

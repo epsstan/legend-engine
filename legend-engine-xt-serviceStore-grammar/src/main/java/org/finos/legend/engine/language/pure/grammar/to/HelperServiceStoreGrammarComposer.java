@@ -15,9 +15,11 @@
 package org.finos.legend.engine.language.pure.grammar.to;
 
 import org.eclipse.collections.api.block.function.Function2;
+import org.eclipse.collections.api.block.function.Function3;
 import org.eclipse.collections.impl.list.mutable.ListAdapter;
 import org.eclipse.collections.impl.utility.LazyIterate;
 import org.eclipse.collections.impl.utility.ListIterate;
+import org.eclipse.collections.impl.utility.MapIterate;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
@@ -67,7 +69,7 @@ public class HelperServiceStoreGrammarComposer
     {
         if (securitySchemes!=null  && !securitySchemes.isEmpty())
         {
-            builder.append(getTabString(baseIndentation + 1)).append("SecuritySchemes ").append(": ").append("[\n").append(LazyIterate.collect(securitySchemes, s -> renderSecurityScheme(s, baseIndentation + 2)).makeString(",\n")).append("\n").append(getTabString()).append("];\n");
+            builder.append(getTabString(baseIndentation + 1)).append("SecuritySchemes ").append(": ").append("[\n").append(MapIterate.toListOfPairs(securitySchemes).collect(pair -> renderSecurityScheme(pair.getOne(),pair.getTwo(), baseIndentation + 2)).makeString(",\n")).append("\n").append(getTabString()).append("];\n");
         }
     }
 
@@ -212,11 +214,11 @@ public class HelperServiceStoreGrammarComposer
         return builder.toString();
     }
 
-    private static String renderSecurityScheme(SecurityScheme securityScheme, int baseIndentation)
+    private static String renderSecurityScheme(String id, SecurityScheme securityScheme, int baseIndentation)
     {
-        List<Function2<SecurityScheme, Integer, String>> processors = ListIterate.flatCollect(IServiceStoreGrammarComposerExtension.getExtensions(), ext -> ext.getExtraSecuritySchemesComposers());
+        List<Function3<String,SecurityScheme, Integer, String>> processors = ListIterate.flatCollect(IServiceStoreGrammarComposerExtension.getExtensions(), ext -> ext.getExtraSecuritySchemesComposers());
 
-        return ListIterate.collect(processors, processor -> processor.apply(securityScheme,baseIndentation))
+        return ListIterate.collect(processors, processor -> processor.value(id, securityScheme,baseIndentation))
                 .select(Objects::nonNull)
                 .getFirstOptional()
                 .orElseThrow(() -> new EngineException("Unsupported securityScheme - " + securityScheme.getClass().getSimpleName(), securityScheme.sourceInformation,EngineErrorType.PARSER));

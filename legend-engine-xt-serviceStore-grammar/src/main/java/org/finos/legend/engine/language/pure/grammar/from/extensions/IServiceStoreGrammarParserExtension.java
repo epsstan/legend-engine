@@ -51,12 +51,6 @@ public interface IServiceStoreGrammarParserExtension extends PureGrammarParserEx
     {
         return process(code, processors, "Security Scheme");
     }
-
-    default void validateSecurity(List<IdentifiedSecurityScheme> supportedSecuritySchemes, SourceInformation sourceInformation, List<SecurityScheme> availableSecuritySchemes)
-    {
-
-    }
-
     default List<Function<SecuritySchemeSourceCode, SecurityScheme>> getExtraSecuritySchemesParsers()
     {
         return Collections.emptyList();

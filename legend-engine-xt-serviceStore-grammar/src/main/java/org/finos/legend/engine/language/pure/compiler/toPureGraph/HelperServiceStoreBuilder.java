@@ -21,6 +21,7 @@ import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
+import org.eclipse.collections.impl.utility.MapIterate;
 import org.finos.legend.engine.language.pure.grammar.to.HelperServiceStoreGrammarComposer;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
@@ -154,29 +155,31 @@ public class HelperServiceStoreBuilder
 
     private static List<Pair<String,Root_meta_external_store_service_metamodel_SecurityScheme>> compileServiceStoreSecuritySchemes(Map<String,SecurityScheme> securitySchemes, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, Root_meta_external_store_service_metamodel_ServiceGroup parent, CompileContext context)
     {
-        return ListIterate.collect(securitySchemes, scheme ->
+        return MapIterate.toListOfPairs(securitySchemes).collect( pair ->
         {
+            String id = pair.getOne();
+            SecurityScheme scheme = pair.getTwo();
             if (scheme instanceof SimpleHttpSecurityScheme)
             {
                 SimpleHttpSecurityScheme simpleHttpSecurityScheme = (SimpleHttpSecurityScheme) scheme;
-                return Tuples.pair(simpleHttpSecurityScheme.id,
-                        new Root_meta_external_store_service_metamodel_SimpleHttpSecurityScheme_Impl(simpleHttpSecurityScheme.id,null, context.pureModel.getClass("meta::external::store::service::metamodel::SimpleHttpSecurityScheme"))
+                return Tuples.pair(id,
+                        new Root_meta_external_store_service_metamodel_SimpleHttpSecurityScheme_Impl(id,null, context.pureModel.getClass("meta::external::store::service::metamodel::SimpleHttpSecurityScheme"))
                            ._scheme(simpleHttpSecurityScheme.scheme));
 
             }
             else if (scheme instanceof ApiKeySecurityScheme)
             {
                 ApiKeySecurityScheme apiKeySecurityScheme = (ApiKeySecurityScheme) scheme;
-                return Tuples.pair(apiKeySecurityScheme.id,
-                        new Root_meta_external_store_service_metamodel_ApiKeySecurityScheme_Impl(apiKeySecurityScheme.id, null, context.pureModel.getClass("meta::external::store::service::metamodel::ApiKeySecurityScheme"))
+                return Tuples.pair(id,
+                        new Root_meta_external_store_service_metamodel_ApiKeySecurityScheme_Impl(id, null, context.pureModel.getClass("meta::external::store::service::metamodel::ApiKeySecurityScheme"))
                            ._location(apiKeySecurityScheme.location)
                            ._keyName(apiKeySecurityScheme.keyName));
             }
             else if (scheme instanceof OauthSecurityScheme)
             {
                 OauthSecurityScheme oauthSecurityScheme = (OauthSecurityScheme) scheme;
-                return Tuples.pair(oauthSecurityScheme.id,
-                        new Root_meta_external_store_service_metamodel_OauthSecurityScheme_Impl(oauthSecurityScheme.id, null, context.pureModel.getClass("meta::external::store::service::metamodel::OauthSecurityScheme"))
+                return Tuples.pair(id,
+                        new Root_meta_external_store_service_metamodel_OauthSecurityScheme_Impl(id, null, context.pureModel.getClass("meta::external::store::service::metamodel::OauthSecurityScheme"))
                            ._scopesAddAll(Lists.mutable.withAll(oauthSecurityScheme.scopes)));
             }
             else

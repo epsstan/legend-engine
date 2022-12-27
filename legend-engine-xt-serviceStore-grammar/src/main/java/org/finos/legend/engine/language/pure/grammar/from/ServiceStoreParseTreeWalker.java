@@ -17,6 +17,7 @@ package org.finos.legend.engine.language.pure.grammar.from;
 import org.antlr.v4.runtime.misc.Interval;
 import org.eclipse.collections.api.RichIterable;
 import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
@@ -37,6 +38,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.Lam
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.classInstance.path.Path;
 import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.classInstance.path.PropertyPathElement;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
+import org.finos.legend.pure.runtime.java.compiled.generation.processors.support.map.PureMap;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,8 +84,10 @@ public class ServiceStoreParseTreeWalker
         ServiceStoreParserGrammar.SecuritySchemesContext securitySchemeCtx = ctx.securitySchemes();
         if (securitySchemeCtx != null)
         {
-            serviceStore.securitySchemes = new PureMap(ListIterate.collect(securitySchemeCtx.securitySchemeObject(), this::visitSecuritySchemeObject).stream().collect(Collectors.toMap(Pair::getOne,Pair::getTwo)));
-            validateSecuritySchemes(serviceStore.securitySchemes, serviceStore.sourceInformation);
+            MutableList<Pair<String,SecurityScheme>> securitySchemeList = ListIterate.collect(securitySchemeCtx.securitySchemeObject(), this::visitSecuritySchemeObject);
+            validateSecuritySchemes(securitySchemeList, serviceStore.sourceInformation);
+            serviceStore.securitySchemes = securitySchemeList.stream().collect(Collectors.toMap(pair -> pair.getOne(),pair -> pair.getTwo()));
+
         }
         serviceStore.elements = ListIterate.collect(ctx.serviceStoreElement(), s -> visitServiceStoreElement(s,serviceStore.securitySchemes));
         validateServiceStoreElements(serviceStore.elements, serviceStore.sourceInformation);
@@ -102,9 +106,9 @@ public class ServiceStoreParseTreeWalker
         }
     }
 
-    private void validateSecuritySchemes(Map<String,SecurityScheme> securitySchemes, SourceInformation sourceInformation)
+    private void validateSecuritySchemes(List<Pair<String,SecurityScheme>> securitySchemes, SourceInformation sourceInformation)
     {
-        RichIterable<String> ids = (RichIterable<String>) securitySchemes.keySet();
+        MutableList<String> ids = ListIterate.collect(securitySchemes.stream().collect(Collectors.toList()), pair -> pair.getOne());
         List<String> nonUniqueIds = ids.select(e -> Collections.frequency(ids.toList(), e) > 1).toSet().toList();
 
         if (nonUniqueIds != null && !nonUniqueIds.isEmpty())
@@ -234,10 +238,16 @@ public class ServiceStoreParseTreeWalker
         return service;
     }
 
-    private void validateSecurity(List<IdentifiedSecurityScheme> supportedSecuritySchemes, SourceInformation sourceInformation, List<SecurityScheme>availableSecuritySchemes)
+    private void validateSecurity(List<IdentifiedSecurityScheme> serviceSecurity, SourceInformation sourceInformation, Map<String,SecurityScheme> availableSecuritySchemes)
     {
-        List<IServiceStoreGrammarParserExtension> extensions = IServiceStoreGrammarParserExtension.getExtensions();
-        extensions.forEach(e -> e.validateSecurity(supportedSecuritySchemes,sourceInformation,availableSecuritySchemes));
+        MutableList<String> serviceSecurityIDs = ListIterate.collect(serviceSecurity, scheme -> scheme.id);
+        MutableList<String> availableSecuritySchemesIDs = ListIterate.collect(availableSecuritySchemes.keySet().stream().collect(Collectors.toList()), key -> key);
+
+        MutableList<String> nonSupportedSecurityID = serviceSecurityIDs.select( id -> !availableSecuritySchemesIDs.contains(id)).toList();
+        if (!nonSupportedSecurityID.isEmpty())
+        {
+            throw new EngineException("These security schemes are not defined in service store - " + nonSupportedSecurityID.stream().collect(Collectors.joining(",")),sourceInformation,EngineErrorType.PARSER);
+        }
     }
 
     private void validateService(Service service)

@@ -47,15 +47,12 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
                 "    auth: [\n" +
-                "        oauth1     : OauthAuthentication\n" +
+                "        oauth1     : OauthAuthenticationSpec\n" +
                 "              {\n" +
-                "                   token : OauthCredential\n" +
-                "                             (\n" +
                 "                                    grantType                   : 'client_credentials';\n" +
                 "                                    clientId                    : 'testClientID';\n" +
                 "                                    clientSecretVaultReference  : 'ref';\n" +
                 "                                    authorizationServerUrl      : 'dummy.com';\n" +
-                "                             );\n" +
                 "              }\n" +
                 "    ];\n" +
                 "}\n" +
@@ -63,7 +60,7 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "ServiceStore meta::external::store::service::showcase::store::TradeProductServiceStore\n" +
                 "(\n" +
                 "   description : 'Showcase Service Store';\n" +
-                ")\n", "COMPILATION error at [2:1-18:1]: Security Scheme not defined in ServiceStore: oauth1");
+                ")\n", "COMPILATION error at [2:1-15:1]: Security Scheme not defined in ServiceStore: oauth1");
     }
 
     @Test
@@ -75,15 +72,12 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
                 "    auth: [\n" +
-                "        http     : OauthAuthentication\n" +
+                "        http     : OauthAuthenticationSpec\n" +
                 "              {\n" +
-                "                   token : OauthCredential\n" +
-                "                             (\n" +
                 "                                    grantType                   : 'client_credentials';\n" +
                 "                                    clientId                    : 'testClientID';\n" +
                 "                                    clientSecretVaultReference  : 'ref';\n" +
                 "                                    authorizationServerUrl      : 'dummy.com';\n" +
-                "                             );\n" +
                 "              }\n" +
                 "    ];\n" +
                 "}\n" +
@@ -97,7 +91,7 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "          scheme : 'basic';\n" +
                 "       }\n" +
                 "    ];\n" +
-                ")\n", "COMPILATION error at [2:1-18:1]: securityScheme-Authentication combination is not supported. Only supported combinations are \n" +
+                ")\n", "COMPILATION error at [2:1-15:1]: securityScheme-Authentication combination is not supported. Only supported combinations are \n" +
                 " [Http, UsernamePasswordAuthentication], [ApiKey, ApiKeySpecification], [Oauth, OauthAuthentication]");
     }
 

@@ -24,10 +24,10 @@ function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::authentic
       o:meta::pure::authentication::OauthAuthenticationSpec [1] |
         ^meta::protocols::pure::vX_X_X::metamodel::authentication::OauthAuthenticationSpec(
             _type = 'oauth',
-            grantType = $o.credential.grantType->toString(),
-            clientId = $o.credential.clientId,
-            clientSecretVaultReference = $o.credential.clientSecretVaultReference,
-            authServerUrl = $o.credential.authServerUrl
+            grantType = $o.grantType->toString(),
+            clientId = $o.clientId,
+            clientSecretVaultReference = $o.clientSecretVaultReference,
+            authServerUrl = $o.authServerUrl
         ),
       u:meta::pure::authentication::UsernamePasswordAuthenticationSpec [1] |
                 ^meta::protocols::pure::vX_X_X::metamodel::authentication::UsernamePasswordAuthenticationSpec(
