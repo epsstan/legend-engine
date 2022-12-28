@@ -222,7 +222,6 @@ function meta::external::store::service::executionPlan::generation::nodeFromServ
 
   let mappedParameters           = $serviceMapping.requestBuildInfo.requestParametersBuildInfo.parameterBuildInfoList.serviceParameter;
   let serviceStoreNode           = ^RestServiceExecutionNode(url             = $s.baseUrl + $serviceMapping.service.resolveFullPathRecursively(),
-<<<<<<< HEAD
                                                              method          = $serviceMapping.service.method,
                                                              mimeType        = $serviceMapping.service.response.binding.contentType,
                                                              params          = $serviceMapping.service.parameters,
@@ -231,15 +230,6 @@ function meta::external::store::service::executionPlan::generation::nodeFromServ
                                                              requestBodyDescription = $requestBodyDescription,
                                                              requiredVariableInputs = $mappedParameters.name->concatenate($requestBodyDescription.resultKey)->map(v | ^VariableInput(name = $v, type = Any, multiplicity = ZeroMany)),
                                                              resultType      = ^DataTypeResultType(type = String));
-=======
-                                                              method          = $serviceMapping.service.method,
-                                                              mimeType        = $serviceMapping.service.response.binding.contentType,
-                                                              params          = $serviceMapping.service.parameters,
-                                                              securitySchemes = $serviceMapping.service.security,
-                                                              authSpecs = $serviceMapping.service.security->toOne()->keyValues()->map(p| pair($p.first,$s.authSpecs->toOne()->keyValues()->filter(kv | $kv.first==$p.first)->toOne()->cast(@Pair<String,meta::pure::authentication::AuthenticationSpec>).second))->newMap(),
-                                                              requestBodyDescription = $requestBodyDescription,
-                                                              resultType      = ^DataTypeResultType(type = String));
->>>>>>> WIP
 
   let allNodes = $serviceStoreQueryProcessedState.executionNodes->concatenate($serviceParamResolutionNode)
                                                                 ->concatenate($serviceBodyResolutionNode)
