@@ -99,7 +99,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "        http     : UsernamePasswordAuthenticationSpec\n" +
                 "              {\n" +
                 "                   username : 'username';\n" +
-                "                   password : VaultCredential\n" +
+                "                   password : CredentialVault\n" +
                 "                             (\n" +
                 "                                   vaultReference      : 'ref1';\n" +
                 "                             );\n" +
@@ -185,7 +185,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "        http     : UsernamePasswordAuthenticationSpec\n" +
                 "              {\n" +
                 "                   username : 'username';\n" +
-                "                   password : VaultCredential\n" +
+                "                   password : CredentialVault\n" +
                 "                             (\n" +
                 "                                   vaultReference      : 'ref1';\n" +
                 "                             );\n" +

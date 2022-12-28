@@ -13,14 +13,15 @@
 // limitations under the License.
 package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 
-public class OAuthAuthenticationSpec extends AuthenticationSpec
-{
-    public String grantType;
-    public String clientId;
-    public String clientSecretVaultReference;
-    public String authServerUrl;
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "_type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = CredentialVault.class, name = "vault")
+})
+public class CredentialProvider{
 
     public SourceInformation sourceInformation;
 }

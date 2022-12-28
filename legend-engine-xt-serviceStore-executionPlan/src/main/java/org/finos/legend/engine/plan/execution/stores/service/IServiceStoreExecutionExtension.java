@@ -14,14 +14,9 @@
 
 package org.finos.legend.engine.plan.execution.stores.service;
 
-import org.eclipse.collections.api.block.function.Function2;
 import org.eclipse.collections.api.factory.Lists;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.finos.legend.engine.plan.execution.extension.ExecutionExtension;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 
-import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.ServiceLoader;
 

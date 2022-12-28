@@ -12,7 +12,7 @@ identifier:                      VALID_STRING
 
 
 
-vaultCredential:          VAULT_CREDENTIAL
+credentialVault:          CREDENTIAL_VAULT
                                             PAREN_OPEN
                                                    (vaultReference)*
                                             PAREN_CLOSE

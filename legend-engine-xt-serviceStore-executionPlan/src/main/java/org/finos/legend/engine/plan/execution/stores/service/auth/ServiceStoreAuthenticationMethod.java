@@ -1,23 +1,16 @@
 package org.finos.legend.engine.plan.execution.stores.service.auth;
 
-import nonapi.io.github.classgraph.json.Id;
-import org.eclipse.collections.api.block.function.Function2;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.collections.impl.utility.ListIterate;
-import org.finos.legend.engine.plan.execution.stores.service.IServiceStoreExecutionExtension;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.AuthenticationMethod;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.IntermediationRule;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.provider.AuthenticationMethodProvider;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.auth.impl.provider.IntermediationRuleProvider;
+import org.finos.legend.engine.plan.execution.authentication.AuthenticationMethod;
+import org.finos.legend.engine.plan.execution.authentication.IntermediationRule;
+import org.finos.legend.engine.plan.execution.authentication.provider.AuthenticationMethodProvider;
+import org.finos.legend.engine.plan.execution.authentication.provider.IntermediationRuleProvider;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.identity.Identity;
 
-import java.net.HttpURLConnection;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.ServiceLoader;
 
 public class ServiceStoreAuthenticationMethod extends AuthenticationMethod<ServiceStoreAuthenticationSpec, Credential>

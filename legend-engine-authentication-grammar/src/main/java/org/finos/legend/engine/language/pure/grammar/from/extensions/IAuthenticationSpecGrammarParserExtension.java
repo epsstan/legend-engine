@@ -21,16 +21,18 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.engine.language.pure.grammar.from.ParserErrorListener;
 import org.finos.legend.engine.language.pure.grammar.from.SpecificationSourceCode;
-import org.finos.legend.engine.language.pure.grammar.from.connection.authentication.SecuritySchemeSourceCode;
+import org.finos.legend.engine.language.pure.grammar.from.authentication.AuthenticationSpecSourceCode;
+import org.finos.legend.engine.language.pure.grammar.from.authentication.CredentialProviderSourceCode;
 import org.finos.legend.engine.language.pure.grammar.from.extension.PureGrammarParserExtension;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.CredentialProvider;
+import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
-import org.finos.legend.engine.language.pure.grammar.from.authentication.AuthenticationSpecSourceCode;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,23 +40,29 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 
-public interface IServiceStoreGrammarParserExtension extends PureGrammarParserExtension
+public interface IAuthenticationSpecGrammarParserExtension extends PureGrammarParserExtension
 {
-    static List<IServiceStoreGrammarParserExtension> getExtensions()
+    static List<IAuthenticationSpecGrammarParserExtension> getExtensions()
     {
-        return Lists.mutable.withAll(ServiceLoader.load(IServiceStoreGrammarParserExtension.class));
+        return Lists.mutable.withAll(ServiceLoader.load(IAuthenticationSpecGrammarParserExtension.class));
     }
 
-    static SecurityScheme process(SecuritySchemeSourceCode code, List<Function<SecuritySchemeSourceCode, SecurityScheme>> processors)
+    static AuthenticationSpec process(AuthenticationSpecSourceCode code, List<Function<AuthenticationSpecSourceCode, AuthenticationSpec>> processors)
     {
-        return process(code, processors, "Security Scheme");
+        return process(code, processors, "Authentication");
     }
-    default List<Function<SecuritySchemeSourceCode, SecurityScheme>> getExtraSecuritySchemesParsers()
+
+    static CredentialProvider process(CredentialProviderSourceCode code, List<Function<CredentialProviderSourceCode, CredentialProvider>> processors)
+    {
+        return process(code, processors, "CredentialProvider");
+    }
+
+    default List<Function<AuthenticationSpecSourceCode, AuthenticationSpec>> getExtraAuthenticationParsers()
     {
         return Collections.emptyList();
     }
 
-    default List<Function<AuthenticationSpecSourceCode, AuthenticationSpec>> getExtraAuthenticationParsers()
+    default List<Function<CredentialProviderSourceCode, CredentialProvider>> getExtraCredentialParsers()
     {
         return Collections.emptyList();
     }

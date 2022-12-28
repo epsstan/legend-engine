@@ -93,7 +93,7 @@ public class TestServiceStoreAuthGrammarRoundtrip extends TestGrammarRoundtrip.T
                 "    http : UsernamePasswordAuthenticationSpec\n" +
                 "    {\n" +
                 "      username : 'username';\n" +
-                "       password : VaultCredential\n" +
+                "       password : CredentialVault\n" +
                 "                             (\n" +
                 "                                   vaultReference      : 'ref1';\n" +
                 "                             );\n" +

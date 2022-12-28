@@ -2,7 +2,7 @@ lexer grammar CredentialLexerGrammar;
 
 import CoreLexerGrammar;
 
-VAULT_CREDENTIAL:               'VaultCredential';
+CREDENTIAL_VAULT:               'CredentialVault';
 VAULT_REFERENCE:                'vaultReference';
 
 

@@ -30,7 +30,7 @@ public class TestBasicAuthWithServiceStore extends ServiceStoreTestSuite
                         "       http : UsernamePasswordAuthenticationSpec\n" +
                         "             {\n" +
                         "                   username : 'username';\n" +
-                        "                   password : VaultCredential" +
+                        "                   password : CredentialVault" +
                         "                              (" +
                         "                                   vaultReference : 'ref1'; " +
                         "                              );\n" +

@@ -22,7 +22,6 @@ import org.eclipse.collections.api.block.procedure.Procedure2;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.data.ServiceStoreEmbeddedDataCompiler;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.extension.Processor;
@@ -110,7 +109,7 @@ public class ServiceStoreCompilerExtension implements IServiceStoreCompilerExten
                         if (serviceStoreConnection.authSpecs != null)
                         {
                             Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore = HelperServiceStoreBuilder.getServiceStore(serviceStoreConnection.element, serviceStoreConnection.elementSourceInformation, context);
-                            pureServiceStoreConnection._authSpecs(new PureMap(HelperAuthenticationBuilder.compileAuthentication(serviceStoreConnection, pureServiceStore, context).stream().collect(Collectors.toMap(Pair::getOne, Pair::getTwo))));
+                            pureServiceStoreConnection._authSpecs(new PureMap(HelperAuthenticationSpecBuilder.compileAuthentication(serviceStoreConnection, pureServiceStore, context).stream().collect(Collectors.toMap(Pair::getOne, Pair::getTwo))));
                         }
                         return pureServiceStoreConnection;
                     }
