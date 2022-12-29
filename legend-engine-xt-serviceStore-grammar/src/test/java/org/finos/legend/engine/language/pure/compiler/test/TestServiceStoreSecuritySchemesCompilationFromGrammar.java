@@ -47,12 +47,13 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
                 "    auth: [\n" +
-                "        oauth1     : OauthAuthenticationSpec\n" +
+                "        oauth1     : Oauth\n" +
                 "              {\n" +
                 "                                    grantType                   : 'client_credentials';\n" +
                 "                                    clientId                    : 'testClientID';\n" +
                 "                                    clientSecretVaultReference  : 'ref';\n" +
                 "                                    authorizationServerUrl      : 'dummy.com';\n" +
+                "                                    scopes                      : ['read','write'];" +
                 "              }\n" +
                 "    ];\n" +
                 "}\n" +
@@ -72,12 +73,13 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
                 "    auth: [\n" +
-                "        http     : OauthAuthenticationSpec\n" +
+                "        http     : Oauth\n" +
                 "              {\n" +
                 "                                    grantType                   : 'client_credentials';\n" +
                 "                                    clientId                    : 'testClientID';\n" +
                 "                                    clientSecretVaultReference  : 'ref';\n" +
                 "                                    authorizationServerUrl      : 'dummy.com';\n" +
+                "                                    scopes                      : ['read','write'];" +
                 "              }\n" +
                 "    ];\n" +
                 "}\n" +
@@ -91,8 +93,8 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "          scheme : 'basic';\n" +
                 "       }\n" +
                 "    ];\n" +
-                ")\n", "COMPILATION error at [2:1-15:1]: securityScheme-Authentication combination is not supported. Only supported combinations are \n" +
-                " [Http, UsernamePasswordAuthentication], [ApiKey, ApiKeySpecification], [Oauth, OauthAuthentication]");
+                ")\n", "COMPILATION error at [2:1-15:1]: securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are \n" +
+                " [Http, UsernamePasswordAuthenticationSpec], [ApiKey, ApiKeySpecificationSpec], [Oauth, OauthAuthenticationSpec]");
     }
 
 }

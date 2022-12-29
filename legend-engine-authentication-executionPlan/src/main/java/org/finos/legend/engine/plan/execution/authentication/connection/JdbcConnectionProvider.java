@@ -17,8 +17,9 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 
 import org.finos.legend.engine.plan.execution.authentication.AuthenticationMethod;
 import org.finos.legend.engine.plan.execution.authentication.ConnectionProvider;
+import org.finos.legend.engine.plan.execution.authentication.ConnectionSpec;
 import org.finos.legend.engine.plan.execution.authentication.provider.AuthenticationMethodProvider;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.identity.Identity;
 import org.finos.legend.engine.shared.core.identity.credential.PlaintextUserPasswordCredential;
@@ -36,7 +37,7 @@ public class JdbcConnectionProvider extends ConnectionProvider<Connection> {
     }
 
     @Override
-    public Connection makeConnection(Object connectionSpec, AuthenticationSpec authenticationSpec, Identity identity) throws Exception
+    public Connection makeConnection(ConnectionSpec connectionSpec, AuthenticationSpec authenticationSpec, Identity identity) throws Exception
     {
         assert(connectionSpec instanceof JdbcConnectionSpec);
         JdbcConnectionSpec jdbcConnectionSpec = (JdbcConnectionSpec) connectionSpec;

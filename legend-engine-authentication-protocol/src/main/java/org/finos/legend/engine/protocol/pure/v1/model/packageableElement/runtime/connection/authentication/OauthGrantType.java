@@ -11,11 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication;
+package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication;
 
-import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
-public class CredentialVault extends CredentialProvider{
+public enum OauthGrantType {
 
-    public String vaultReference;
-    public SourceInformation sourceInformation;
+    client_credentials
 }

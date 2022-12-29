@@ -11,10 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication;
+package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication;
 
-public class ApiKeyAuthenticationSpec extends AuthenticationSpec {
+public class UsernamePasswordAuthenticationSpec extends AuthenticationSpec {
 
-    //TODO: Refactor value to be a vault credential
-    public String value;
+    public String username;
+    public CredentialVault password;
 }

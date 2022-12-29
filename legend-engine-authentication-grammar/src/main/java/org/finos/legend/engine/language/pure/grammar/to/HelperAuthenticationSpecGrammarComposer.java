@@ -15,15 +15,16 @@
 package org.finos.legend.engine.language.pure.grammar.to;
 
 
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.ApiKeyAuthenticationSpec;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.OAuthAuthenticationSpec;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.UsernamePasswordAuthenticationSpec;
+import org.eclipse.collections.impl.list.mutable.ListAdapter;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.ApiKeyAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.OAuthAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.UsernamePasswordAuthenticationSpec;
 
 import static org.finos.legend.engine.language.pure.grammar.to.PureGrammarComposerUtility.convertString;
 import static org.finos.legend.engine.language.pure.grammar.to.PureGrammarComposerUtility.getTabString;
 
-public class HelperAuthenticationGrammarComposer
+public class HelperAuthenticationSpecGrammarComposer
 {
     public static String renderAuthenticationSpec(String securityScheme, AuthenticationSpec a, int baseIndentation)
     {
@@ -31,19 +32,20 @@ public class HelperAuthenticationGrammarComposer
         {
             OAuthAuthenticationSpec spec = (OAuthAuthenticationSpec) a;
             return getTabString(baseIndentation) + securityScheme +
-                    " : OauthAuthenticationSpec\n" +
+                    " : Oauth\n" +
                     getTabString(baseIndentation) + "{\n" +
                     getTabString(baseIndentation + 1) + "grantType : " + convertString(spec.grantType.toString(), true) + ";\n" +
                     getTabString(baseIndentation + 1) + "clientId : " + convertString(spec.clientId, true) + ";\n" +
                     getTabString(baseIndentation + 1) + "clientSecretVaultReference : " + convertString(spec.clientSecretVaultReference, true) + ";\n" +
                     getTabString(baseIndentation + 1) + "authorizationServerUrl : " + convertString(spec.authServerUrl, true) + ";\n" +
+                    getTabString(baseIndentation + 1) + "scopes : [" + ListAdapter.adapt(spec.scopes).makeString(",") + "];\n" +
                     getTabString(baseIndentation) + "}";
         }
         else if (a instanceof UsernamePasswordAuthenticationSpec)
         {
             UsernamePasswordAuthenticationSpec spec = (UsernamePasswordAuthenticationSpec) a;
             return  getTabString(baseIndentation) + securityScheme +
-                    " : UsernamePasswordAuthenticationSpec\n" +
+                    " : UsernamePassword\n" +
                     getTabString(baseIndentation) + "{\n" +
                     getTabString(baseIndentation + 1) + "username : " + convertString(spec.username.toString(), true) + ";\n" +
                     getTabString(baseIndentation + 1) + "password : VaultCredential" +
@@ -56,7 +58,7 @@ public class HelperAuthenticationGrammarComposer
         {
             ApiKeyAuthenticationSpec spec = (ApiKeyAuthenticationSpec) a;
             return  getTabString(baseIndentation) + securityScheme +
-                    " : ApiKeyAuthenticationSpec\n" +
+                    " : ApiKey\n" +
                     getTabString(baseIndentation) + "{\n" +
                     getTabString(baseIndentation + 1) + "location : " + convertString(spec.value.toString(), true) + ";\n" +
                     getTabString(baseIndentation + 1) + "keyName : " + convertString(spec.value.toString(), true) + ";\n" +

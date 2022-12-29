@@ -2,17 +2,18 @@ lexer grammar AuthenticationLexerGrammar;
 
 import CoreLexerGrammar;
 
-OAUTH_AUTHENTICATION:                                       'OauthAuthenticationSpec';
+OAUTH_AUTHENTICATION:                                       'Oauth';
 GRANT_TYPE:                                                 'grantType';
 CLIENT_ID:                                                  'clientId';
 CLIENT_SECRET_VAULT_REFERENCE:                              'clientSecretVaultReference';
 AUTH_SERVER_URL:                                            'authorizationServerUrl';
+SCOPES:                                                     'scopes';
 
-BASIC_AUTHENTICATION:                                       'UsernamePasswordAuthenticationSpec';
+BASIC_AUTHENTICATION:                                       'UsernamePassword';
 USERNAME:                                                   'username';
 PASSWORD:                                                   'password';
 
-API_KEY_AUTHENTICATION:                                     'ApiKeyAuthenticationSpec';
+API_KEY_AUTHENTICATION:                                     'ApiKey';
 VALUE:                                                      'value';
 LOCATION:                                                   'Location';
 KEYNAME:                                                    'keyName';

@@ -11,33 +11,39 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import meta::protocols::pure::vX_X_X::metamodel::authentication::*;
+import meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::*;
 
-Class <<typemodifiers.abstract>> meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
+Class <<typemodifiers.abstract>> meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::AuthenticationSpec
 {
     _type    : String[1];
 }
 
-Class meta::protocols::pure::vX_X_X::metamodel::authentication::OauthAuthenticationSpec extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
+Class meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::OauthAuthenticationSpec extends meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::AuthenticationSpec
 {
     grantType: String[1];
     clientId: String[1];
     clientSecretVaultReference: String[0..1];
     authServerUrl: String[1];
+    scopes: String[*];
 }
 
-Class meta::protocols::pure::vX_X_X::metamodel::authentication::VaultCredential extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
+Class <<typemodifiers.abstract>> meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::CredentialProvider
+{
+   _type    : String[1];
+}
+
+Class meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::CredentialVault extends meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::CredentialProvider
 {
    vaultReference: String[1];
 }
 
-Class meta::protocols::pure::vX_X_X::metamodel::authentication::UsernamePasswordAuthenticationSpec extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
+Class meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::UsernamePasswordAuthenticationSpec extends meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::AuthenticationSpec
 {
    username: String[1];
-   password: VaultCredential[1];
+   password: CredentialVault[1];
 }
 
-Class meta::protocols::pure::vX_X_X::metamodel::authentication::ApiKeyAuthenticationSpec extends meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec
+Class meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::ApiKeyAuthenticationSpec extends meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::AuthenticationSpec
 {
    location: String[1];
    keyName: String[1];

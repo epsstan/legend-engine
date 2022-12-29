@@ -27,7 +27,7 @@ import org.finos.legend.engine.language.pure.grammar.from.SpecificationSourceCod
 import org.finos.legend.engine.language.pure.grammar.from.connection.authentication.SecuritySchemeSourceCode;
 import org.finos.legend.engine.language.pure.grammar.from.extension.PureGrammarParserExtension;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.engine.language.pure.grammar.from.authentication.AuthenticationSpecSourceCode;

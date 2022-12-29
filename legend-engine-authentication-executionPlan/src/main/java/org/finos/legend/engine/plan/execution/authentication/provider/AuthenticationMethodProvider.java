@@ -16,11 +16,8 @@ package org.finos.legend.engine.plan.execution.authentication.provider;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.finos.legend.engine.plan.execution.authentication.AuthenticationMethod;
 import org.finos.legend.engine.plan.execution.authentication.IntermediationRule;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.Credential;
-
-
-import java.util.List;
 
 public class AuthenticationMethodProvider
 {

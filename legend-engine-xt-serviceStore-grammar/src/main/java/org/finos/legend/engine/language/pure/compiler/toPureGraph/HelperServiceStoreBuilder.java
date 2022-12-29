@@ -25,6 +25,8 @@ import org.eclipse.collections.impl.utility.MapIterate;
 import org.finos.legend.engine.language.pure.grammar.to.HelperServiceStoreGrammarComposer;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.*;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.connection.ServiceStoreConnection;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.*;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
@@ -187,6 +189,70 @@ public class HelperServiceStoreBuilder
                 throw new EngineException("Unsupported Security Scheme Type : " + scheme.getClass().getSimpleName(), scheme.sourceInformation, EngineErrorType.COMPILATION);
             }
         });
+    }
+
+    public static List<Pair<String, ? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpec>> compileAuthentication(ServiceStoreConnection serviceStoreConnection, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, CompileContext context)
+    {
+        return serviceStoreConnection.authSpecs.entrySet().stream().map(
+                entry ->
+                {
+                    String securitySchemeId = entry.getKey();
+                    AuthenticationSpec authSpec = entry.getValue();
+
+                    validateSecurityScheme(securitySchemeId,authSpec,pureServiceStore,serviceStoreConnection.sourceInformation);
+
+                    if (authSpec instanceof UsernamePasswordAuthenticationSpec)
+                    {
+                        return Tuples.pair(securitySchemeId, (Root_meta_pure_runtime_connection_authentication_UsernamePasswordAuthenticationSpec_Impl) HelperAuthenticationSpecBuilder.compileAuthentication(authSpec,context));
+                    }
+                    else if (authSpec instanceof OAuthAuthenticationSpec)
+                    {
+                        return Tuples.pair(securitySchemeId,(Root_meta_pure_runtime_connection_authentication_OauthAuthenticationSpec_Impl) HelperAuthenticationSpecBuilder.compileAuthentication(authSpec,context));
+                    }
+                    else if (authSpec instanceof ApiKeyAuthenticationSpec)
+                    {
+                        return Tuples.pair(securitySchemeId, (Root_meta_pure_runtime_connection_authentication_ApiKeyAuthenticationSpec_Impl) HelperAuthenticationSpecBuilder.compileAuthentication(authSpec,context));
+                    }
+                    else
+                    {
+                        throw new EngineException("Unsupported Authentication Type : " + authSpec.getClass().getSimpleName(), null, EngineErrorType.COMPILATION);
+                    }
+                }).collect(Collectors.toList());
+    }
+
+    private static void validateSecurityScheme(String id, AuthenticationSpec authSpec, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, SourceInformation sourceInformation)
+    {
+        Root_meta_external_store_service_metamodel_SecurityScheme_Impl securityScheme = (Root_meta_external_store_service_metamodel_SecurityScheme_Impl) pureServiceStore._securitySchemes().getMap().get(id);
+        if(securityScheme == null)
+        {
+            throw new EngineException("Security Scheme not defined in ServiceStore: " + id, sourceInformation, EngineErrorType.COMPILATION);
+        }
+
+        if (securityScheme instanceof Root_meta_external_store_service_metamodel_SimpleHttpSecurityScheme_Impl)
+        {
+            if (!(authSpec instanceof UsernamePasswordAuthenticationSpec))
+            {
+                throw new EngineException("securityScheme-Authentication combination is not supported. Only supported combinations are \n [Http, UsernamePasswordAuthentication], [ApiKey, ApiKeySpecification], [Oauth, OauthAuthentication]",sourceInformation,EngineErrorType.COMPILATION);
+            }
+        }
+        else if (securityScheme instanceof Root_meta_external_store_service_metamodel_ApiKeySecurityScheme_Impl)
+        {
+            if (!(authSpec instanceof ApiKeyAuthenticationSpec))
+            {
+                throw new EngineException("securityScheme-Authentication combination is not supported. Only supported combinations are \n [Http, UsernamePasswordAuthentication], [ApiKey, ApiKeySpecification], [Oauth, OauthAuthentication]",sourceInformation,EngineErrorType.COMPILATION);
+            }
+        }
+        else if (securityScheme instanceof Root_meta_external_store_service_metamodel_OauthSecurityScheme_Impl)
+        {
+            if (!(authSpec instanceof OAuthAuthenticationSpec))
+            {
+                throw new EngineException("securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are \n [Http, UsernamePasswordAuthenticationSpec], [ApiKey, ApiKeySpecificationSpec], [Oauth, OauthAuthenticationSpec]",sourceInformation,EngineErrorType.COMPILATION);
+            }
+        }
+        else
+        {
+            throw new EngineException("Unsupported Security Scheme type : " + id);
+        }
     }
 
     private static Root_meta_external_store_service_metamodel_ServiceGroup compileServiceGroup(ServiceGroup serviceGroup, Root_meta_external_store_service_metamodel_ServiceStore owner, Root_meta_external_store_service_metamodel_ServiceGroup parent, CompileContext context)

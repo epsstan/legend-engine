@@ -11,9 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication;
+package org.finos.legend.engine.plan.execution.authentication;
 
-public enum OauthGrantType {
-
-    client_credentials
+public abstract class ConnectionSpec {
 }

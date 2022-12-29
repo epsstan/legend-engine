@@ -15,7 +15,7 @@ package org.finos.legend.engine.plan.execution.authentication.apiKey;
 
 
 import org.finos.legend.engine.plan.execution.authentication.IntermediationRule;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.ApiKeyAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.ApiKeyAuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.identity.credential.PlaintextCredential;
 

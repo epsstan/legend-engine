@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication;
+package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -19,11 +19,9 @@ import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "_type")
 @JsonSubTypes({
-            @JsonSubTypes.Type(value = OAuthAuthenticationSpec.class, name = "oauth"),
-            @JsonSubTypes.Type(value = UsernamePasswordAuthenticationSpec.class, name = "basic" ),
-            @JsonSubTypes.Type(value = ApiKeyAuthenticationSpec.class, name = "apiKey")
-    })
-public class AuthenticationSpec {
+        @JsonSubTypes.Type(value = CredentialVault.class, name = "vault")
+})
+public class CredentialProvider{
 
     public SourceInformation sourceInformation;
 }

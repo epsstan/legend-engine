@@ -1,5 +1,5 @@
 {
   "name" : "core_authentication",
-  "pattern" : "(meta::pure::authentication|meta::protocols::pure)(::.*)?",
+  "pattern" : "(meta::pure::runtime::connection::authentication|meta::protocols::pure)(::.*)?",
   "dependencies" : ["platform", "core"]
 }

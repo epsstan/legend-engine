@@ -15,39 +15,41 @@
 ###Pure
 import meta::pure::extension::*;
 import meta::pure::functions::collection::*;
-import meta::pure::authentication::*;
-import meta::protocols::pure::vX_X_X::extension::authentication::*;
+import meta::pure::runtime::connection::authentication::*;
+import meta::protocols::pure::vX_X_X::extension::runtime::connection::authentication::*;
 
-function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::authentication::transformAuthenticationSpec(a:meta::pure::authentication::AuthenticationSpec[1], extensions:Extension[*]):meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec[1]
+function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::authentication::transformAuthenticationSpec(a:meta::pure::runtime::connection::authentication::AuthenticationSpec[1], extensions:Extension[*]):meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::AuthenticationSpec[1]
 {
-   $a->match($extensions.serializerExtension('vX_X_X')->cast(@meta::protocols::pure::vX_X_X::extension::SerializerExtension_vX_X_X).moduleSerializerExtension('authenticationSpec')->cast(@meta::protocols::pure::vX_X_X::extension::authentication::AuthenticationModuleSerializerExtension).transfers_authentication_transformAuthenticationSpec->concatenate([
-      o:meta::pure::authentication::OauthAuthenticationSpec [1] |
-        ^meta::protocols::pure::vX_X_X::metamodel::authentication::OauthAuthenticationSpec(
+   $a->match($extensions.serializerExtension('vX_X_X')->cast(@meta::protocols::pure::vX_X_X::extension::SerializerExtension_vX_X_X).moduleSerializerExtension('authenticationSpec')->cast(@meta::protocols::pure::vX_X_X::extension::runtime::connection::authentication::AuthenticationModuleSerializerExtension).transfers_authentication_transformAuthenticationSpec->concatenate([
+      o:meta::pure::runtime::connection::authentication::OauthAuthenticationSpec [1] |
+        ^meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::OauthAuthenticationSpec(
             _type = 'oauth',
             grantType = $o.grantType->toString(),
             clientId = $o.clientId,
             clientSecretVaultReference = $o.clientSecretVaultReference,
-            authServerUrl = $o.authServerUrl
+            authServerUrl = $o.authServerUrl,
+            scopes = $o.scopes
         ),
-      u:meta::pure::authentication::UsernamePasswordAuthenticationSpec [1] |
-                ^meta::protocols::pure::vX_X_X::metamodel::authentication::UsernamePasswordAuthenticationSpec(
-                    _type = 'basic',
+      u:meta::pure::runtime::connection::authentication::UsernamePasswordAuthenticationSpec [1] |
+                ^meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::UsernamePasswordAuthenticationSpec(
+                    _type = 'usernamePassword',
                     username = $u.username,
-                    password = ^meta::protocols::pure::vX_X_X::metamodel::authentication::VaultCredential(
+                    password = ^meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::CredentialVault(
                                            _type = 'vault',
                                            vaultReference = $u.password.vaultReference
                                            )
                 ),
-      a:meta::pure::authentication::ApiKeyAuthenticationSpec [1] |
-                ^meta::protocols::pure::vX_X_X::metamodel::authentication::ApiKeyAuthenticationSpec(
+      a:meta::pure::runtime::connection::authentication::ApiKeyAuthenticationSpec [1] |
+                ^meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::ApiKeyAuthenticationSpec(
                       _type = 'apiKey',
                       location = $a.location->toString(),
                       keyName = $a.keyName,
                       value = $a.value
                 ),
-      other: meta::pure::authentication::AuthenticationSpec[1] |
-         ^meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec(
-            _type = 'unknown'
-         )
+      other: meta::pure::runtime::connection::authentication::AuthenticationSpec[1] |
+               fail('Unsupported AuthenticationSpec');
+               ^meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::AuthenticationSpec(
+                      _type = 'unknown'
+                );
    ])->toOneMany())
 }

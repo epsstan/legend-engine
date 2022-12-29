@@ -13,7 +13,9 @@
 // limitations under the License.
 package org.finos.legend.engine.plan.execution.authentication.connection;
 
-public class JdbcConnectionSpec {
+import org.finos.legend.engine.plan.execution.authentication.ConnectionSpec;
+
+public class JdbcConnectionSpec extends ConnectionSpec {
 
     public String dbHostname;
     public int dbPort;

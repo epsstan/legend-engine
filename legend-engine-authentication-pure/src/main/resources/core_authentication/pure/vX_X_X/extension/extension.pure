@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-Class meta::protocols::pure::vX_X_X::extension::authentication::AuthenticationModuleSerializerExtension extends meta::protocols::pure::vX_X_X::extension::ModuleSerializerExtension
+Class meta::protocols::pure::vX_X_X::extension::runtime::connection::authentication::AuthenticationModuleSerializerExtension extends meta::protocols::pure::vX_X_X::extension::ModuleSerializerExtension
 {
-   transfers_authentication_transformAuthenticationSpec : Function<{Nil[1] -> meta::protocols::pure::vX_X_X::metamodel::authentication::AuthenticationSpec[1]}>[*];
+   transfers_authentication_transformAuthenticationSpec : Function<{Nil[1] -> meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::AuthenticationSpec[1]}>[*];
 }

@@ -14,7 +14,7 @@
 
 import meta::pure::runtime::*;
 import meta::external::store::service::metamodel::*;
-import meta::pure::authentication::*;
+import meta::pure::runtime::connection::authentication::*;
 
 Class meta::external::store::service::metamodel::runtime::ServiceStoreConnection extends Connection
 [

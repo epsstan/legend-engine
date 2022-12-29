@@ -24,17 +24,16 @@ import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.CredentialLexerGrammar;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.CredentialParserGrammar;
 import org.finos.legend.engine.language.pure.grammar.from.authentication.AuthenticationSpecSourceCode;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
 import org.finos.legend.engine.language.pure.grammar.from.authentication.CredentialProviderParseTreeWalker;
 import org.finos.legend.engine.language.pure.grammar.from.authentication.CredentialProviderSourceCode;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.CredentialProvider;
-import org.finos.legend.engine.shared.core.identity.Credential;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.CredentialProvider;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-public class AuthenticationSpecSpecGrammarParserExtension implements IAuthenticationSpecGrammarParserExtension
+public class AuthenticationSpecGrammarParserExtension implements IAuthenticationSpecGrammarParserExtension
 {
     public static final String NAME = "Authentication";
 
@@ -46,11 +45,11 @@ public class AuthenticationSpecSpecGrammarParserExtension implements IAuthentica
             AuthenticationSpecParseTreeWalker walker = new AuthenticationSpecParseTreeWalker(parserInfo.walkerSourceInformation);
             switch (code.getType())
             {
-                case "ApiKeyAuthenticationSpec":
+                case "ApiKey":
                     return parseAuthenticationSpec(code, p -> walker.visitApiKeyAuthenticationSpec(code,p.apiKeyAuthentication()));
-                case "UsernamePasswordAuthenticationSpec":
+                case "UsernamePassword":
                     return parseAuthenticationSpec(code, p -> walker.visitUsernamePasswordAuthenticationSpec(code, p.basicAuthentication()));
-                case "OauthAuthenticationSpec":
+                case "Oauth":
                     return parseAuthenticationSpec(code, p -> walker.visitOAuthAuthenticationSpec(code, p.oauthAuthentication()));
                 default:
                     return null;
@@ -106,27 +105,27 @@ public class AuthenticationSpecSpecGrammarParserExtension implements IAuthentica
 
     private static SourceCodeParserInfo getAuthenticationParserInfo(AuthenticationSpecSourceCode authenticationSpecSourceCode)
     {
-        CharStream input = CharStreams.fromString(authenticationSpecSourceCode.code);
-        ParserErrorListener errorListener = new ParserErrorListener(authenticationSpecSourceCode.walkerSourceInformation);
+        CharStream input = CharStreams.fromString(authenticationSpecSourceCode.getCode());
+        ParserErrorListener errorListener = new ParserErrorListener(authenticationSpecSourceCode.getWalkerSourceInformation());
         AuthenticationLexerGrammar lexer = new AuthenticationLexerGrammar(input);
         lexer.removeErrorListeners();
         lexer.addErrorListener(errorListener);
         AuthenticationParserGrammar parser = new AuthenticationParserGrammar(new CommonTokenStream(lexer));
         parser.removeErrorListeners();
         parser.addErrorListener(errorListener);
-        return new SourceCodeParserInfo(authenticationSpecSourceCode.code, input, authenticationSpecSourceCode.sourceInformation, authenticationSpecSourceCode.walkerSourceInformation, lexer, parser, null);
+        return new SourceCodeParserInfo(authenticationSpecSourceCode.getCode(), input, authenticationSpecSourceCode.getSourceInformation(), authenticationSpecSourceCode.getWalkerSourceInformation(), lexer, parser, null);
     }
 
     private static SourceCodeParserInfo getCredentialParserInfo(CredentialProviderSourceCode credentialProviderSourceCode)
     {
-        CharStream input = CharStreams.fromString(credentialProviderSourceCode.code);
-        ParserErrorListener errorListener = new ParserErrorListener(credentialProviderSourceCode.walkerSourceInformation);
+        CharStream input = CharStreams.fromString(credentialProviderSourceCode.getCode());
+        ParserErrorListener errorListener = new ParserErrorListener(credentialProviderSourceCode.getWalkerSourceInformation());
         CredentialLexerGrammar lexer = new CredentialLexerGrammar(input);
         lexer.removeErrorListeners();
         lexer.addErrorListener(errorListener);
         CredentialParserGrammar parser = new CredentialParserGrammar(new CommonTokenStream(lexer));
         parser.removeErrorListeners();
         parser.addErrorListener(errorListener);
-        return new SourceCodeParserInfo(credentialProviderSourceCode.code, input, credentialProviderSourceCode.sourceInformation, credentialProviderSourceCode.walkerSourceInformation, lexer, parser, null);
+        return new SourceCodeParserInfo(credentialProviderSourceCode.getCode(), input, credentialProviderSourceCode.getSourceInformation(), credentialProviderSourceCode.getWalkerSourceInformation(), lexer, parser, null);
     }
 }

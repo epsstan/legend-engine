@@ -15,41 +15,12 @@
 package org.finos.legend.engine.language.pure.grammar.from.authentication;
 
 import org.finos.legend.engine.language.pure.grammar.from.ParseTreeWalkerSourceInformation;
-import org.finos.legend.engine.language.pure.grammar.from.SpecificationSourceCode;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 
 public class CredentialProviderSourceCode extends SpecificationSourceCode
 {
-    public final String code;
-    public final String type;
-    public final SourceInformation sourceInformation;
-    public final ParseTreeWalkerSourceInformation walkerSourceInformation;
     public CredentialProviderSourceCode(String code, String type, SourceInformation sourceInformation, ParseTreeWalkerSourceInformation walkerSourceInformation)
     {
         super(code, type, sourceInformation, walkerSourceInformation);
-        this.code = code;
-        this.type = type;
-        this.sourceInformation = sourceInformation;
-        this.walkerSourceInformation = walkerSourceInformation;
-    }
-
-    public SourceInformation getSourceInformation()
-    {
-        return sourceInformation;
-    }
-
-    public String getType()
-    {
-        return type;
-    }
-
-    public String getCode()
-    {
-        return code;
-    }
-
-    public ParseTreeWalkerSourceInformation getWalkerSourceInformation()
-    {
-        return walkerSourceInformation;
     }
 }

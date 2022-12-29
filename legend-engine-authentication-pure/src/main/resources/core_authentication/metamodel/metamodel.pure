@@ -12,46 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import meta::pure::authentication::*;
+import meta::pure::runtime::connection::authentication::*;
 
-Class <<typemodifiers.abstract>> meta::pure::authentication::AuthenticationSpec
+Class <<typemodifiers.abstract>> meta::pure::runtime::connection::authentication::AuthenticationSpec
 {
 
 }
 
-Class meta::pure::authentication::OauthAuthenticationSpec extends meta::pure::authentication::AuthenticationSpec
+Class meta::pure::runtime::connection::authentication::OauthAuthenticationSpec extends meta::pure::runtime::connection::authentication::AuthenticationSpec
 {
-    grantType: String[1];
+    grantType: OauthGrantType[1];
     clientId: String[1];
     clientSecretVaultReference: String[0..1];
     authServerUrl: String[1];
+    scopes: String[*];
 }
 
-Class meta::pure::authentication::UsernamePasswordAuthenticationSpec extends meta::pure::authentication::AuthenticationSpec
+Enum meta::pure::runtime::connection::authentication::OauthGrantType
+{
+   client_credentials
+}
+
+Class meta::pure::runtime::connection::authentication::UsernamePasswordAuthenticationSpec extends meta::pure::runtime::connection::authentication::AuthenticationSpec
 {
    username: String[1];
-   password: VaultCredential[1];
+   password: CredentialVault[1];
 }
 
-Enum meta::pure::authentication::Location
+Enum meta::pure::runtime::connection::authentication::Location
 {
   header,
   cookie
 }
 
-Class meta::pure::authentication::ApiKeyAuthenticationSpec extends meta::pure::authentication::AuthenticationSpec
+Class meta::pure::runtime::connection::authentication::ApiKeyAuthenticationSpec extends meta::pure::runtime::connection::authentication::AuthenticationSpec
 {
    location: Location[1];
    keyName: String[1];
    value: String[1];
 }
 
-Class <<typemodifiers.abstract>> meta::pure::authentication::Credential
+Class <<typemodifiers.abstract>> meta::pure::runtime::connection::authentication::CredentialProvider
 {
 
 }
 
-Class meta::pure::authentication::VaultCredential extends meta::pure::authentication::Credential
+Class meta::pure::runtime::connection::authentication::CredentialVault extends meta::pure::runtime::connection::authentication::CredentialProvider
 {
     vaultReference: String[1];
 }

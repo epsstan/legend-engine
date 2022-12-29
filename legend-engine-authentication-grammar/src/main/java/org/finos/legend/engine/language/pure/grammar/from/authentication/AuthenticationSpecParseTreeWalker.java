@@ -14,19 +14,17 @@
 
 package org.finos.legend.engine.language.pure.grammar.from.authentication;
 
+import org.eclipse.collections.impl.utility.ListIterate;
+import org.finos.legend.engine.language.pure.grammar.from.ParseTreeWalkerSourceInformation;
 import org.finos.legend.engine.language.pure.grammar.from.PureGrammarParserUtility;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.AuthenticationParserGrammar;
-import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.CredentialParserGrammar;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.*;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.OAuthAuthenticationSpec;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.ApiKeyAuthenticationSpec;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.UsernamePasswordAuthenticationSpec;
-import org.finos.legend.engine.language.pure.grammar.from.ParseTreeWalkerSourceInformation;
 import org.finos.legend.engine.language.pure.grammar.from.extensions.IAuthenticationSpecGrammarParserExtension;
-import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
-import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
-import org.eclipse.collections.impl.utility.ListIterate;
+import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.*;
+import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class AuthenticationSpecParseTreeWalker
@@ -73,8 +71,7 @@ public class AuthenticationSpecParseTreeWalker
         o.sourceInformation = code.getSourceInformation();
 
         AuthenticationParserGrammar.GrantTypeContext grantTypeContext = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.grantType(), "grantType", o.sourceInformation);
-        //o.grantType = OauthGrantType.valueOf(PureGrammarParserUtility.fromGrammarString(grantTypeContext.STRING().getText(), true));
-        o.grantType = PureGrammarParserUtility.fromGrammarString(grantTypeContext.STRING().getText(), true);
+        o.grantType = OauthGrantType.valueOf(PureGrammarParserUtility.fromGrammarString(grantTypeContext.STRING().getText(), true));
 
         AuthenticationParserGrammar.ClientIdContext clientIdContext = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.clientId(), "clientId", o.sourceInformation);
         o.clientId = PureGrammarParserUtility.fromGrammarString(clientIdContext.STRING().getText(), true);
@@ -87,6 +84,9 @@ public class AuthenticationSpecParseTreeWalker
 
         AuthenticationParserGrammar.AuthServerUrlContext authServerUrlContext = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.authServerUrl(), "authServerUrl", o.sourceInformation);
         o.authServerUrl = PureGrammarParserUtility.fromGrammarString(authServerUrlContext.STRING().getText(), true);
+
+        AuthenticationParserGrammar.ScopesContext scopesContext = PureGrammarParserUtility.validateAndExtractOptionalField(ctx.scopes(),"scopes",o.sourceInformation);
+        o.scopes =  scopesContext != null && scopesContext.STRING() != null ? ListIterate.collect(scopesContext.STRING(), scopeCtx -> PureGrammarParserUtility.fromGrammarString(scopeCtx.getText(), true)) : new ArrayList<>();
 
         return o;
     }

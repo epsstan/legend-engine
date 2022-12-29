@@ -14,11 +14,10 @@
 
 package org.finos.legend.engine.language.pure.grammar.from.authentication;
 
-import org.finos.legend.engine.language.pure.grammar.from.PureGrammarParserUtility;
-import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.AuthenticationParserGrammar;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.CredentialVault;
 import org.finos.legend.engine.language.pure.grammar.from.ParseTreeWalkerSourceInformation;
+import org.finos.legend.engine.language.pure.grammar.from.PureGrammarParserUtility;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.authentication.CredentialParserGrammar;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.CredentialVault;
 
 public class CredentialProviderParseTreeWalker
 {

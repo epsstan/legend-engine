@@ -13,7 +13,7 @@
 // limitations under the License.
 package org.finos.legend.engine.plan.execution.authentication;
 
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.Credential;
 
 import java.lang.reflect.ParameterizedType;

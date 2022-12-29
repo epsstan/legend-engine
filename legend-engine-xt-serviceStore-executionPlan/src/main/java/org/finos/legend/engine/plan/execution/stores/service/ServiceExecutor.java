@@ -17,20 +17,10 @@ package org.finos.legend.engine.plan.execution.stores.service;
 import io.opentracing.Span;
 import io.opentracing.util.GlobalTracer;
 import org.apache.http.Header;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.util.EntityUtils;
-import org.eclipse.collections.api.block.function.Function3;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.factory.Lists;
@@ -56,7 +46,7 @@ import org.finos.legend.engine.plan.execution.authentication.connection.HttpConn
 import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreAuthenticationSpec;
 import org.finos.legend.engine.plan.execution.authentication.provider.AuthenticationMethodProvider;
 import org.finos.legend.engine.plan.execution.authentication.provider.IntermediationRuleProvider;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.factory.IdentityFactoryProvider;
 import java.net.HttpURLConnection;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -71,7 +61,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class ServiceExecutor
 {

@@ -16,7 +16,7 @@ package org.finos.legend.engine.plan.execution.authentication.apiKey;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.finos.legend.engine.plan.execution.authentication.AuthenticationMethod;
 import org.finos.legend.engine.plan.execution.authentication.IntermediationRule;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.ApiKeyAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.ApiKeyAuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.identity.Identity;
 import org.finos.legend.engine.shared.core.identity.credential.PlaintextCredential;

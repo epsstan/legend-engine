@@ -15,7 +15,7 @@ package org.finos.legend.engine.plan.execution.authentication.usernamePassword;
 
 
 import org.finos.legend.engine.plan.execution.authentication.IntermediationRule;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.UsernamePasswordAuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.UsernamePasswordAuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.identity.credential.PlaintextUserPasswordCredential;
 

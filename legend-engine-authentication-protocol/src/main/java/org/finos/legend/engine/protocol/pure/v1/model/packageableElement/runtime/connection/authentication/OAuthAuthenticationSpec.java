@@ -11,13 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package org.finos.legend.engine.plan.execution.authentication;
+package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication;
 
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
-import org.finos.legend.engine.shared.core.identity.Identity;
+import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 
-public abstract class ConnectionProvider<T> {
+import java.util.List;
 
-    public abstract T makeConnection(ConnectionSpec connectionSpec, AuthenticationSpec authenticationSpec, Identity identity) throws Exception;
+public class OAuthAuthenticationSpec extends AuthenticationSpec
+{
+    public OauthGrantType grantType;
+    public String clientId;
+    public String clientSecretVaultReference;
+    public String authServerUrl;
+    public List<String> scopes;
 
+    public SourceInformation sourceInformation;
 }

@@ -18,6 +18,7 @@ oauthAuthentication:          OAUTH_AUTHENTICATION
                                                 | clientId
                                                 | clientSecret
                                                 | authServerUrl
+                                                | scopes
                                             )*
                                             BRACE_CLOSE
 ;
@@ -32,6 +33,9 @@ clientSecret:                               CLIENT_SECRET_VAULT_REFERENCE COLON 
 ;
 
 authServerUrl:                              AUTH_SERVER_URL COLON STRING SEMI_COLON
+;
+
+scopes:                                     SCOPES COLON BRACKET_OPEN (STRING (COMMA STRING)*)? BRACKET_CLOSE SEMI_COLON
 ;
 
 basicAuthentication:                        BASIC_AUTHENTICATION

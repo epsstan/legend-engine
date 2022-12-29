@@ -14,10 +14,8 @@
 
 package org.finos.legend.engine.language.pure.grammar.to;
 
-import org.eclipse.collections.api.block.function.Function2;
 import org.eclipse.collections.api.block.function.Function3;
 import org.eclipse.collections.impl.list.mutable.ListAdapter;
-import org.eclipse.collections.impl.utility.LazyIterate;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.eclipse.collections.impl.utility.MapIterate;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
@@ -79,7 +77,7 @@ public class HelperServiceStoreGrammarComposer
         {
             return "\n" + context.getIndentationString() + getTabString() + "auth: [\n" +
                     serviceStoreConnection. authSpecs.entrySet().stream().map(entry
-                            -> HelperAuthenticationGrammarComposer.renderAuthenticationSpec(entry.getKey(), entry.getValue(), 2))
+                            -> HelperAuthenticationSpecGrammarComposer.renderAuthenticationSpec(entry.getKey(), entry.getValue(), 2))
                             .collect (Collectors. joining(",\n")) +
                           "\n" + context.getIndentationString() + getTabString() + "];";
         }

@@ -18,8 +18,10 @@ import org.apache.commons.codec.binary.Base64;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.finos.legend.engine.plan.execution.authentication.AuthenticationMethod;
+import org.finos.legend.engine.plan.execution.authentication.ConnectionProvider;
+import org.finos.legend.engine.plan.execution.authentication.ConnectionSpec;
 import org.finos.legend.engine.plan.execution.authentication.provider.AuthenticationMethodProvider;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.identity.Identity;
 import org.finos.legend.engine.shared.core.identity.credential.PlaintextUserPasswordCredential;
@@ -27,8 +29,7 @@ import org.finos.legend.engine.shared.core.identity.credential.PlaintextUserPass
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-//TODO: This class to extend connectionProvider
-public class HttpConnectionProvider //extends ConnectionProvider<HttpURLConnection>
+public class HttpConnectionProvider extends ConnectionProvider<HttpURLConnection>
 {
     private static AuthenticationMethodProvider authenticationMethodProvider;
 
@@ -36,7 +37,7 @@ public class HttpConnectionProvider //extends ConnectionProvider<HttpURLConnecti
         this.authenticationMethodProvider = authenticationMethodProvider;
     }
 
-    public static HttpURLConnection makeConnection(Object connectionSpec, AuthenticationSpec authenticationSpec, Identity identity) throws Exception
+    public HttpURLConnection makeConnection(ConnectionSpec connectionSpec, AuthenticationSpec authenticationSpec, Identity identity) throws Exception
     {
 
         assert(connectionSpec instanceof HttpConnectionSpec);
