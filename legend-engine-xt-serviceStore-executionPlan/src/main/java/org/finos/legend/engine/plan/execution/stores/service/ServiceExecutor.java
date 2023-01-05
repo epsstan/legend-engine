@@ -88,9 +88,11 @@ public class ServiceExecutor
 
         try
         {
+            //TODO: Inject authenticationMethodProvider at a higher level
             FastList<AuthenticationMethod> allMethods = FastList.newList(ServiceLoader.load(AuthenticationMethod.class));
             FastList<IntermediationRule> allRules = FastList.newList(ServiceLoader.load(IntermediationRule.class));
             AuthenticationMethodProvider authenticationMethodProvider = new AuthenticationMethodProvider(allMethods,new IntermediationRuleProvider(allRules));
+
             HttpURLConnection connection = new ServiceStoreConnectionProvider(authenticationMethodProvider).makeConnection(new ServiceStoreConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType),new ServiceStoreAuthenticationSpec(securitySchemes,authSpecs), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
 
             InputStream responseStream = connection.getInputStream();

@@ -60,6 +60,7 @@ public class TestApiKeyWithServiceStore extends ServiceStoreTestSuite
     public void serviceStoreSimpleExample()
     {
 
+        //TODO: add asserts to this test
         PureModelContextData data = PureGrammarParser.newInstance().parseModel(pureGrammar);
 
         SingleExecutionPlan plan = buildPlanForQuery(pureGrammar);

@@ -144,8 +144,8 @@ public class ServiceStoreConnectionProvider extends ConnectionProvider<HttpURLCo
         if (scheme instanceof CompositeSecurityScheme)
         {
             CompositeSecurityScheme compositeSecurityScheme = (CompositeSecurityScheme) scheme;
-            CompositeCredential compositeCredential = (CompositeCredential) credential;
             assert(credential instanceof CompositeCredential);
+            CompositeCredential compositeCredential = (CompositeCredential) credential;
             Arrays.asList(securitySchemeId.split("::")).forEach( id -> {
                     try
                     {
