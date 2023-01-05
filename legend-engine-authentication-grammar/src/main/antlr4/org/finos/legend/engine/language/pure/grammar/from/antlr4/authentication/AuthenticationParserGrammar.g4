@@ -68,7 +68,7 @@ location:                                  LOCATION VALUE STRING SEMI_COLON
 keyName:                                   KEYNAME VALUE STRING SEMI_COLON
 ;
 
-value:                                     VALUE COLON STRING SEMI_COLON
+value:                                     VALUE COLON credential SEMI_COLON
 ;
 
 credential:     credentialType (credentialObject)?

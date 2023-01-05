@@ -11,21 +11,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-package org.finos.legend.engine.shared.core.identity.credential;
+package org.finos.legend.engine.plan.execution.stores.service.auth;
 
 import org.finos.legend.engine.shared.core.identity.Credential;
 
-public class PlaintextCredential implements Credential {
+import java.util.Map;
 
-    private String value;
+public class CompositeCredential implements Credential {
 
-    public PlaintextCredential(String value) {
-        this.value = value;
+    private Map<String,Credential> credentials;
+
+    public CompositeCredential(Map<String,Credential> credentials) {
+        this.credentials = credentials;
     }
 
-    public String getValue() {
-        return value;
+    public Map<String,Credential> getCredentials() {
+        return credentials;
     }
-
 }

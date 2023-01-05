@@ -92,11 +92,6 @@
         </dependency>
         <!-- ENGINE -->
 
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-        </dependency>
-
         <!-- Eclipse -->
         <dependency>
             <groupId>org.eclipse.collections</groupId>
@@ -108,13 +103,5 @@
         </dependency>
         <!-- Eclipse -->
 
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
-
     </dependencies>
-
-
-
 </project>

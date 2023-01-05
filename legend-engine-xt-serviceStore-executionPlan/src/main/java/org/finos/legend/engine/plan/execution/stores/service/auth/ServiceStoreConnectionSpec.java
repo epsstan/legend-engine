@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package org.finos.legend.engine.plan.execution.authentication.connection;
+package org.finos.legend.engine.plan.execution.stores.service.auth;
 
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
@@ -20,7 +20,7 @@ import org.finos.legend.engine.plan.execution.authentication.ConnectionSpec;
 import java.net.URI;
 import java.util.List;
 
-public class HttpConnectionSpec extends ConnectionSpec {
+public class ServiceStoreConnectionSpec extends ConnectionSpec {
 
     public URI uri;
     public String httpMethod;
@@ -28,7 +28,7 @@ public class HttpConnectionSpec extends ConnectionSpec {
     public StringEntity requestBodyDescription;
     public String mimeType;
 
-    public HttpConnectionSpec(URI uri, String httpMethod, List<Header> headers, StringEntity requestBodyDescription, String mimeType) {
+    public ServiceStoreConnectionSpec(URI uri, String httpMethod, List<Header> headers, StringEntity requestBodyDescription, String mimeType) {
         this.uri = uri;
         this.httpMethod = httpMethod;
         this.headers = headers;

@@ -47,5 +47,5 @@ Class meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authenticat
 {
    location: String[1];
    keyName: String[1];
-   value: String[1];
+   value: CredentialVault[1];
 }

@@ -17,6 +17,39 @@
     {
       "request": {
         "method": "GET",
+        "url": "/trades/allTradesService2",
+        "cookies": {
+          "apiKey1": {
+            "equalTo": "value"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": "s_tradeId,s_traderDetails,s_tradeDetails\n1,abc:F_Name_1:L_Name_1,30:100\n2,abc:F_Name_1:L_Name_1,31:200\n3,abc:F_Name_2:L_Name_2,30:300\n4,abc:F_Name_2:L_Name_2,31:400"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/trades/allTradesService3",
+        "cookies": {
+          "apiKey1": {
+            "equalTo": "value1"
+          },
+          "apiKey2": {
+            "equalTo": "value2"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": "s_tradeId,s_traderDetails,s_tradeDetails\n1,abc:F_Name_1:L_Name_1,30:100\n2,abc:F_Name_1:L_Name_1,31:200\n3,abc:F_Name_2:L_Name_2,30:300\n4,abc:F_Name_2:L_Name_2,31:400"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
         "url": "/products/getProductById/30"
       },
       "response": {

@@ -48,9 +48,9 @@ public class AuthenticationSpecParseTreeWalker
         AuthenticationParserGrammar.PasswordContext passwordContext = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.password(),"password", u.sourceInformation);
 
         //TODO: Validate type of credential
-        CredentialVault v = (CredentialVault) this.visitCredentialProvider(passwordContext.credential());
+        CredentialVault credVault = (CredentialVault) this.visitCredentialProvider(passwordContext.credential());
 
-        u.password = v;
+        u.password = credVault;
         return u;
     }
 
@@ -60,8 +60,11 @@ public class AuthenticationSpecParseTreeWalker
         u.sourceInformation = code.getSourceInformation();
 
         AuthenticationParserGrammar.ValueContext valueContext = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.value(),"value", u.sourceInformation);
-        u.value = PureGrammarParserUtility.fromGrammarString(valueContext.STRING().getText(), true);
 
+        //TODO: Validate type of credential
+        CredentialVault credVault = (CredentialVault) this.visitCredentialProvider(valueContext.credential());
+
+        u.value = credVault;
         return u;
     }
 

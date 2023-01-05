@@ -49,7 +49,7 @@ Class meta::pure::runtime::connection::authentication::ApiKeyAuthenticationSpec 
 {
    location: Location[1];
    keyName: String[1];
-   value: String[1];
+   value: CredentialVault[1];
 }
 
 Class <<typemodifiers.abstract>> meta::pure::runtime::connection::authentication::CredentialProvider

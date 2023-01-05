@@ -41,8 +41,8 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.s
 import org.pac4j.core.profile.CommonProfile;
 import org.finos.legend.engine.plan.execution.authentication.AuthenticationMethod;
 import org.finos.legend.engine.plan.execution.authentication.IntermediationRule;
-import org.finos.legend.engine.plan.execution.authentication.connection.HttpConnectionProvider;
-import org.finos.legend.engine.plan.execution.authentication.connection.HttpConnectionSpec;
+import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreConnectionProvider;
+import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreConnectionSpec;
 import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreAuthenticationSpec;
 import org.finos.legend.engine.plan.execution.authentication.provider.AuthenticationMethodProvider;
 import org.finos.legend.engine.plan.execution.authentication.provider.IntermediationRuleProvider;
@@ -91,7 +91,7 @@ public class ServiceExecutor
             FastList<AuthenticationMethod> allMethods = FastList.newList(ServiceLoader.load(AuthenticationMethod.class));
             FastList<IntermediationRule> allRules = FastList.newList(ServiceLoader.load(IntermediationRule.class));
             AuthenticationMethodProvider authenticationMethodProvider = new AuthenticationMethodProvider(allMethods,new IntermediationRuleProvider(allRules));
-            HttpURLConnection connection = new HttpConnectionProvider(authenticationMethodProvider).makeConnection(new HttpConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType),new ServiceStoreAuthenticationSpec(securitySchemes,authSpecs), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
+            HttpURLConnection connection = new ServiceStoreConnectionProvider(authenticationMethodProvider).makeConnection(new ServiceStoreConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType),new ServiceStoreAuthenticationSpec(securitySchemes,authSpecs), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
 
             InputStream responseStream = connection.getInputStream();
 

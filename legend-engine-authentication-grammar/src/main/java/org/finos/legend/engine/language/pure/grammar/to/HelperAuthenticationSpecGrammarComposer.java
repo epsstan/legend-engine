@@ -62,7 +62,10 @@ public class HelperAuthenticationSpecGrammarComposer
                     getTabString(baseIndentation) + "{\n" +
                     getTabString(baseIndentation + 1) + "location : " + convertString(spec.value.toString(), true) + ";\n" +
                     getTabString(baseIndentation + 1) + "keyName : " + convertString(spec.value.toString(), true) + ";\n" +
-                    getTabString(baseIndentation + 1) + "value : " + convertString(spec.value.toString(), true) + ";\n" +
+                    getTabString(baseIndentation + 1) + "value : VaultCredential" +
+                    getTabString(baseIndentation + 1) + "(\n" +
+                    getTabString(baseIndentation + 2) + "vaultReference : " + convertString(spec.value.toString(), true) + ";\n" +
+                    getTabString(baseIndentation + 1) + ");\n" +
                     getTabString(baseIndentation) + "}";
         }
         return null;

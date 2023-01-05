@@ -28,7 +28,8 @@ import java.util.ListIterator;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = SimpleHttpSecurityScheme.class, name = "http"),
         @JsonSubTypes.Type(value = ApiKeySecurityScheme.class, name = "apiKey"),
-        @JsonSubTypes.Type(value = OauthSecurityScheme.class, name = "oauth")
+        @JsonSubTypes.Type(value = OauthSecurityScheme.class, name = "oauth"),
+        @JsonSubTypes.Type(value = CompositeSecurityScheme.class, name = "composite")
 
 })
 public abstract class SecurityScheme {

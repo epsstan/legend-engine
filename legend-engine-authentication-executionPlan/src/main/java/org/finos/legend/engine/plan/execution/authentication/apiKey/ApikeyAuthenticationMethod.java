@@ -29,7 +29,7 @@ public class ApikeyAuthenticationMethod extends AuthenticationMethod<ApiKeyAuthe
         {
             for (Credential credential : identity.getCredentials())
             {
-                FastList<IntermediationRule> matchingRules = FastList.newList(intermediationRules).select(rule -> rule.matchesInputAndOutput(spec.getClass(), credential.getClass(), PlaintextCredential.class));
+                FastList<IntermediationRule> matchingRules = FastList.newList(intermediationRules).select(rule -> rule.matchesOutput(spec.getClass(), PlaintextCredential.class));
                 if (!matchingRules.isEmpty())
                 {
                     IntermediationRule intermediationRule = matchingRules.get(0);

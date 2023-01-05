@@ -32,6 +32,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.s
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.*;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -226,11 +227,18 @@ public class HelperServiceStoreGrammarComposer
     {
         if (securityScheme instanceof IdentifiedSecurityScheme)
         {
-            return ((IdentifiedSecurityScheme) securityScheme).id;
+            String id = ((IdentifiedSecurityScheme) securityScheme).id;
+            if (id.contains("::"))
+            {
+               return "(" + ListAdapter.adapt(Arrays.asList(id.split("::"))).makeString(" && ") + ")";
+            }
+
+            return id;
         }
+
         return unsupported(securityScheme.getClass(), "Security Scheme type");
 
-         }
+    }
 
     // -------------------------------------- CLASS MAPPING --------------------------------------
 

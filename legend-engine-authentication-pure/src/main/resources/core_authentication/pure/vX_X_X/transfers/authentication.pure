@@ -44,7 +44,10 @@ function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::authentic
                       _type = 'apiKey',
                       location = $a.location->toString(),
                       keyName = $a.keyName,
-                      value = $a.value
+                      value = ^meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::CredentialVault(
+                                             _type = 'vault',
+                                             vaultReference = $a.value.vaultReference
+                                             )
                 ),
       other: meta::pure::runtime::connection::authentication::AuthenticationSpec[1] |
                fail('Unsupported AuthenticationSpec');

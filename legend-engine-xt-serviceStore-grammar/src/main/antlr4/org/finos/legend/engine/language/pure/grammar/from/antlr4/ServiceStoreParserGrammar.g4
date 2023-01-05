@@ -120,8 +120,12 @@ enumDefinition:                             ENUM EQUAL qualifiedName
 ;
 responseDefinition:                         RESPONSE COLON typeReferenceDefinition SEMI_COLON
 ;
-securitySchemeDefinition:                   SECURITY_SCHEME COLON BRACKET_OPEN (identifier (COMMA identifier)*)? BRACKET_CLOSE SEMI_COLON
+securitySchemeDefinition:                   SECURITY_SCHEME COLON BRACKET_OPEN (securitySchemeListDefinition (COMMA securitySchemeListDefinition)*)? BRACKET_CLOSE SEMI_COLON
 ;
+
+securitySchemeListDefinition:               identifier | PAREN_OPEN identifier AND identifier (AND identifier)* PAREN_CLOSE
+;
+
 typeReferenceDefinition:                    type | listType
 ;
 type:                                       ( primitiveType | complexType)

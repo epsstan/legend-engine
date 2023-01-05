@@ -41,8 +41,6 @@ PARAM_MAPPING:                                   '~paramMapping';
 INVERTED_ARROW:                                  '<-';
 QUOTED_STRING:                                   ('"' ( EscSeq | ~["\r\n] )*  '"');
 
-
-
 // -------------------------------------- ISLAND ---------------------------------------
 BRACE_OPEN:                    '{' -> pushMode (SECURITY_SCHEME_ISLAND_MODE);
 

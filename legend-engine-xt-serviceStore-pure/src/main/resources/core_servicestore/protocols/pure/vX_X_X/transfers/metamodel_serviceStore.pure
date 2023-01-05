@@ -97,6 +97,12 @@ function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::store::se
             _type = 'oauth',
             scopes = $o.scopes
         ),
+      c:meta::external::store::service::metamodel::CompositeSecurityScheme[1] |
+                ^meta::protocols::pure::vX_X_X::metamodel::store::service::CompositeSecurityScheme(
+                    _type = 'composite',
+                    operation = $c.operation->toString(),
+                    securitySchemes = $c.securitySchemes->toOne()->keyValues()->map(s | pair($s.first, $s.second->meta::protocols::pure::vX_X_X::transformation::fromPureGraph::store::service::transformSecurityScheme($extensions)))->newMap()
+                ),
       other: meta::external::store::service::metamodel::SecurityScheme[1] |
          ^meta::protocols::pure::vX_X_X::metamodel::store::service::SecurityScheme(
             _type = 'unknown'

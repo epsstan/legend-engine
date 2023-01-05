@@ -22,6 +22,6 @@ import org.finos.legend.engine.shared.core.identity.credential.PlaintextCredenti
 public class AnyToPlainTextIntermediationRule extends IntermediationRule<ApiKeyAuthenticationSpec,Credential, PlaintextCredential> {
     @Override
     public PlaintextCredential makeCredential(ApiKeyAuthenticationSpec spec, Credential credential) throws Exception {
-        return new PlaintextCredential(spec.value);// TODO: add vaultImplementations
+        return new PlaintextCredential(spec.value.vaultReference);// TODO: add vaultImplementations
     }
 }

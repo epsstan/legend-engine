@@ -11,7 +11,7 @@ import org.junit.Test;
 import static org.finos.legend.engine.plan.execution.stores.service.utils.ServiceStoreTestUtils.buildPlanForQuery;
 import static org.finos.legend.engine.plan.execution.stores.service.utils.ServiceStoreTestUtils.executePlan;
 
-public class TestBasicAuthWithServiceStore extends ServiceStoreTestSuite
+public class TestBooleanLogicWithSecuritySchemes extends ServiceStoreTestSuite
 {
     private static String pureGrammar;
 
@@ -35,11 +35,18 @@ public class TestBasicAuthWithServiceStore extends ServiceStoreTestSuite
                         "                                   vaultReference : 'password'; " +
                         "                              );\n" +
                         "             },\n" +
-                        "       api : ApiKey\n" +
+                        "       api1 : ApiKey\n" +
                         "             {\n" +
                         "                   value : CredentialVault" +
                         "                              (" +
-                        "                                   vaultReference : 'value'; " +
+                        "                                   vaultReference : 'value1'; " +
+                        "                              );\n" +
+                        "             }," +
+                        "       api2 : ApiKey\n" +
+                        "             {\n" +
+                        "                   value : CredentialVault" +
+                        "                              (" +
+                        "                                   vaultReference : 'value2'; " +
                         "                              );\n" +
                         "             }," +
                         "        oauth     : Oauth\n" +
@@ -53,7 +60,7 @@ public class TestBasicAuthWithServiceStore extends ServiceStoreTestSuite
                         "\n" +
                         "    ];\n" +
                         "}";
-        pureGrammar = ServiceStoreTestUtils.readGrammarFromPureFile("/securitySchemes/testGrammar.pure") + "\n\n" + serviceStoreConnection;
+        pureGrammar = ServiceStoreTestUtils.readGrammarFromPureFile("/securitySchemes/testGrammar3.pure") + "\n\n" + serviceStoreConnection;
     }
 
     @Test

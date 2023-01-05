@@ -20,6 +20,7 @@ import org.eclipse.collections.api.block.function.Function3;
 import org.eclipse.collections.api.block.procedure.Procedure;
 import org.eclipse.collections.api.block.procedure.Procedure2;
 import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
@@ -44,8 +45,10 @@ import org.finos.legend.pure.m3.coreinstance.meta.pure.mapping.Mapping;
 import org.finos.legend.pure.m3.coreinstance.meta.pure.mapping.SetImplementation;
 import org.finos.legend.pure.runtime.java.compiled.generation.processors.support.map.PureMap;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ServiceStoreCompilerExtension implements IServiceStoreCompilerExtension
@@ -146,8 +149,26 @@ public class ServiceStoreCompilerExtension implements IServiceStoreCompilerExten
                 (securityScheme,context,owner) ->
                 {
                     String identifier = ((IdentifiedSecurityScheme)securityScheme).id;
-                    Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes().getMap().get(identifier);
-                    return Tuples.pair(identifier,scheme);
+                    if (identifier.contains("::"))
+                    {
+                        List<String> ids = Arrays.asList(identifier.split("::")) ;
+                        Map<String,Root_meta_external_store_service_metamodel_SecurityScheme> individualSecuritySchemes = Maps.mutable.empty();
+                        ids.forEach( id ->
+                        {
+                            Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes().getMap().get(id);
+                            individualSecuritySchemes.put(id,scheme);
+                        });
+                        Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) new Root_meta_external_store_service_metamodel_CompositeSecurityScheme_Impl("",null,context.pureModel.getClass("meta::external::store::service::metamodel::CompositeSecurityScheme"))
+                                ._operation(context.pureModel.getEnumValue("meta::external::store::service::metamodel::Operation", "AND"))
+                                        ._securitySchemes(new PureMap(individualSecuritySchemes));
+                        return Tuples.pair(identifier,scheme);
+                    }
+                    else
+                    {
+                        Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes().getMap().get(identifier);
+                        return Tuples.pair(identifier,scheme);
+                    }
+
                 }
         );
     }

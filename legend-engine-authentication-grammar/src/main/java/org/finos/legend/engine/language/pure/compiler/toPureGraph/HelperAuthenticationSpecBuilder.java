@@ -41,19 +41,20 @@ public class HelperAuthenticationSpecBuilder{
             }
            else if (authSpec instanceof OAuthAuthenticationSpec)
            {
-               OAuthAuthenticationSpec oAuthAuthentication = (OAuthAuthenticationSpec) authSpec;
+               OAuthAuthenticationSpec oAuthAuthenticationSpec = (OAuthAuthenticationSpec) authSpec;
                return (A) new Root_meta_pure_runtime_connection_authentication_OauthAuthenticationSpec_Impl("")
-                          ._grantType(context.pureModel.getEnumValue("meta::pure::runtime::connection::authentication::OauthGrantType", oAuthAuthentication.grantType.toString()))
-                          ._clientId(oAuthAuthentication.clientId)
-                          ._clientSecretVaultReference(oAuthAuthentication.clientSecretVaultReference)
-                          ._authServerUrl(oAuthAuthentication.authServerUrl)
-                          ._scopes(Lists.mutable.withAll(oAuthAuthentication.scopes));
+                          ._grantType(context.pureModel.getEnumValue("meta::pure::runtime::connection::authentication::OauthGrantType", oAuthAuthenticationSpec.grantType.toString()))
+                          ._clientId(oAuthAuthenticationSpec.clientId)
+                          ._clientSecretVaultReference(oAuthAuthenticationSpec.clientSecretVaultReference)
+                          ._authServerUrl(oAuthAuthenticationSpec.authServerUrl)
+                          ._scopes(Lists.mutable.withAll(oAuthAuthenticationSpec.scopes));
            }
            else if (authSpec instanceof ApiKeyAuthenticationSpec)
             {
-                ApiKeyAuthenticationSpec apiKeyAuthentication = (ApiKeyAuthenticationSpec) authSpec;
+                ApiKeyAuthenticationSpec apiKeyAuthenticationSpec = (ApiKeyAuthenticationSpec) authSpec;
                 return (A) new Root_meta_pure_runtime_connection_authentication_ApiKeyAuthenticationSpec_Impl("")
-                                ._value(apiKeyAuthentication.value);
+                                ._value(new Root_meta_pure_runtime_connection_authentication_CredentialVault_Impl("")
+                                        ._vaultReference(((CredentialVault)apiKeyAuthenticationSpec.value).vaultReference));
                                
             }
            else

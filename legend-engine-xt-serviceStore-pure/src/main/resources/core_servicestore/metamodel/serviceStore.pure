@@ -147,6 +147,16 @@ Class meta::external::store::service::metamodel::OauthSecurityScheme extends met
    scopes : String[*];
 }
 
+Class meta::external::store::service::metamodel::CompositeSecurityScheme extends meta::external::store::service::metamodel::SecurityScheme
+{
+   operation : Operation[1];
+   securitySchemes : Map<String,SecurityScheme>[1];
+}
+
+Enum meta::external::store::service::metamodel::Operation
+{
+   AND
+}
 
 Class meta::external::store::service::metamodel::SerializationFormat
 {

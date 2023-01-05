@@ -19,6 +19,7 @@ import org.eclipse.collections.api.RichIterable;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.list.mutable.ListAdapter;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.ServiceStoreParserGrammar;
@@ -40,10 +41,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.valueSpecification.raw.cla
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.pure.runtime.java.compiled.generation.processors.support.map.PureMap;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -231,7 +229,7 @@ public class ServiceStoreParseTreeWalker
 
         // security
         ServiceStoreParserGrammar.SecuritySchemeDefinitionContext supportedAuthCtx = PureGrammarParserUtility.validateAndExtractRequiredField(ctx.securitySchemeDefinition(), "security", this.walkerSourceInformation.getSourceInformation(ctx));
-        service.security = ListIterate.collect(supportedAuthCtx.identifier(), this::visitSecurityScheme);
+        service.security = ListIterate.collect(supportedAuthCtx.securitySchemeListDefinition(), this::visitSecurityScheme);
         validateSecurity(service.security, this.walkerSourceInformation.getSourceInformation(supportedAuthCtx),securitySchemes);
 
         validateService(service);
@@ -240,10 +238,22 @@ public class ServiceStoreParseTreeWalker
 
     private void validateSecurity(List<IdentifiedSecurityScheme> serviceSecurity, SourceInformation sourceInformation, Map<String,SecurityScheme> availableSecuritySchemes)
     {
-        MutableList<String> serviceSecurityIDs = ListIterate.collect(serviceSecurity, scheme -> scheme.id);
+        MutableList<String> serviceSecurityIds = Lists.mutable.empty();
+        serviceSecurity.forEach( scheme -> {
+            if (scheme.id.contains("::"))
+            {
+                List<String> individualIds = Arrays.asList(scheme.id.split("::"));
+                serviceSecurityIds.addAll(individualIds);
+            }
+            else
+            {
+                serviceSecurityIds.add(scheme.id);
+            }
+        });
+
         MutableList<String> availableSecuritySchemesIDs = ListIterate.collect(availableSecuritySchemes.keySet().stream().collect(Collectors.toList()), key -> key);
 
-        MutableList<String> nonSupportedSecurityID = serviceSecurityIDs.select( id -> !availableSecuritySchemesIDs.contains(id)).toList();
+        MutableList<String> nonSupportedSecurityID = serviceSecurityIds.select( id -> !availableSecuritySchemesIDs.contains(id)).toList();
         if (!nonSupportedSecurityID.isEmpty())
         {
             throw new EngineException("These security schemes are not defined in service store - " + nonSupportedSecurityID.stream().collect(Collectors.joining(",")),sourceInformation,EngineErrorType.PARSER);
@@ -410,12 +420,11 @@ public class ServiceStoreParseTreeWalker
         return typeReference;
     }
 
-    private IdentifiedSecurityScheme visitSecurityScheme(ServiceStoreParserGrammar.IdentifierContext securitySchemeCtx)
+    private IdentifiedSecurityScheme visitSecurityScheme(ServiceStoreParserGrammar.SecuritySchemeListDefinitionContext securitySchemeCtx)
     {
-        IdentifiedSecurityScheme identifiedSecurityScheme = new IdentifiedSecurityScheme();
-        identifiedSecurityScheme.id = securitySchemeCtx.getText();
-        identifiedSecurityScheme.sourceInformation = this.walkerSourceInformation.getSourceInformation(securitySchemeCtx);
-        return identifiedSecurityScheme;
+        List<String> ids = ListIterate.collect(securitySchemeCtx.identifier(), ctx -> ctx.getText());
+        String compositeId = ListAdapter.adapt(ids).makeString("::");
+        return new IdentifiedSecurityScheme(compositeId,this.walkerSourceInformation.getSourceInformation(securitySchemeCtx));
     }
 
 

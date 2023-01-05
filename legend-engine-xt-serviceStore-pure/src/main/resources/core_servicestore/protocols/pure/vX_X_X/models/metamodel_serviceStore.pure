@@ -110,6 +110,12 @@ Class meta::protocols::pure::vX_X_X::metamodel::store::service::OauthSecuritySch
    scopes : String[*];
 }
 
+Class meta::protocols::pure::vX_X_X::metamodel::store::service::CompositeSecurityScheme extends meta::protocols::pure::vX_X_X::metamodel::store::service::SecurityScheme
+{
+   operation : String[1];
+   securitySchemes : Map<String,SecurityScheme>[1];
+}
+
 Class meta::protocols::pure::vX_X_X::metamodel::store::service::ServiceGroupPtr
 {
    serviceStore : String[1];

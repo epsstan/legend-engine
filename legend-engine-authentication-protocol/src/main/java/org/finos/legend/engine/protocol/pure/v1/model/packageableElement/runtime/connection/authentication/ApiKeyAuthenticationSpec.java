@@ -15,6 +15,7 @@ package org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtim
 
 public class ApiKeyAuthenticationSpec extends AuthenticationSpec {
 
-    //TODO: Refactor value to be a vault credential
-    public String value;
+    public String location;
+    public String keyName;
+    public CredentialVault value;
 }
