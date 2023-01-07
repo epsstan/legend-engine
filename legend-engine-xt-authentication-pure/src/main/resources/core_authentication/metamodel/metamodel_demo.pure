@@ -1,0 +1,8 @@
+
+import meta::relational::metamodel::*;
+import meta::pure::runtime::connection::authentication::*;
+
+Class meta::pure::runtime::connection::authentication::demo::AuthenticationDemo extends PackageableElement
+{
+    authentication: AuthenticationSpecification[1];
+}
