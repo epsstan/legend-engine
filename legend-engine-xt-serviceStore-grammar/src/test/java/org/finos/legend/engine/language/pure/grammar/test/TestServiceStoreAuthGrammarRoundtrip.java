@@ -24,7 +24,7 @@ public class TestServiceStoreAuthGrammarRoundtrip extends TestGrammarRoundtrip.T
         test("###ServiceStore\n" +
                 "ServiceStore meta::external::store::service::showcase::store::TradeProductServiceStore\n" +
                 "(\n" +
-                "    SecuritySchemes : [\n" +
+                "    securitySchemes : {\n" +
                 "      http : Http\n" +
                 "      {\n" +
                 "        scheme : 'basic';\n" +
@@ -42,7 +42,7 @@ public class TestServiceStoreAuthGrammarRoundtrip extends TestGrammarRoundtrip.T
                 "      {\n" +
                 "        scopes : ['read'];\n" +
                 "      }\n" +
-                "  ];\n" +
+                "  };\n" +
                 "  ServiceGroup TradeServices\n" +
                 "  (\n" +
                 "    path : '/trades';\n" +
@@ -75,7 +75,7 @@ public class TestServiceStoreAuthGrammarRoundtrip extends TestGrammarRoundtrip.T
                 "{\n" +
                 "  store: meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "  baseUrl: 'http://127.0.0.1:53008';\n" +
-                "  auth: [\n" +
+                "  auth: {\n" +
                 "    oauth1 : Oauth\n" +
                 "              {\n" +
                 "                                    grantType                   : 'client_credentials';\n" +
@@ -107,7 +107,7 @@ public class TestServiceStoreAuthGrammarRoundtrip extends TestGrammarRoundtrip.T
                 "                                   vaultReference : 'ref2'; " +
                 "                              );\n" +
                 "             }" +
-                "  ];\n" +
+                "  };\n" +
                 "}\n");
     }
 
@@ -118,7 +118,7 @@ public class TestServiceStoreAuthGrammarRoundtrip extends TestGrammarRoundtrip.T
                 "ServiceStore meta::external::store::service::showcase::store::TradeProductServiceStore\n" +
                 "(\n" +
                 "   description : 'Showcase Service Store';\n" +
-                "   SecuritySchemes : [\n" +
+                "   securitySchemes : {\n" +
                 "       http : Http\n" +
                 "       {\n" +
                 "          scheme : 'basic';\n" +
@@ -136,7 +136,7 @@ public class TestServiceStoreAuthGrammarRoundtrip extends TestGrammarRoundtrip.T
                 "        {\n" +
                 "           scopes : ['read'];\n" +
                 "        }\n" +
-                "   ];\n" +
+                "   };\n" +
                 "   ServiceGroup TradeServices\n" +
                 "   (\n" +
                 "      path : '/trades';\n" +
@@ -170,7 +170,7 @@ public class TestServiceStoreAuthGrammarRoundtrip extends TestGrammarRoundtrip.T
                 "{\n" +
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
-                "    auth: [\n" +
+                "    auth: {\n" +
                 "        oauth1     : Oauth\n" +
                 "              {\n" +
                 "                                    grantType                   : 'client_credentials';\n" +
@@ -194,7 +194,7 @@ public class TestServiceStoreAuthGrammarRoundtrip extends TestGrammarRoundtrip.T
                 "                                   vaultReference : 'ref2'; " +
                 "                              );\n" +
                 "             }" +
-                "    ];\n" +
+                "    };\n" +
                 "}\n" +
                 "###ExternalFormat\n" +
                 "SchemaSet meta::external::store::service::showcase::store::tradeSchemaSet\n" +

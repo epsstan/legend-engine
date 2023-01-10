@@ -23,25 +23,25 @@ connectionStore:                        STORE COLON qualifiedName SEMI_COLON
 ;
 
 authenticationSpec:                         AUTH_SPECS COLON
-                                        BRACKET_OPEN
+                                        BRACE_OPEN
                                                 ( authSpecificationObject ( COMMA authSpecificationObject )* )?
-                                        BRACKET_CLOSE
+                                        BRACE_CLOSE
                                         SEMI_COLON
 ;
 
-authSpecificationObject:     qualifiedName COLON singleAuthSpecification
+authSpecificationObject:                qualifiedName COLON singleAuthSpecification
 ;
 
-singleAuthSpecification:     authSpecificationType (authSpecification)?
+singleAuthSpecification:                authSpecificationType (authSpecification)?
 ;
 
-authSpecificationType:       VALID_STRING
+authSpecificationType:                  VALID_STRING
 ;
 
-authSpecification:           BRACE_OPEN (authSpecificationValue)*
+authSpecification:                      BRACE_OPEN (authSpecificationValue)*
 ;
 
-authSpecificationValue:      AUTH_SPECIFICATION_ISLAND_OPEN | AUTH_SPECIFICATION_CONTENT | AUTH_SPECIFICATION_ISLAND_CLOSE
+authSpecificationValue:                 AUTH_SPECIFICATION_ISLAND_OPEN | AUTH_SPECIFICATION_CONTENT | AUTH_SPECIFICATION_ISLAND_CLOSE
 ;
 
 baseUrl:                                BASE_URL COLON identifier SEMI_COLON

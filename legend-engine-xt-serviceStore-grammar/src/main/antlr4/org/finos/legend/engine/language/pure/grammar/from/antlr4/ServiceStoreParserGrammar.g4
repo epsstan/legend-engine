@@ -39,9 +39,9 @@ serviceStore:                               SERVICE_STORE qualifiedName
 description:                                DESCRIPTION COLON identifier SEMI_COLON
 ;
 securitySchemes:                            SECURITY_SCHEMES COLON
-                                                 BRACKET_OPEN
+                                                 BRACE_OPEN
                                                        ( securitySchemeObject ( COMMA securitySchemeObject )* )?
-                                                 BRACKET_CLOSE
+                                                 BRACE_CLOSE
                                             SEMI_COLON
 ;
 

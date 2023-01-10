@@ -20,7 +20,7 @@
         "url": "/trades/allTradesService2",
         "cookies": {
           "apiKey1": {
-            "equalTo": "value"
+            "equalTo": "value1"
           }
         }
       },

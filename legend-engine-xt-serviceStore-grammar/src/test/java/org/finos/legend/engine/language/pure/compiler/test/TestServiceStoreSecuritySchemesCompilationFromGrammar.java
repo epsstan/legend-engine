@@ -46,16 +46,16 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "{\n" +
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
-                "    auth: [\n" +
+                "    auth: {\n" +
                 "        oauth1     : Oauth\n" +
-                "              {\n" +
-                "                                    grantType                   : 'client_credentials';\n" +
-                "                                    clientId                    : 'testClientID';\n" +
-                "                                    clientSecretVaultReference  : 'ref';\n" +
-                "                                    authorizationServerUrl      : 'dummy.com';\n" +
-                "                                    scopes                      : ['read','write'];" +
-                "              }\n" +
-                "    ];\n" +
+                "                     {\n" +
+                "                           grantType                   : 'client_credentials';\n" +
+                "                           clientId                    : 'testClientID';\n" +
+                "                           clientSecretVaultReference  : 'ref';\n" +
+                "                           authorizationServerUrl      : 'dummy.com';\n" +
+                "                           scopes                      : ['read','write'];" +
+                "                     }\n" +
+                "    };\n" +
                 "}\n" +
                 "###ServiceStore\n" +
                 "ServiceStore meta::external::store::service::showcase::store::TradeProductServiceStore\n" +
@@ -72,29 +72,28 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "{\n" +
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
-                "    auth: [\n" +
+                "    auth: {\n" +
                 "        http     : Oauth\n" +
-                "              {\n" +
-                "                                    grantType                   : 'client_credentials';\n" +
-                "                                    clientId                    : 'testClientID';\n" +
-                "                                    clientSecretVaultReference  : 'ref';\n" +
-                "                                    authorizationServerUrl      : 'dummy.com';\n" +
-                "                                    scopes                      : ['read','write'];" +
-                "              }\n" +
-                "    ];\n" +
+                "                   {\n" +
+                "                         grantType                   : 'client_credentials';\n" +
+                "                         clientId                    : 'testClientID';\n" +
+                "                         clientSecretVaultReference  : 'ref';\n" +
+                "                         authorizationServerUrl      : 'dummy.com';\n" +
+                "                         scopes                      : ['read','write'];" +
+                "                   }\n" +
+                "    };\n" +
                 "}\n" +
                 "###ServiceStore\n" +
                 "ServiceStore meta::external::store::service::showcase::store::TradeProductServiceStore\n" +
                 "(\n" +
                 "   description : 'Showcase Service Store';\n" +
-                "   SecuritySchemes : [\n" +
+                "   securitySchemes : {\n" +
                 "       http : Http\n" +
                 "       {\n" +
                 "          scheme : 'basic';\n" +
                 "       }\n" +
-                "    ];\n" +
-                ")\n", "COMPILATION error at [2:1-15:1]: securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are \n" +
-                " [Http, UsernamePasswordAuthenticationSpec], [ApiKey, ApiKeySpecificationSpec], [Oauth, OauthAuthenticationSpec]");
+                "    };\n" +
+                ")\n", "COMPILATION error at [2:1-15:1]: securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are [Http, UsernamePassword], [ApiKey, ApiKey], [Oauth, Oauth]");
     }
 
     @Test
@@ -104,7 +103,7 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "ServiceStore meta::external::store::service::showcase::store::TradeProductServiceStore\n" +
                 "(\n" +
                 "   description : 'Showcase Service Store';\n" +
-                "   SecuritySchemes : [\n" +
+                "   securitySchemes : {\n" +
                 "       http : Http\n" +
                 "       {\n" +
                 "          scheme : 'basic';\n" +
@@ -122,7 +121,7 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "        {\n" +
                 "           scopes : ['read'];\n" +
                 "        }\n" +
-                "   ];\n" +
+                "   };\n" +
                 "   ServiceGroup TradeServices\n" +
                 "   (\n" +
                 "      path : '/trades';\n" +
@@ -156,31 +155,31 @@ public class TestServiceStoreSecuritySchemesCompilationFromGrammar  extends Test
                 "{\n" +
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
-                "    auth: [\n" +
-                "        oauth1     : Oauth\n" +
-                "              {\n" +
-                "                                    grantType                   : 'client_credentials';\n" +
-                "                                    clientId                    : 'testClientID';\n" +
-                "                                    clientSecretVaultReference  : 'ref';\n" +
-                "                                    authorizationServerUrl      : 'dummy.com';\n" +
-                "                                    scopes                      : ['read','write'];" +
-                "              },\n" +
+                "    auth: {\n" +
+                "        oauth1    : Oauth\n" +
+                "                     {\n" +
+                "                           grantType                   : 'client_credentials';\n" +
+                "                           clientId                    : 'testClientID';\n" +
+                "                           clientSecretVaultReference  : 'ref';\n" +
+                "                           authorizationServerUrl      : 'dummy.com';\n" +
+                "                           scopes                      : ['read','write'];" +
+                "                     },\n" +
                 "        http     : UsernamePassword\n" +
-                "              {\n" +
-                "                   username : 'username';\n" +
-                "                   password : CredentialVault\n" +
-                "                             (\n" +
-                "                                   vaultReference      : 'ref1';\n" +
-                "                             );\n" +
-                "              },\n" +
-                "       api : ApiKey\n" +
-                "             {\n" +
-                "                   value : CredentialVault" +
-                "                              (" +
-                "                                   vaultReference : 'ref2'; " +
-                "                              );\n" +
-                "             }" +
-                "    ];\n" +
+                "                   {\n" +
+                "                          username : 'username';\n" +
+                "                          password : CredentialVault\n" +
+                "                                       (\n" +
+                "                                           vaultReference      : 'ref1';\n" +
+                "                                       );\n" +
+                "                   },\n" +
+                "       api      : ApiKey\n" +
+                "                   {\n" +
+                "                          value : CredentialVault" +
+                "                                   (" +
+                "                                       vaultReference : 'ref2'; " +
+                "                                   );\n" +
+                "                   }" +
+                "    };\n" +
                 "}\n" +
                 "###ExternalFormat\n" +
                 "SchemaSet meta::external::store::service::showcase::store::tradeSchemaSet\n" +

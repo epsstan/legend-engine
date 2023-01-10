@@ -16,6 +16,7 @@ package org.finos.legend.engine.language.pure.compiler.toPureGraph;
 
 import org.eclipse.collections.api.RichIterable;
 import org.eclipse.collections.api.block.function.Function3;
+import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -34,10 +35,7 @@ import org.finos.legend.pure.generated.*;
 import org.finos.legend.pure.m3.coreinstance.meta.pure.store.Store;
 import org.finos.legend.pure.runtime.java.compiled.generation.processors.support.map.PureMap;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class HelperServiceStoreBuilder
@@ -232,21 +230,21 @@ public class HelperServiceStoreBuilder
         {
             if (!(authSpec instanceof UsernamePasswordAuthenticationSpec))
             {
-                throw new EngineException("securityScheme-Authentication combination is not supported. Only supported combinations are \n [Http, UsernamePasswordAuthentication], [ApiKey, ApiKeySpecification], [Oauth, OauthAuthentication]",sourceInformation,EngineErrorType.COMPILATION);
+                throw new EngineException("securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are [Http, UsernamePassword], [ApiKey, ApiKey], [Oauth, Oauth]",sourceInformation,EngineErrorType.COMPILATION);
             }
         }
         else if (securityScheme instanceof Root_meta_external_store_service_metamodel_ApiKeySecurityScheme_Impl)
         {
             if (!(authSpec instanceof ApiKeyAuthenticationSpec))
             {
-                throw new EngineException("securityScheme-Authentication combination is not supported. Only supported combinations are \n [Http, UsernamePasswordAuthentication], [ApiKey, ApiKeySpecification], [Oauth, OauthAuthentication]",sourceInformation,EngineErrorType.COMPILATION);
+                throw new EngineException("securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are [Http, UsernamePassword], [ApiKey, ApiKey], [Oauth, Oauth]",sourceInformation,EngineErrorType.COMPILATION);
             }
         }
         else if (securityScheme instanceof Root_meta_external_store_service_metamodel_OauthSecurityScheme_Impl)
         {
             if (!(authSpec instanceof OAuthAuthenticationSpec))
             {
-                throw new EngineException("securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are \n [Http, UsernamePasswordAuthenticationSpec], [ApiKey, ApiKeySpecificationSpec], [Oauth, OauthAuthenticationSpec]",sourceInformation,EngineErrorType.COMPILATION);
+                throw new EngineException("securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are [Http, UsernamePassword], [ApiKey, ApiKey], [Oauth, Oauth]",sourceInformation,EngineErrorType.COMPILATION);
             }
         }
         else
@@ -417,5 +415,29 @@ public class HelperServiceStoreBuilder
                .select(Objects::nonNull)
                .getFirstOptional()
                .orElseThrow(() -> new EngineException("Can't find security scheme : " + ((IdentifiedSecurityScheme)securityScheme).id,info,EngineErrorType.COMPILATION));
+    }
+
+    public static Pair<String, Root_meta_external_store_service_metamodel_SecurityScheme> compileSecurityScheme(SecurityScheme securityScheme, Root_meta_external_store_service_metamodel_ServiceStore owner, CompileContext context)
+    {
+        String identifier = ((IdentifiedSecurityScheme)securityScheme).id;
+        if (identifier.contains("::"))
+        {
+            List<String> ids = Arrays.asList(identifier.split("::")) ;
+            Map<String,Root_meta_external_store_service_metamodel_SecurityScheme> individualSecuritySchemes = Maps.mutable.empty();
+            ids.forEach( id ->
+            {
+                Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes().getMap().get(id);
+                individualSecuritySchemes.put(id,scheme);
+            });
+            Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) new Root_meta_external_store_service_metamodel_CompositeSecurityScheme_Impl("",null,context.pureModel.getClass("meta::external::store::service::metamodel::CompositeSecurityScheme"))
+                    ._operation(context.pureModel.getEnumValue("meta::external::store::service::metamodel::Operation", "AND"))
+                    ._securitySchemes(new PureMap(individualSecuritySchemes));
+            return Tuples.pair(identifier,scheme);
+        }
+        else
+        {
+            Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes().getMap().get(identifier);
+            return Tuples.pair(identifier,scheme);
+        }
     }
 }

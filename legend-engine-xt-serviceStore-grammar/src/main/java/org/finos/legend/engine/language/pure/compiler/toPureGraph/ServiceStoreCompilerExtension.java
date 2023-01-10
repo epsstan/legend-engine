@@ -26,6 +26,7 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.data.ServiceStoreEmbeddedDataCompiler;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.extension.Processor;
+import org.finos.legend.engine.language.pure.grammar.to.HelperServiceStoreGrammarComposer;
 import org.finos.legend.engine.protocol.pure.PureClientVersions;
 import org.finos.legend.engine.protocol.pure.v1.model.data.EmbeddedData;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.connection.Connection;
@@ -145,32 +146,7 @@ public class ServiceStoreCompilerExtension implements IServiceStoreCompilerExten
     @Override
     public List<Function3<SecurityScheme, CompileContext, Root_meta_external_store_service_metamodel_ServiceStore, Pair<String, Root_meta_external_store_service_metamodel_SecurityScheme>>> getExtraSecuritySchemeProcessors()
     {
-        return Lists.mutable.with(
-                (securityScheme,context,owner) ->
-                {
-                    String identifier = ((IdentifiedSecurityScheme)securityScheme).id;
-                    if (identifier.contains("::"))
-                    {
-                        List<String> ids = Arrays.asList(identifier.split("::")) ;
-                        Map<String,Root_meta_external_store_service_metamodel_SecurityScheme> individualSecuritySchemes = Maps.mutable.empty();
-                        ids.forEach( id ->
-                        {
-                            Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes().getMap().get(id);
-                            individualSecuritySchemes.put(id,scheme);
-                        });
-                        Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) new Root_meta_external_store_service_metamodel_CompositeSecurityScheme_Impl("",null,context.pureModel.getClass("meta::external::store::service::metamodel::CompositeSecurityScheme"))
-                                ._operation(context.pureModel.getEnumValue("meta::external::store::service::metamodel::Operation", "AND"))
-                                        ._securitySchemes(new PureMap(individualSecuritySchemes));
-                        return Tuples.pair(identifier,scheme);
-                    }
-                    else
-                    {
-                        Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes().getMap().get(identifier);
-                        return Tuples.pair(identifier,scheme);
-                    }
-
-                }
-        );
+        return Lists.mutable.with((securityScheme, context,owner) -> HelperServiceStoreBuilder.compileSecurityScheme(securityScheme, owner, context));
     }
 
 }

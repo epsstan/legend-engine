@@ -14,10 +14,15 @@
 
 package org.finos.legend.engine.language.pure.grammar.to;
 
+import org.eclipse.collections.api.block.function.Function2;
 import org.eclipse.collections.api.block.function.Function3;
+import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.list.mutable.ListAdapter;
+import org.eclipse.collections.impl.tuple.Tuples;
+import org.eclipse.collections.impl.utility.LazyIterate;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.eclipse.collections.impl.utility.MapIterate;
+import org.finos.legend.engine.language.pure.compiler.toPureGraph.CompileContext;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
@@ -31,6 +36,8 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.s
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.mapping.ServiceRequestParametersBuildInfo;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.*;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
+import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_SecurityScheme;
+import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_ServiceStore;
 
 import java.util.Arrays;
 import java.util.List;
@@ -57,30 +64,64 @@ public class HelperServiceStoreGrammarComposer
             builder.append("description : ").append("'").append(serviceStore.description).append("'").append(";\n\n");
         }
 
-        renderSecuritySchemes(serviceStore.securitySchemes, builder, baseIndentation);
+        renderSecuritySchemes(serviceStore.securitySchemes, builder, PureGrammarComposerContext.Builder.newInstance().withIndentation(baseIndentation).build());
         renderServiceStoreElements(serviceStore.elements, builder, baseIndentation);
 
         builder.append(")");
         return builder.toString();
     }
 
-    public static void renderSecuritySchemes(Map<String,SecurityScheme> securitySchemes, StringBuilder builder, int baseIndentation)
+    public static void renderSecuritySchemes(Map<String,SecurityScheme> securitySchemes, StringBuilder builder, PureGrammarComposerContext context)
     {
         if (securitySchemes!=null  && !securitySchemes.isEmpty())
         {
-            builder.append(getTabString(baseIndentation + 1)).append("SecuritySchemes ").append(": ").append("[\n").append(MapIterate.toListOfPairs(securitySchemes).collect(pair -> renderSecurityScheme(pair.getOne(),pair.getTwo(), baseIndentation + 2)).makeString(",\n")).append("\n").append(getTabString()).append("];\n");
+            builder.append(context.getIndentationString()).append(PureGrammarComposerUtility.getTabString(1)).append("securitySchemes ").append(": ").append("{\n").append(MapIterate.toListOfPairs(securitySchemes).collect(pair -> renderSecurityScheme(pair.getOne(),pair.getTwo(), context)).makeString(",\n")).append("\n").append(getTabString()).append("};\n");
         }
+    }
+
+    public static String renderSecurityScheme(Pair<String,SecurityScheme> securitySchemePair, PureGrammarComposerContext context)
+    {
+        String id = securitySchemePair.getOne();
+        SecurityScheme _scheme = securitySchemePair.getTwo();
+        if (_scheme instanceof SimpleHttpSecurityScheme)
+        {
+            SimpleHttpSecurityScheme scheme = (SimpleHttpSecurityScheme) _scheme;
+            return context.getIndentationString()  + id + " : Http\n" +
+                    context.getIndentationString() + "{\n" +
+                    context.getIndentationString() + PureGrammarComposerUtility.getTabString(1) + "scheme : " + convertString(scheme.scheme, true) + ";\n" +
+                    context.getIndentationString() + "}";
+        }
+        else if (_scheme instanceof ApiKeySecurityScheme)
+        {
+            ApiKeySecurityScheme scheme = (ApiKeySecurityScheme) _scheme;
+            return context.getIndentationString() + id + " : ApiKey\n" +
+                    context.getIndentationString() + "{\n" +
+                    context.getIndentationString() + PureGrammarComposerUtility.getTabString(1) + "location : " + convertString(scheme.location, true) + ";\n" +
+                    context.getIndentationString() + PureGrammarComposerUtility.getTabString(1) + "keyName : " + convertString(scheme.keyName, true) + ";\n" +
+                    context.getIndentationString() + "}";
+        }
+        else if (_scheme instanceof OauthSecurityScheme)
+        {
+            OauthSecurityScheme scheme = (OauthSecurityScheme) _scheme;
+            return context.getIndentationString() + id + " : Oauth\n" +
+                    context.getIndentationString() + "{\n" +
+                    context.getIndentationString() + PureGrammarComposerUtility.getTabString(1) + "scopes : [" + LazyIterate.collect(scheme.scopes, s -> convertString(s, true)).makeString(",") + "];\n" +
+                    context.getIndentationString() + "}";
+        }
+
+        return null;
+
     }
 
     public static String renderAuthSpecs (ServiceStoreConnection serviceStoreConnection, PureGrammarComposerContext context)
     {
         if (serviceStoreConnection.authSpecs!=null)
         {
-            return "\n" + context.getIndentationString() + getTabString() + "auth: [\n" +
+            return "\n" + context.getIndentationString() + getTabString() + "auth: {\n" +
                     serviceStoreConnection. authSpecs.entrySet().stream().map(entry
                             -> HelperAuthenticationSpecGrammarComposer.renderAuthenticationSpec(entry.getKey(), entry.getValue(), 2))
                             .collect (Collectors. joining(",\n")) +
-                          "\n" + context.getIndentationString() + getTabString() + "];";
+                          "\n" + context.getIndentationString() + getTabString() + "};";
         }
         return "";
     }
@@ -213,11 +254,11 @@ public class HelperServiceStoreGrammarComposer
         return builder.toString();
     }
 
-    private static String renderSecurityScheme(String id, SecurityScheme securityScheme, int baseIndentation)
+    private static String renderSecurityScheme(String id, SecurityScheme securityScheme, PureGrammarComposerContext context)
     {
-        List<Function3<String,SecurityScheme, Integer, String>> processors = ListIterate.flatCollect(IServiceStoreGrammarComposerExtension.getExtensions(), ext -> ext.getExtraSecuritySchemesComposers());
+        List<Function2<Pair<String,SecurityScheme>, PureGrammarComposerContext,String>> processors = ListIterate.flatCollect(IServiceStoreGrammarComposerExtension.getExtensions(), ext -> ext.getExtraSecuritySchemesComposers());
 
-        return ListIterate.collect(processors, processor -> processor.value(id, securityScheme,baseIndentation))
+        return ListIterate.collect(processors, processor -> processor.value(Tuples.pair(id, securityScheme),context))
                 .select(Objects::nonNull)
                 .getFirstOptional()
                 .orElseThrow(() -> new EngineException("Unsupported securityScheme - " + securityScheme.getClass().getSimpleName(), securityScheme.sourceInformation,EngineErrorType.PARSER));

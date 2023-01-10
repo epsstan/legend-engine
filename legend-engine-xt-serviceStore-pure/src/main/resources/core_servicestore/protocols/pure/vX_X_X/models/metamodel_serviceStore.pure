@@ -102,7 +102,7 @@ Class meta::protocols::pure::vX_X_X::metamodel::store::service::SimpleHttpSecuri
 Class meta::protocols::pure::vX_X_X::metamodel::store::service::ApiKeySecurityScheme extends meta::protocols::pure::vX_X_X::metamodel::store::service::SecurityScheme
 {
    location : String[1];
-   keyName : String [1];
+   keyName  : String[1];
 }
 
 Class meta::protocols::pure::vX_X_X::metamodel::store::service::OauthSecurityScheme extends meta::protocols::pure::vX_X_X::metamodel::store::service::SecurityScheme

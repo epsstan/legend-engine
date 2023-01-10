@@ -47,7 +47,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "ServiceStore meta::external::store::service::showcase::store::TradeProductServiceStore\n" +
                 "(\n" +
                 "   description : 'Showcase Service Store';\n" +
-                "   SecuritySchemes : [\n" +
+                "   securitySchemes : {\n" +
                 "       http : Http\n" +
                 "       {\n" +
                 "          scheme : 'basic';\n" +
@@ -61,7 +61,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "        {\n" +
                 "           scopes : ['read','openid'];\n" +
                 "        }\n" +
-                "   ];\n" +
+                "   };\n" +
                 "   ServiceGroup TradeServices\n" +
                 "   (\n" +
                 "      path : '/trades';\n" +
@@ -95,24 +95,24 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "{\n" +
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
-                "    auth: [\n" +
+                "    auth: {\n" +
                 "        http     : UsernamePassword\n" +
-                "              {\n" +
-                "                   username : 'username';\n" +
-                "                   password : CredentialVault\n" +
-                "                             (\n" +
-                "                                   vaultReference      : 'ref1';\n" +
-                "                             );\n" +
-                "              },\n" +
+                "                   {\n" +
+                "                       username : 'username';\n" +
+                "                       password : CredentialVault\n" +
+                "                                   (\n" +
+                "                                       vaultReference      : 'ref1';\n" +
+                "                                   );\n" +
+                "                   },\n" +
                 "        oauth     : Oauth\n" +
-                "              {\n" +
-                "                                   grantType                   : 'client_credentials';\n" +
-                "                                   clientId                    : 'testClientID';\n" +
-                "                                   clientSecretVaultReference  : 'ref';\n" +
-                "                                   authorizationServerUrl      : 'dummy.com';\n" +
-                "                                   scopes                      : ['read','write'];" +
-                "              }\n" +
-                "    ];\n" +
+                "                    {\n" +
+                "                        grantType                   : 'client_credentials';\n" +
+                "                        clientId                    : 'testClientID';\n" +
+                "                        clientSecretVaultReference  : 'ref';\n" +
+                "                        authorizationServerUrl      : 'dummy.com';\n" +
+                "                        scopes                      : ['read','write'];" +
+                "                    }\n" +
+                "    };\n" +
                 "}");
     }
     @Test
@@ -122,7 +122,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "ServiceStore meta::external::store::service::showcase::store::TradeProductServiceStore\n" +
                 "(\n" +
                 "   description : 'Showcase Service Store';\n" +
-                "   SecuritySchemes : [\n" +
+                "   securitySchemes : {\n" +
                 "       http : Http\n" +
                 "       {\n" +
                 "          scheme : 'basic';\n" +
@@ -140,7 +140,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "        {\n" +
                 "           scopes : ['read'];\n" +
                 "        }\n" +
-                "   ];\n" +
+                "   };\n" +
                 "   ServiceGroup TradeServices\n" +
                 "   (\n" +
                 "      path : '/trades';\n" +
@@ -174,23 +174,23 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "{\n" +
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
-                "    auth: [\n" +
+                "    auth: {\n" +
                 "        oauth1     : Oauth\n" +
-                "              {\n" +
-                "                                    grantType                   : 'client_credentials';\n" +
-                "                                    clientId                    : 'testClientID';\n" +
-                "                                    clientSecretVaultReference  : 'ref';\n" +
-                "                                    authorizationServerUrl      : 'dummy.com';\n" +
-                "                                    scopes                      : ['read','write'];" +
-                "              },\n" +
+                "                     {\n" +
+                "                        grantType                   : 'client_credentials';\n" +
+                "                        clientId                    : 'testClientID';\n" +
+                "                        clientSecretVaultReference  : 'ref';\n" +
+                "                        authorizationServerUrl      : 'dummy.com';\n" +
+                "                        scopes                      : ['read','write'];" +
+                "                     },\n" +
                 "        http     : UsernamePassword\n" +
-                "              {\n" +
-                "                   username : 'username';\n" +
-                "                   password : CredentialVault\n" +
+                "                   {\n" +
+                "                       username : 'username';\n" +
+                "                       password : CredentialVault\n" +
                 "                             (\n" +
                 "                                   vaultReference      : 'ref1';\n" +
                 "                             );\n" +
-                "              },\n" +
+                "                   },\n" +
                 "       api : ApiKey\n" +
                 "             {\n" +
                 "                   value : CredentialVault" +
@@ -198,7 +198,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "                                   vaultReference : 'ref2'; " +
                 "                              );\n" +
                 "             }" +
-                "    ];\n" +
+                "    };\n" +
                 "}\n" +
                 "###ExternalFormat\n" +
                 "SchemaSet meta::external::store::service::showcase::store::tradeSchemaSet\n" +
@@ -234,7 +234,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "ServiceStore meta::external::store::service::showcase::store::TradeProductServiceStore\n" +
                 "(\n" +
                 "   description : 'Showcase Service Store';\n" +
-                "   SecuritySchemes : [\n" +
+                "   securitySchemes : {\n" +
                 "       http : Http\n" +
                 "       {\n" +
                 "          scheme : 'basic';\n" +
@@ -252,7 +252,7 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "        {\n" +
                 "           scopes : ['read'];\n" +
                 "        }\n" +
-                "   ];\n" +
+                "   };\n" +
                 "   ServiceGroup TradeServices\n" +
                 "   (\n" +
                 "      path : '/trades';\n" +
@@ -286,31 +286,31 @@ public class TestServiceStoreAuthGrammarParser extends TestGrammarParser.TestGra
                 "{\n" +
                 "    store   : meta::external::store::service::showcase::store::TradeProductServiceStore;\n" +
                 "    baseUrl : 'http://127.0.0.1:53008';\n" +
-                "    auth: [\n" +
+                "    auth: {\n" +
                 "        oauth1     : Oauth\n" +
-                "              {\n" +
-                "                                    grantType                   : 'client_credentials';\n" +
-                "                                    clientId                    : 'testClientID';\n" +
-                "                                    clientSecretVaultReference  : 'ref';\n" +
-                "                                    authorizationServerUrl      : 'dummy.com';\n" +
-                "                                    scopes                      : ['read','write'];" +
+                "                     {\n" +
+                "                         grantType                   : 'client_credentials';\n" +
+                "                         clientId                    : 'testClientID';\n" +
+                "                         clientSecretVaultReference  : 'ref';\n" +
+                "                         authorizationServerUrl      : 'dummy.com';\n" +
+                "                         scopes                      : ['read','write'];" +
                 "              }\n" +
                 "        http     : UsernamePassword\n" +
-                "              {\n" +
-                "                   username : 'username';\n" +
-                "                   password : CredentialVault\n" +
-                "                             (\n" +
-                "                                   vaultReference      : 'ref1';\n" +
-                "                             );\n" +
-                "              },\n" +
-                "       api : ApiKey\n" +
-                "             {\n" +
-                "                   value : CredentialVault" +
-                "                              (" +
+                "                   {\n" +
+                "                       username : 'username';\n" +
+                "                       password : CredentialVault\n" +
+                "                                  (\n" +
+                "                                       vaultReference      : 'ref1';\n" +
+                "                                  );\n" +
+                "                   },\n" +
+                "       api     : ApiKey\n" +
+                "                 {\n" +
+                "                       value : CredentialVault" +
+                "                               (" +
                 "                                   vaultReference : 'ref2'; " +
-                "                              );\n" +
+                "                               );\n" +
                 "             }" +
-                "    ];\n" +
+                "    };\n" +
                 "}\n" +
                 "###ExternalFormat\n" +
                 "SchemaSet meta::external::store::service::showcase::store::tradeSchemaSet\n" +

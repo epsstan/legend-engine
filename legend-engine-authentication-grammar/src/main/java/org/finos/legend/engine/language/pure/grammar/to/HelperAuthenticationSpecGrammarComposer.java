@@ -50,7 +50,7 @@ public class HelperAuthenticationSpecGrammarComposer
                     getTabString(baseIndentation + 1) + "username : " + convertString(spec.username.toString(), true) + ";\n" +
                     getTabString(baseIndentation + 1) + "password : VaultCredential" +
                     getTabString(baseIndentation + 1) + "(\n" +
-                    getTabString(baseIndentation + 2) + "vaultReference : " + convertString(spec.password.toString(), true) + ";\n" +
+                    getTabString(baseIndentation + 2) + "vaultReference : " + convertString(spec.password.vaultReference.toString(), true) + ";\n" +
                     getTabString(baseIndentation + 1) + ");\n" +
                     getTabString(baseIndentation) + "}";
         }
@@ -60,11 +60,11 @@ public class HelperAuthenticationSpecGrammarComposer
             return  getTabString(baseIndentation) + securityScheme +
                     " : ApiKey\n" +
                     getTabString(baseIndentation) + "{\n" +
-                    getTabString(baseIndentation + 1) + "location : " + convertString(spec.value.toString(), true) + ";\n" +
-                    getTabString(baseIndentation + 1) + "keyName : " + convertString(spec.value.toString(), true) + ";\n" +
+                    getTabString(baseIndentation + 1) + "location : " + convertString(spec.location, true) + ";\n" +
+                    getTabString(baseIndentation + 1) + "keyName : " + convertString(spec.keyName, true) + ";\n" +
                     getTabString(baseIndentation + 1) + "value : VaultCredential" +
                     getTabString(baseIndentation + 1) + "(\n" +
-                    getTabString(baseIndentation + 2) + "vaultReference : " + convertString(spec.value.toString(), true) + ";\n" +
+                    getTabString(baseIndentation + 2) + "vaultReference : " + convertString(spec.value.vaultReference.toString(), true) + ";\n" +
                     getTabString(baseIndentation + 1) + ");\n" +
                     getTabString(baseIndentation) + "}";
         }
