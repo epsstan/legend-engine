@@ -26,4 +26,9 @@ import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 public class AuthenticationSpec {
 
     public SourceInformation sourceInformation;
+
+    public <T> T accept(AuthenticationSpecVisitor<T> authenticationSpecVisitor)
+    {
+        return authenticationSpecVisitor.visit(this);
+    }
 }

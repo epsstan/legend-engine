@@ -25,5 +25,10 @@ public class OAuthAuthenticationSpec extends AuthenticationSpec
     public String authServerUrl;
     public List<String> scopes;
 
-    public SourceInformation sourceInformation;
+    @Override
+    public <T> T accept(AuthenticationSpecVisitor<T> authenticationSpecVisitor)
+    {
+        return authenticationSpecVisitor.visit(this);
+    }
+
 }

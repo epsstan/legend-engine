@@ -14,7 +14,17 @@
 
 package org.finos.legend.engine.plan.execution.stores.service;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.Header;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.eclipse.collections.api.block.function.Function2;
 import org.eclipse.collections.api.block.function.Function3;
+import org.finos.legend.engine.shared.core.function.Function5;
 import org.eclipse.collections.api.list.MutableList;
 import org.finos.legend.engine.plan.execution.nodes.state.ExecutionState;
 import org.finos.legend.engine.plan.execution.result.Result;
@@ -23,6 +33,13 @@ import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.Execut
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.LimitExecutionNode;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.RestServiceExecutionNode;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.ServiceParametersResolutionExecutionNode;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ApiKeySecurityScheme;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SimpleHttpSecurityScheme;
+import org.finos.legend.engine.shared.core.identity.Credential;
+import org.finos.legend.engine.shared.core.identity.credential.PlaintextCredential;
+import org.finos.legend.engine.shared.core.identity.credential.PlaintextUserPasswordCredential;
 import org.pac4j.core.profile.CommonProfile;
 
 import java.util.Collections;
@@ -41,5 +58,40 @@ public class ServiceStoreExecutionExtension implements IServiceStoreExecutionExt
             }
             return null;
         }));
+    }
+
+    public List<Function5<SecurityScheme, AuthenticationSpec, Credential, RequestBuilder, HttpClientBuilder, Boolean>> getExtraSecuritySchemeProcessors()
+    {
+        return Collections.singletonList((securityScheme,authenticationSpec,credential,requestBuilder,httpClientBuilder) ->
+        {
+            if (securityScheme instanceof SimpleHttpSecurityScheme && credential instanceof PlaintextUserPasswordCredential)
+            {
+                PlaintextUserPasswordCredential cred = (PlaintextUserPasswordCredential)credential;
+                String encoding = Base64.encodeBase64String((cred.getUser()+ ":" + cred.getPassword()).getBytes());
+                requestBuilder.addHeader("Authorization", "Basic " + encoding);
+                return true;
+            }
+
+            else if (securityScheme instanceof ApiKeySecurityScheme && credential instanceof PlaintextCredential)
+            {
+                PlaintextCredential cred = (PlaintextCredential) credential;
+                ApiKeySecurityScheme apiKeySecurityScheme = (ApiKeySecurityScheme) securityScheme;
+                if (apiKeySecurityScheme.location.equals("cookie"))
+                {
+                    requestBuilder.addHeader("Cookie", String.format("%s=%s",apiKeySecurityScheme.keyName,cred.getValue()));
+//                    if (cookie!=null)
+//                    {
+//                        String newCookieString = cookie + ";" + String.format("%s=%s",apiKeySecurityScheme.keyName,cred.getValue());
+//                        connection.setRequestProperty("Cookie",newCookieString);
+//                    }
+//                    else
+//                    {
+//                        connection.setRequestProperty("Cookie", String.format("%s=%s", apiKeySecurityScheme.keyName, cred.getValue()));
+//                    }
+                }
+                return true;
+            }
+            return null;
+        });
     }
 }

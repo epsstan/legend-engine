@@ -17,4 +17,10 @@ public class UsernamePasswordAuthenticationSpec extends AuthenticationSpec {
 
     public String username;
     public CredentialVault password;
+
+    @Override
+    public <T> T accept(AuthenticationSpecVisitor<T> authenticationSpecVisitor)
+    {
+        return authenticationSpecVisitor.visit(this);
+    }
 }

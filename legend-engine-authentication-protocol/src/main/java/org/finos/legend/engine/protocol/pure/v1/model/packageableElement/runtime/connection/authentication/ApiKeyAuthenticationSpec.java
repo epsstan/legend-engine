@@ -18,4 +18,10 @@ public class ApiKeyAuthenticationSpec extends AuthenticationSpec {
     public String location;
     public String keyName;
     public CredentialVault value;
+
+    @Override
+    public <T> T accept(AuthenticationSpecVisitor<T> authenticationSpecVisitor)
+    {
+        return authenticationSpecVisitor.visit(this);
+    }
 }

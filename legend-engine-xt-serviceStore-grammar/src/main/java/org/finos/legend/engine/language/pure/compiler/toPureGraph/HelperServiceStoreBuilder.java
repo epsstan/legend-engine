@@ -16,7 +16,7 @@ package org.finos.legend.engine.language.pure.compiler.toPureGraph;
 
 import org.eclipse.collections.api.RichIterable;
 import org.eclipse.collections.api.block.function.Function3;
-import org.eclipse.collections.api.factory.Maps;
+import org.eclipse.collections.api.block.function.Function2;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -189,7 +189,7 @@ public class HelperServiceStoreBuilder
         });
     }
 
-    public static List<Pair<String, ? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpec>> compileAuthentication(ServiceStoreConnection serviceStoreConnection, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, CompileContext context)
+    public static List<Pair<String, ? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpec>> compileAuthenticationSpec(ServiceStoreConnection serviceStoreConnection, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, CompileContext context)
     {
         return serviceStoreConnection.authSpecs.entrySet().stream().map(
                 entry ->
@@ -197,24 +197,10 @@ public class HelperServiceStoreBuilder
                     String securitySchemeId = entry.getKey();
                     AuthenticationSpec authSpec = entry.getValue();
 
-                    validateSecurityScheme(securitySchemeId,authSpec,pureServiceStore,serviceStoreConnection.sourceInformation);
+                    //validateSecurityScheme(securitySchemeId,authSpec,pureServiceStore,serviceStoreConnection.sourceInformation);
 
-                    if (authSpec instanceof UsernamePasswordAuthenticationSpec)
-                    {
-                        return Tuples.pair(securitySchemeId, (Root_meta_pure_runtime_connection_authentication_UsernamePasswordAuthenticationSpec_Impl) HelperAuthenticationSpecBuilder.compileAuthentication(authSpec,context));
-                    }
-                    else if (authSpec instanceof OAuthAuthenticationSpec)
-                    {
-                        return Tuples.pair(securitySchemeId,(Root_meta_pure_runtime_connection_authentication_OauthAuthenticationSpec_Impl) HelperAuthenticationSpecBuilder.compileAuthentication(authSpec,context));
-                    }
-                    else if (authSpec instanceof ApiKeyAuthenticationSpec)
-                    {
-                        return Tuples.pair(securitySchemeId, (Root_meta_pure_runtime_connection_authentication_ApiKeyAuthenticationSpec_Impl) HelperAuthenticationSpecBuilder.compileAuthentication(authSpec,context));
-                    }
-                    else
-                    {
-                        throw new EngineException("Unsupported Authentication Type : " + authSpec.getClass().getSimpleName(), null, EngineErrorType.COMPILATION);
-                    }
+                    return compileAuthenticationSpec(securitySchemeId,authSpec,context);
+
                 }).collect(Collectors.toList());
     }
 
@@ -417,27 +403,14 @@ public class HelperServiceStoreBuilder
                .orElseThrow(() -> new EngineException("Can't find security scheme : " + ((IdentifiedSecurityScheme)securityScheme).id,info,EngineErrorType.COMPILATION));
     }
 
-    public static Pair<String, Root_meta_external_store_service_metamodel_SecurityScheme> compileSecurityScheme(SecurityScheme securityScheme, Root_meta_external_store_service_metamodel_ServiceStore owner, CompileContext context)
+    private static Pair<String,? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpec_Impl> compileAuthenticationSpec(String securitySchemeId, AuthenticationSpec authenticationSpec, CompileContext context)
     {
-        String identifier = ((IdentifiedSecurityScheme)securityScheme).id;
-        if (identifier.contains("::"))
-        {
-            List<String> ids = Arrays.asList(identifier.split("::")) ;
-            Map<String,Root_meta_external_store_service_metamodel_SecurityScheme> individualSecuritySchemes = Maps.mutable.empty();
-            ids.forEach( id ->
-            {
-                Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes().getMap().get(id);
-                individualSecuritySchemes.put(id,scheme);
-            });
-            Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) new Root_meta_external_store_service_metamodel_CompositeSecurityScheme_Impl("",null,context.pureModel.getClass("meta::external::store::service::metamodel::CompositeSecurityScheme"))
-                    ._operation(context.pureModel.getEnumValue("meta::external::store::service::metamodel::Operation", "AND"))
-                    ._securitySchemes(new PureMap(individualSecuritySchemes));
-            return Tuples.pair(identifier,scheme);
-        }
-        else
-        {
-            Root_meta_external_store_service_metamodel_SecurityScheme scheme = (Root_meta_external_store_service_metamodel_SecurityScheme) owner._securitySchemes().getMap().get(identifier);
-            return Tuples.pair(identifier,scheme);
-        }
+        List<Function2<AuthenticationSpec, CompileContext, ? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpec_Impl>> processors = ListIterate.flatCollect(IAuthenticationCompilerExtension.getExtensions(), ext -> ext.getExtraAuthenticationProcessors());
+
+        return Tuples.pair(securitySchemeId, ListIterate
+                .collect(processors,processor -> processor.value(authenticationSpec,context))
+                .select(Objects::nonNull)
+                .getFirstOptional()
+                .orElseThrow(() -> new EngineException("Can't find AuthenticationSpec corresponding to security Scheme : " + securitySchemeId,authenticationSpec.sourceInformation,EngineErrorType.COMPILATION)));
     }
 }

@@ -14,15 +14,23 @@
 
 package org.finos.legend.engine.plan.execution.stores.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.opentracing.Span;
 import io.opentracing.util.GlobalTracer;
 import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.engine.plan.execution.nodes.helpers.freemarker.FreeMarkerExecutor;
@@ -48,6 +56,8 @@ import org.finos.legend.engine.plan.execution.authentication.provider.Authentica
 import org.finos.legend.engine.plan.execution.authentication.provider.IntermediationRuleProvider;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.factory.IdentityFactoryProvider;
+
+import java.io.Closeable;
 import java.net.HttpURLConnection;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import java.util.ServiceLoader;
@@ -88,37 +98,39 @@ public class ServiceExecutor
 
         try
         {
+
             //TODO: Inject authenticationMethodProvider at a higher level
             FastList<AuthenticationMethod> allMethods = FastList.newList(ServiceLoader.load(AuthenticationMethod.class));
             FastList<IntermediationRule> allRules = FastList.newList(ServiceLoader.load(IntermediationRule.class));
             AuthenticationMethodProvider authenticationMethodProvider = new AuthenticationMethodProvider(allMethods,new IntermediationRuleProvider(allRules));
 
-            HttpURLConnection connection = new ServiceStoreConnectionProvider(authenticationMethodProvider).makeConnection(new ServiceStoreConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType),new ServiceStoreAuthenticationSpec(securitySchemes,authSpecs), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
+            Pair<HttpClientBuilder, RequestBuilder> builders = new ServiceStoreConnectionProvider(authenticationMethodProvider).makeConnection(new ServiceStoreConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType),new ServiceStoreAuthenticationSpec(securitySchemes,authSpecs), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
+            CloseableHttpClient httpClient = builders.getOne().build();
+            HttpUriRequest request = builders.getTwo().build();
 
-            InputStream responseStream = connection.getInputStream();
 
-            //TODO: FIX
-//            ObjectMapper mapper = new ObjectMapper();
-//            int statusCode = 200;// httpResponse.getStatusLine().getStatusCode();
-//
-//            if (span != null)
-//            {
-//                span.setTag("Status code", statusCode);
-//            }
-//
-//            if (statusCode != HttpStatus.SC_OK)
-//            {
-//                String explanation = httpResponse.getEntity() == null ? "" : EntityUtils.toString(httpResponse.getEntity());
-//
-//                if (span != null)
-//                {
-//                    span.setTag("Failure message", explanation);
-//                }
-//                throw new RuntimeException("HTTP request [" + request.toString() + "] failed with error - " + explanation);
-//            }
-//
-//            return httpResponse.getEntity().getContent();
-            return responseStream;
+            CloseableHttpResponse httpResponse = httpClient.execute(request);
+
+            ObjectMapper mapper = new ObjectMapper();
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+
+            if (span != null)
+            {
+                span.setTag("Status code", statusCode);
+            }
+
+            if (statusCode != HttpStatus.SC_OK)
+            {
+                String explanation = httpResponse.getEntity() == null ? "" : EntityUtils.toString(httpResponse.getEntity());
+
+                if (span != null)
+                {
+                    span.setTag("Failure message", explanation);
+                }
+                throw new RuntimeException("HTTP request [" + request.toString() + "] failed with error - " + explanation);
+            }
+
+            return httpResponse.getEntity().getContent();
         }
         catch (RuntimeException e)
         {

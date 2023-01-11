@@ -110,6 +110,36 @@ public class ServiceStoreGrammarComposerExtension implements IServiceStoreGramma
     @Override
     public List<Function2<Pair<String,SecurityScheme>, PureGrammarComposerContext,String>> getExtraSecuritySchemesComposers()
     {
-        return Lists.mutable.with((s,context) -> HelperServiceStoreGrammarComposer.renderSecurityScheme(s,context));
+        return Lists.mutable.with((securitySchemePair,context) -> {
+            String id = securitySchemePair.getOne();
+            SecurityScheme _scheme = securitySchemePair.getTwo();
+            if (_scheme instanceof SimpleHttpSecurityScheme)
+            {
+                SimpleHttpSecurityScheme scheme = (SimpleHttpSecurityScheme) _scheme;
+                return context.getIndentationString()  + id + " : Http\n" +
+                        context.getIndentationString() + "{\n" +
+                        context.getIndentationString() + PureGrammarComposerUtility.getTabString(1) + "scheme : " + convertString(scheme.scheme, true) + ";\n" +
+                        context.getIndentationString() + "}";
+            }
+            else if (_scheme instanceof ApiKeySecurityScheme)
+            {
+                ApiKeySecurityScheme scheme = (ApiKeySecurityScheme) _scheme;
+                return context.getIndentationString() + id + " : ApiKey\n" +
+                        context.getIndentationString() + "{\n" +
+                        context.getIndentationString() + PureGrammarComposerUtility.getTabString(1) + "location : " + convertString(scheme.location, true) + ";\n" +
+                        context.getIndentationString() + PureGrammarComposerUtility.getTabString(1) + "keyName : " + convertString(scheme.keyName, true) + ";\n" +
+                        context.getIndentationString() + "}";
+            }
+            else if (_scheme instanceof OauthSecurityScheme)
+            {
+                OauthSecurityScheme scheme = (OauthSecurityScheme) _scheme;
+                return context.getIndentationString() + id + " : Oauth\n" +
+                        context.getIndentationString() + "{\n" +
+                        context.getIndentationString() + PureGrammarComposerUtility.getTabString(1) + "scopes : [" + LazyIterate.collect(scheme.scopes, s -> convertString(s, true)).makeString(",") + "];\n" +
+                        context.getIndentationString() + "}";
+            }
+
+            return null;
+        });
     }
 }

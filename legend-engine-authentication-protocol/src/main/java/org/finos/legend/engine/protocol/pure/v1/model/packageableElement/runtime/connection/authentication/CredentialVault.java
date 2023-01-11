@@ -17,5 +17,5 @@ import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 public class CredentialVault extends CredentialProvider{
 
     public String vaultReference;
-    public SourceInformation sourceInformation;
+
 }

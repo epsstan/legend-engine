@@ -17,34 +17,47 @@ package org.finos.legend.engine.plan.execution.stores.service.auth;
 import org.apache.commons.codec.binary.Base64;
 
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.eclipse.collections.api.block.function.Function2;
 import org.eclipse.collections.api.factory.Maps;
+import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.tuple.Tuples;
+import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.engine.plan.execution.authentication.AuthenticationMethod;
 import org.finos.legend.engine.plan.execution.authentication.ConnectionProvider;
 import org.finos.legend.engine.plan.execution.authentication.ConnectionSpec;
 import org.finos.legend.engine.plan.execution.authentication.IntermediationRule;
 import org.finos.legend.engine.plan.execution.authentication.provider.AuthenticationMethodProvider;
 import org.finos.legend.engine.plan.execution.authentication.provider.IntermediationRuleProvider;
+import org.finos.legend.engine.plan.execution.stores.service.IServiceStoreExecutionExtension;
+import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ApiKeySecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.CompositeSecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SimpleHttpSecurityScheme;
+import org.finos.legend.engine.shared.core.function.Function4;
+import org.finos.legend.engine.shared.core.function.Function5;
 import org.finos.legend.engine.shared.core.identity.Credential;
 import org.finos.legend.engine.shared.core.identity.Identity;
 import org.finos.legend.engine.shared.core.identity.credential.PlaintextCredential;
 import org.finos.legend.engine.shared.core.identity.credential.PlaintextUserPasswordCredential;
+import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.ServiceLoader;
+import java.util.*;
 
 //TODO: HttpURLConnection API is not feature rich + hard to maintain, Refactor to use apache HttpClient api
-public class ServiceStoreConnectionProvider extends ConnectionProvider<HttpURLConnection>
+public class ServiceStoreConnectionProvider extends ConnectionProvider<Pair<HttpClientBuilder,RequestBuilder>>
 {
     private static AuthenticationMethodProvider authenticationMethodProvider;
 
@@ -52,7 +65,7 @@ public class ServiceStoreConnectionProvider extends ConnectionProvider<HttpURLCo
         this.authenticationMethodProvider = authenticationMethodProvider;
     }
 
-    public HttpURLConnection makeConnection(ConnectionSpec connectionSpec, AuthenticationSpec authenticationSpec, Identity identity) throws Exception
+    public Pair<HttpClientBuilder,RequestBuilder> makeConnection(ConnectionSpec connectionSpec, AuthenticationSpec authenticationSpec, Identity identity) throws Exception
     {
         assert (connectionSpec instanceof ServiceStoreConnectionSpec);
         ServiceStoreConnectionSpec serviceStoreConnectionSpec = (ServiceStoreConnectionSpec) connectionSpec;
@@ -66,33 +79,31 @@ public class ServiceStoreConnectionProvider extends ConnectionProvider<HttpURLCo
         for (Map.Entry<String, SecurityScheme> entry : securitySchemeMap.entrySet())
         {
             Credential cred = processSecurityScheme(entry.getKey(),entry.getValue(),authenticationSpecMap,identity);
-            HttpURLConnection conn = makeConnectionUtil(serviceStoreConnectionSpec,serviceStoreAuthenticationSpec,identity);
-            configureAuthentication(conn,entry.getKey(),entry.getValue(),cred);
-            if (conn.getResponseCode() == HttpStatus.SC_OK)
-            {
-                return conn;
-            }
+            HttpClientBuilder httpClientBuilder = HttpClients.custom();
+            RequestBuilder builder = makeRequestUtil(serviceStoreConnectionSpec,serviceStoreAuthenticationSpec,identity);
+            configureAuthentication(builder,httpClientBuilder,entry.getKey(),entry.getValue(), authenticationSpecMap, cred);
+            return Tuples.pair(httpClientBuilder,builder);
         }
-        return makeConnectionUtil(serviceStoreConnectionSpec,serviceStoreAuthenticationSpec,identity);
+        return Tuples.pair(HttpClients.custom(),makeRequestUtil(serviceStoreConnectionSpec,serviceStoreAuthenticationSpec,identity));
     }
 
-    public HttpURLConnection makeConnectionUtil(ServiceStoreConnectionSpec serviceStoreConnectionSpec, AuthenticationSpec authenticationSpec, Identity identity) throws Exception
+    public static RequestBuilder makeRequestUtil(ServiceStoreConnectionSpec serviceStoreConnectionSpec, AuthenticationSpec authenticationSpec, Identity identity) throws Exception
     {
-        HttpURLConnection connection = (HttpURLConnection) (new URL(serviceStoreConnectionSpec.uri.toString()).openConnection());
+        RequestBuilder builder = null;
         switch (serviceStoreConnectionSpec.httpMethod.toString())
         {
             case "GET":
-                connection.setRequestMethod("GET");
+                builder = RequestBuilder.get(serviceStoreConnectionSpec.uri);
                 break;
             case "POST":
-                connection.setRequestMethod("POST");
+                builder = RequestBuilder.post(serviceStoreConnectionSpec.uri);
                 break;
             default:
                 throw new UnsupportedOperationException("The HTTP method " + serviceStoreConnectionSpec.httpMethod + " is not supported");
         }
-        serviceStoreConnectionSpec.headers.forEach(header -> connection.setRequestProperty(header.getName(),header.getValue()));
+        serviceStoreConnectionSpec.headers.forEach(builder::addHeader);
 
-        return connection;
+        return builder;
     }
 
     private static Credential processSecurityScheme(String schemeId, SecurityScheme securityScheme, Map<String,AuthenticationSpec> authenticationSpecMap, Identity identity) throws Exception
@@ -139,7 +150,7 @@ public class ServiceStoreConnectionProvider extends ConnectionProvider<HttpURLCo
 
         }
     }
-    private static void configureAuthentication(HttpURLConnection connection, String securitySchemeId, SecurityScheme scheme, Credential credential) throws IOException
+    private static void configureAuthentication(RequestBuilder builder,HttpClientBuilder httpClientBuilder, String securitySchemeId, SecurityScheme scheme,Map<String,AuthenticationSpec> authenticationSpecMap, Credential credential) throws IOException
     {
         if (scheme instanceof CompositeSecurityScheme)
         {
@@ -149,7 +160,7 @@ public class ServiceStoreConnectionProvider extends ConnectionProvider<HttpURLCo
             Arrays.asList(securitySchemeId.split("::")).forEach( id -> {
                     try
                     {
-                        authenticateUtil(connection,id,compositeSecurityScheme.securitySchemes.get(id),compositeCredential.getCredentials().get(id));
+                        authenticateUtil(builder,httpClientBuilder,id,compositeSecurityScheme.securitySchemes.get(id),authenticationSpecMap.get(id),compositeCredential.getCredentials().get(id));
                     }
                     catch (IOException e)
                     {
@@ -158,37 +169,22 @@ public class ServiceStoreConnectionProvider extends ConnectionProvider<HttpURLCo
                 } );
 
         }
-        authenticateUtil(connection,securitySchemeId,scheme,credential);
+        else
+        {
+            authenticateUtil(builder, httpClientBuilder, securitySchemeId, scheme, authenticationSpecMap.get(securitySchemeId), credential);
+        }
     }
 
-    private static void authenticateUtil(HttpURLConnection connection,String securitySchemeId, SecurityScheme scheme,Credential credential) throws IOException
+    private static void authenticateUtil(RequestBuilder builder, HttpClientBuilder httpClientBuilder,String securitySchemeId, SecurityScheme scheme, AuthenticationSpec authenticationSpec,Credential credential) throws IOException
     {
-        if (scheme instanceof SimpleHttpSecurityScheme)
-        {
-            assert(credential instanceof PlaintextUserPasswordCredential);
-            PlaintextUserPasswordCredential cred = (PlaintextUserPasswordCredential)credential;
-            String encoding = Base64.encodeBase64String((cred.getUser()+ ":" + cred.getPassword()).getBytes());
-            connection.setRequestProperty("Authorization", "Basic " + encoding);
-        }
-        else if (scheme instanceof ApiKeySecurityScheme)
-        {
-            assert(credential instanceof PlaintextCredential);
-            PlaintextCredential cred = (PlaintextCredential) credential;
-            ApiKeySecurityScheme apiKeySecurityScheme = (ApiKeySecurityScheme) scheme;
-            if (apiKeySecurityScheme.location.equals("cookie"))
-            {
-                String cookie = connection.getRequestProperty("Cookie");
-                if (cookie!=null)
-                {
-                    String newCookieString = cookie + ";" + String.format("%s=%s",apiKeySecurityScheme.keyName,cred.getValue());
-                    connection.setRequestProperty("Cookie",newCookieString);
-                }
-                else
-                {
-                    connection.setRequestProperty("Cookie", String.format("%s=%s", apiKeySecurityScheme.keyName, cred.getValue()));
-                }
-            }
-        }
+        List<Function5<SecurityScheme, AuthenticationSpec, Credential, RequestBuilder, HttpClientBuilder, Boolean>> processors = ListIterate.flatCollect(IServiceStoreExecutionExtension.getExtensions(), ext -> ext.getExtraSecuritySchemeProcessors());
+
+            ListIterate
+                    .collect(processors,processor -> processor.value(scheme,authenticationSpec,credential,builder,httpClientBuilder))
+                    .select(Objects::nonNull)
+                    .getFirstOptional()
+                    .orElseThrow(() -> new EngineException(" Error using security scheme " + securitySchemeId,authenticationSpec.sourceInformation, EngineErrorType.COMPILATION));
+
     }
 
 }
