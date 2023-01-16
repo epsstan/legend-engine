@@ -43,6 +43,14 @@ public class AuthenticationParseTreeWalker
     private final ImportAwareCodeSection section;
     private final PureGrammarParserContext context;
 
+    public AuthenticationParseTreeWalker(ParseTreeWalkerSourceInformation walkerSourceInformation)
+    {
+        this.walkerSourceInformation = walkerSourceInformation;
+        this.elementConsumer = null;
+        this.section = null;
+        this.context = null;
+    }
+
     public AuthenticationParseTreeWalker(ParseTreeWalkerSourceInformation walkerSourceInformation, Consumer<PackageableElement> elementConsumer, ImportAwareCodeSection section, PureGrammarParserContext context)
     {
         this.walkerSourceInformation = walkerSourceInformation;
@@ -80,7 +88,7 @@ public class AuthenticationParseTreeWalker
         throw new EngineException("Unsupported authentication", sourceInformation, EngineErrorType.PARSER);
     }
 
-    private AuthenticationSpecification visitGcpWIFWithAWSIdPAuthenticationContext(AuthenticationParserGrammar.GcpWIFWithAWSIdPAuthenticationContext ctx)
+    public AuthenticationSpecification visitGcpWIFWithAWSIdPAuthenticationContext(AuthenticationParserGrammar.GcpWIFWithAWSIdPAuthenticationContext ctx)
     {
         GCPWIFWithAWSIdPAuthenticationSpecification authenticationSpecification = new GCPWIFWithAWSIdPAuthenticationSpecification();
         authenticationSpecification.sourceInformation = walkerSourceInformation.getSourceInformation(ctx);
@@ -98,7 +106,7 @@ public class AuthenticationParseTreeWalker
         return authenticationSpecification;
     }
 
-    private GCPWIFWithAWSIdPAuthenticationSpecification.IdPConfiguration visitGCPWithAWSIdPIdp(AuthenticationParserGrammar.GcpWIFWithAWSIdPAuthentication_awsIdpContext ctx)
+    public GCPWIFWithAWSIdPAuthenticationSpecification.IdPConfiguration visitGCPWithAWSIdPIdp(AuthenticationParserGrammar.GcpWIFWithAWSIdPAuthentication_awsIdpContext ctx)
     {
         GCPWIFWithAWSIdPAuthenticationSpecification.IdPConfiguration configuration = new GCPWIFWithAWSIdPAuthenticationSpecification.IdPConfiguration();
 
@@ -123,7 +131,7 @@ public class AuthenticationParseTreeWalker
         return configuration;
     }
 
-    private GCPWIFWithAWSIdPAuthenticationSpecification.WorkloadConfiguration visitGCPWithAWSIdPWorkload(AuthenticationParserGrammar.GcpWIFWithAWSIdPAuthentication_gcpWorkloadContext ctx)
+    public GCPWIFWithAWSIdPAuthenticationSpecification.WorkloadConfiguration visitGCPWithAWSIdPWorkload(AuthenticationParserGrammar.GcpWIFWithAWSIdPAuthentication_gcpWorkloadContext ctx)
     {
         GCPWIFWithAWSIdPAuthenticationSpecification.WorkloadConfiguration workloadConfiguration = new GCPWIFWithAWSIdPAuthenticationSpecification.WorkloadConfiguration();
 
@@ -142,7 +150,7 @@ public class AuthenticationParseTreeWalker
         return workloadConfiguration;
     }
 
-    private AuthenticationSpecification visitApiKeyAuthentication(AuthenticationParserGrammar.ApiKeyAuthenticationContext ctx)
+    public AuthenticationSpecification visitApiKeyAuthentication(AuthenticationParserGrammar.ApiKeyAuthenticationContext ctx)
     {
         ApiKeyAuthenticationSpecification authenticationSpecification = new ApiKeyAuthenticationSpecification();
         authenticationSpecification.sourceInformation = walkerSourceInformation.getSourceInformation(ctx);
@@ -161,7 +169,7 @@ public class AuthenticationParseTreeWalker
         return authenticationSpecification;
     }
 
-    private AuthenticationSpecification visitUserPasswordAuthentication(AuthenticationParserGrammar.UserPasswordAuthenticationContext ctx)
+    public AuthenticationSpecification visitUserPasswordAuthentication(AuthenticationParserGrammar.UserPasswordAuthenticationContext ctx)
     {
         UserPasswordAuthenticationSpecification authenticationSpecification = new UserPasswordAuthenticationSpecification();
         authenticationSpecification.sourceInformation = walkerSourceInformation.getSourceInformation(ctx);
@@ -176,7 +184,7 @@ public class AuthenticationParseTreeWalker
         return authenticationSpecification;
     }
 
-    private EncryptedPrivateKeyPairAuthenticationSpecification visitEncryptedKeyPairAuthentication(AuthenticationParserGrammar.EncryptedPrivateKeyAuthenticationContext ctx)
+    public EncryptedPrivateKeyPairAuthenticationSpecification visitEncryptedKeyPairAuthentication(AuthenticationParserGrammar.EncryptedPrivateKeyAuthenticationContext ctx)
     {
         EncryptedPrivateKeyPairAuthenticationSpecification authenticationSpecification = new EncryptedPrivateKeyPairAuthenticationSpecification();
         authenticationSpecification.sourceInformation = walkerSourceInformation.getSourceInformation(ctx);
@@ -190,69 +198,69 @@ public class AuthenticationParseTreeWalker
         return authenticationSpecification;
     }
 
-    private CredentialVaultSecret visitCredentialVaultSecret(AuthenticationParserGrammar.Secret_valueContext secretContext)
+    public CredentialVaultSecret visitCredentialVaultSecret(AuthenticationParserGrammar.Secret_valueContext secretContext)
     {
         SourceInformation sourceInformation = walkerSourceInformation.getSourceInformation(secretContext);
         if (secretContext.propertiesVaultSecret() != null)
         {
-            return this.visitPropertiesFileCredentialVaultSecret(secretContext);
+            return this.visitPropertiesFileCredentialVaultSecret(secretContext.propertiesVaultSecret());
         }
         else if (secretContext.environmentVaultSecret() != null)
         {
-            return this.visitEnvironmentVaultCredentialVaultSecret(secretContext);
+            return this.visitEnvironmentVaultCredentialVaultSecret(secretContext.environmentVaultSecret());
         }
         else if (secretContext.systemPropertiesVaultSecret() != null)
         {
-            return this.visitSystemPropertiesCredentialVaultSecret(secretContext);
+            return this.visitSystemPropertiesCredentialVaultSecret(secretContext.systemPropertiesVaultSecret());
         }
         else if (secretContext.awsSecretsManagerVaultSecret() != null)
         {
-            return this.awsSecretsManagerCredentialVaultSecret(secretContext);
+            return this.awsSecretsManagerCredentialVaultSecret(secretContext.awsSecretsManagerVaultSecret());
         }
         throw new EngineException("Unrecognized secret", sourceInformation, EngineErrorType.PARSER);
     }
 
-    private AWSSecretsManagerCredentialVaultSecret awsSecretsManagerCredentialVaultSecret(AuthenticationParserGrammar.Secret_valueContext secretContext)
+    public AWSSecretsManagerCredentialVaultSecret awsSecretsManagerCredentialVaultSecret(AuthenticationParserGrammar.AwsSecretsManagerVaultSecretContext secretContext)
     {
         AWSSecretsManagerCredentialVaultSecret credentialVaultSecret = new AWSSecretsManagerCredentialVaultSecret();
-        AuthenticationParserGrammar.VaultReferenceContext vaultReferenceContext = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.awsSecretsManagerVaultSecret().vaultReference(), "reference", credentialVaultSecret.sourceInformation);
+        AuthenticationParserGrammar.VaultReferenceContext vaultReferenceContext = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.vaultReference(), "reference", credentialVaultSecret.sourceInformation);
         credentialVaultSecret.reference = PureGrammarParserUtility.fromGrammarString(vaultReferenceContext.STRING().getText(), true);
 
-        AuthenticationParserGrammar.VersionIdContext versionIdContext = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.awsSecretsManagerVaultSecret().versionId(), "versionId", credentialVaultSecret.sourceInformation);
+        AuthenticationParserGrammar.VersionIdContext versionIdContext = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.versionId(), "versionId", credentialVaultSecret.sourceInformation);
         credentialVaultSecret.versionId = PureGrammarParserUtility.fromGrammarString(versionIdContext.STRING().getText(), true);
 
-        AuthenticationParserGrammar.VersionStageContext versionStage = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.awsSecretsManagerVaultSecret().versionStage(), "versionStage", credentialVaultSecret.sourceInformation);
+        AuthenticationParserGrammar.VersionStageContext versionStage = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.versionStage(), "versionStage", credentialVaultSecret.sourceInformation);
         credentialVaultSecret.versionStage = PureGrammarParserUtility.fromGrammarString(versionStage.STRING().getText(), true);
 
         return credentialVaultSecret;
     }
 
-    private CredentialVaultSecret visitSystemPropertiesCredentialVaultSecret(AuthenticationParserGrammar.Secret_valueContext secretContext)
+    public CredentialVaultSecret visitSystemPropertiesCredentialVaultSecret(AuthenticationParserGrammar.SystemPropertiesVaultSecretContext secretContext)
     {
         SystemPropertiesCredentialVaultSecret credentialVaultSecret = new SystemPropertiesCredentialVaultSecret();
         credentialVaultSecret.sourceInformation = walkerSourceInformation.getSourceInformation(secretContext);
-        AuthenticationParserGrammar.VaultReferenceContext vaultReferenceContext = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.systemPropertiesVaultSecret().vaultReference(), "reference", credentialVaultSecret.sourceInformation);
+        AuthenticationParserGrammar.VaultReferenceContext vaultReferenceContext = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.vaultReference(), "reference", credentialVaultSecret.sourceInformation);
         credentialVaultSecret.reference = PureGrammarParserUtility.fromGrammarString(vaultReferenceContext.STRING().getText(), true);
 
         return credentialVaultSecret;
     }
 
 
-    private EnvironmentCredentialVaultSecret visitEnvironmentVaultCredentialVaultSecret(AuthenticationParserGrammar.Secret_valueContext secretContext)
+    public EnvironmentCredentialVaultSecret visitEnvironmentVaultCredentialVaultSecret(AuthenticationParserGrammar.EnvironmentVaultSecretContext secretContext)
     {
         EnvironmentCredentialVaultSecret credentialVaultSecret = new EnvironmentCredentialVaultSecret();
         credentialVaultSecret.sourceInformation = walkerSourceInformation.getSourceInformation(secretContext);
-        AuthenticationParserGrammar.VaultReferenceContext vaultReferenceContext = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.environmentVaultSecret().vaultReference(), "reference", credentialVaultSecret.sourceInformation);
+        AuthenticationParserGrammar.VaultReferenceContext vaultReferenceContext = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.vaultReference(), "reference", credentialVaultSecret.sourceInformation);
         credentialVaultSecret.reference = PureGrammarParserUtility.fromGrammarString(vaultReferenceContext.STRING().getText(), true);
 
         return credentialVaultSecret;
     }
 
-    private PropertiesFileCredentialVaultSecret visitPropertiesFileCredentialVaultSecret(AuthenticationParserGrammar.Secret_valueContext secretContext)
+    public PropertiesFileCredentialVaultSecret visitPropertiesFileCredentialVaultSecret(AuthenticationParserGrammar.PropertiesVaultSecretContext secretContext)
     {
         PropertiesFileCredentialVaultSecret credentialVaultSecret = new PropertiesFileCredentialVaultSecret();
         credentialVaultSecret.sourceInformation = walkerSourceInformation.getSourceInformation(secretContext);
-        AuthenticationParserGrammar.VaultReferenceContext vaultReferenceContext = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.propertiesVaultSecret().vaultReference(), "reference", credentialVaultSecret.sourceInformation);
+        AuthenticationParserGrammar.VaultReferenceContext vaultReferenceContext = PureGrammarParserUtility.validateAndExtractRequiredField(secretContext.vaultReference(), "reference", credentialVaultSecret.sourceInformation);
         credentialVaultSecret.reference = PureGrammarParserUtility.fromGrammarString(vaultReferenceContext.STRING().getText(), true);
 
         return credentialVaultSecret;
