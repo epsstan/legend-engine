@@ -19,20 +19,26 @@ import io.opentracing.Span;
 import io.opentracing.util.GlobalTracer;
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.factory.Lists;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.utility.ListIterate;
+import org.finos.legend.authentication.credentialprovider.CredentialProvider;
+import org.finos.legend.authentication.credentialprovider.CredentialProviderProvider;
+import org.finos.legend.authentication.intermediationrule.IntermediationRule;
+import org.finos.legend.authentication.intermediationrule.IntermediationRuleProvider;
 import org.finos.legend.engine.plan.execution.nodes.helpers.freemarker.FreeMarkerExecutor;
 import org.finos.legend.engine.plan.execution.nodes.state.ExecutionState;
 import org.finos.legend.engine.plan.execution.result.ConstantResult;
@@ -41,26 +47,17 @@ import org.finos.legend.engine.plan.execution.result.Result;
 import org.finos.legend.engine.plan.execution.result.StreamingResult;
 import org.finos.legend.engine.plan.execution.result.serialization.SerializationFormat;
 import org.finos.legend.engine.plan.execution.stores.service.activity.ServiceStoreExecutionActivity;
+import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreAuthenticationSpecification;
+import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreConnectionProvider;
+import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreConnectionSpec;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.RequestBodyDescription;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.specification.AuthenticationSpecification;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.HttpMethod;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.Location;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ServiceParameter;
-import org.pac4j.core.profile.CommonProfile;
-import org.finos.legend.engine.plan.execution.authentication.AuthenticationMethod;
-import org.finos.legend.engine.plan.execution.authentication.IntermediationRule;
-import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreConnectionProvider;
-import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreConnectionSpec;
-import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreAuthenticationSpec;
-import org.finos.legend.engine.plan.execution.authentication.provider.AuthenticationMethodProvider;
-import org.finos.legend.engine.plan.execution.authentication.provider.IntermediationRuleProvider;
 import org.finos.legend.engine.shared.core.identity.factory.IdentityFactoryProvider;
-
-import java.io.Closeable;
-import java.net.HttpURLConnection;
-import org.eclipse.collections.impl.list.mutable.FastList;
-import java.util.ServiceLoader;
+import org.pac4j.core.profile.CommonProfile;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -71,6 +68,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 public class ServiceExecutor
 {
@@ -92,7 +90,7 @@ public class ServiceExecutor
         return new InputStreamResult(response, org.eclipse.collections.api.factory.Lists.mutable.with(new ServiceStoreExecutionActivity(url)));
     }
 
-    public static InputStream executeRequest(HttpMethod httpMethod, URI uri, List<Header> headers, StringEntity requestBodyDescription, String mimeType, Map<String,SecurityScheme> securitySchemes, Map<String, AuthenticationSpec> authSpecs, MutableList<CommonProfile> profiles)
+    public static InputStream executeRequest(HttpMethod httpMethod, URI uri, List<Header> headers, StringEntity requestBodyDescription, String mimeType, Map<String,SecurityScheme> securitySchemes, Map<String, AuthenticationSpecification> authSpecs, MutableList<CommonProfile> profiles)
     {
         Span span = GlobalTracer.get().activeSpan();
 
@@ -100,11 +98,11 @@ public class ServiceExecutor
         {
 
             //TODO: Inject authenticationMethodProvider at a higher level
-            FastList<AuthenticationMethod> allMethods = FastList.newList(ServiceLoader.load(AuthenticationMethod.class));
+            FastList<CredentialProvider> allMethods = FastList.newList(ServiceLoader.load(CredentialProvider.class));
             FastList<IntermediationRule> allRules = FastList.newList(ServiceLoader.load(IntermediationRule.class));
-            AuthenticationMethodProvider authenticationMethodProvider = new AuthenticationMethodProvider(allMethods,new IntermediationRuleProvider(allRules));
+            CredentialProviderProvider authenticationMethodProvider = new CredentialProviderProvider(allMethods,new IntermediationRuleProvider(allRules));
 
-            Pair<HttpClientBuilder, RequestBuilder> builders = new ServiceStoreConnectionProvider(authenticationMethodProvider).makeConnection(new ServiceStoreConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType),new ServiceStoreAuthenticationSpec(securitySchemes,authSpecs), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
+            Pair<HttpClientBuilder, RequestBuilder> builders = new ServiceStoreConnectionProvider(authenticationMethodProvider).makeConnection(new ServiceStoreConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType),new ServiceStoreAuthenticationSpecification(securitySchemes,authSpecs), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
             CloseableHttpClient httpClient = builders.getOne().build();
             HttpUriRequest request = builders.getTwo().build();
 

@@ -17,6 +17,7 @@ package org.finos.legend.engine.language.pure.grammar.from.connection;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
+import org.finos.legend.engine.language.pure.dsl.authentication.grammar.from.IAuthenticationGrammarParserExtension;
 import org.finos.legend.engine.language.pure.dsl.authentication.grammar.from.SpecificationSourceCode;
 import org.finos.legend.engine.language.pure.grammar.from.ParseTreeWalkerSourceInformation;
 import org.finos.legend.engine.language.pure.grammar.from.PureGrammarParserUtility;
@@ -81,8 +82,8 @@ public class ServiceStoreConnectionParseTreeWalker
         );
 
 
-        List<IAuthenticationSpecGrammarParserExtension> extensions = IAuthenticationSpecGrammarParserExtension.getExtensions();
-        AuthenticationSpecification spec = IAuthenticationSpecGrammarParserExtension.process(code, ListIterate.flatCollect(extensions, IAuthenticationSpecGrammarParserExtension::getExtraAuthenticationParsers));
+        List<IAuthenticationGrammarParserExtension> extensions = IAuthenticationGrammarParserExtension.getExtensions();
+        AuthenticationSpecification spec = IAuthenticationGrammarParserExtension.process(code, ListIterate.flatCollect(extensions, IAuthenticationGrammarParserExtension::getExtraAuthenticationParsers));
 
         if (spec == null)
         {

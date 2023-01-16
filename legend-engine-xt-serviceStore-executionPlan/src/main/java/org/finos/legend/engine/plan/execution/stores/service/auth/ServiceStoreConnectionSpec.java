@@ -15,12 +15,12 @@ package org.finos.legend.engine.plan.execution.stores.service.auth;
 
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
-import org.finos.legend.engine.plan.execution.authentication.ConnectionSpec;
+import org.finos.legend.engine.connection.ConnectionSpecification;
 
 import java.net.URI;
 import java.util.List;
 
-public class ServiceStoreConnectionSpec extends ConnectionSpec {
+public class ServiceStoreConnectionSpec extends ConnectionSpecification {
 
     public URI uri;
     public String httpMethod;

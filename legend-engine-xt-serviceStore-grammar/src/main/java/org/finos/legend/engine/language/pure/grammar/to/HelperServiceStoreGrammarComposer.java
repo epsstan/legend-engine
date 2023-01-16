@@ -232,12 +232,13 @@ public class HelperServiceStoreGrammarComposer
 
     private static String renderAuthenticationSpecification(String id, AuthenticationSpecification authenticationSpec, int baseIndentation)
     {
-        List<Function2<Pair<String,AuthenticationSpecification>,Integer,String>> processors = ListIterate.flatCollect(IAuthenticationGrammarComposerExtension.getExtensions(), ext -> ext.getExtraAuthenticationComposers());
-
-        return ListIterate.collect(processors, processor -> processor.value(Tuples.pair(id, authenticationSpec),baseIndentation))
-                .select(Objects::nonNull)
-                .getFirstOptional()
-                .orElseThrow(() -> new EngineException("Unsupported authenticationSpec corresponding to securityScheme - " + id,authenticationSpec.sourceInformation,EngineErrorType.PARSER));
+        return "";
+//        List<Function2<Pair<String,AuthenticationSpecification>,Integer,String>> processors = ListIterate.flatCollect(IAuthenticationGrammarComposerExtension.getExtensions(), ext -> ext.getExtraAuthenticationComposers());
+//
+//        return ListIterate.collect(processors, processor -> processor.value(Tuples.pair(id, authenticationSpec),baseIndentation))
+//                .select(Objects::nonNull)
+//                .getFirstOptional()
+//                .orElseThrow(() -> new EngineException("Unsupported authenticationSpec corresponding to securityScheme - " + id,authenticationSpec.sourceInformation,EngineErrorType.PARSER));
     }
 
     private static String renderSecurity(SecurityScheme securityScheme, int baseIndentation)

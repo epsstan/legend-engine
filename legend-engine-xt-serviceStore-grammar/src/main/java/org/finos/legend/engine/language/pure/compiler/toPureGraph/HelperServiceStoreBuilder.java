@@ -23,6 +23,7 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.eclipse.collections.impl.utility.MapIterate;
+import org.finos.legend.engine.language.pure.dsl.authentication.compiler.toPureGraph.HelperAuthenticationBuilder;
 import org.finos.legend.engine.language.pure.grammar.to.HelperServiceStoreGrammarComposer;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
@@ -406,14 +407,9 @@ public class HelperServiceStoreBuilder
                .orElseThrow(() -> new EngineException("Can't find security scheme : " + ((IdentifiedSecurityScheme)securityScheme).id,info,EngineErrorType.COMPILATION));
     }
 
-    private static Pair<String,? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpecification_Impl> compileAuthenticationSpecification(String securitySchemeId, AuthenticationSpecification authenticationSpecification, CompileContext context)
+    private static Pair<String, Root_meta_pure_runtime_connection_authentication_AuthenticationSpecification> compileAuthenticationSpecification(String securitySchemeId, AuthenticationSpecification authenticationSpecification, CompileContext context)
     {
-        List<Function2<AuthenticationSpecification, CompileContext, ? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpecification_Impl>> processors = ListIterate.flatCollect(IAuthenticationCompilerExtension.getExtensions(), ext -> ext.getExtraAuthenticationProcessors());
-
-        return Tuples.pair(securitySchemeId, ListIterate
-                .collect(processors,processor -> processor.value(authenticationSpecification,context))
-                .select(Objects::nonNull)
-                .getFirstOptional()
-                .orElseThrow(() -> new EngineException("Can't find Authentication Specification corresponding to security Scheme : " + securitySchemeId,authenticationSpecification.sourceInformation,EngineErrorType.COMPILATION)));
+        //TODO: Use extensions
+        return Tuples.pair(securitySchemeId, HelperAuthenticationBuilder.buildAuthenticationSpecification(authenticationSpecification,context));
     }
 }
