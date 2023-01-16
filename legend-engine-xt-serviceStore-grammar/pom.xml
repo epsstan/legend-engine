@@ -106,7 +106,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-authentication-pure</artifactId>
+            <artifactId>legend-engine-xt-authentication-pure</artifactId>
         </dependency>
         <!-- PURE -->
 
@@ -143,11 +143,11 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-authentication-protocol</artifactId>
+            <artifactId>legend-engine-xt-authentication-protocol</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-authentication-grammar</artifactId>
+            <artifactId>legend-engine-xt-authentication-grammar</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.engine</groupId>
@@ -210,7 +210,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-authentication-protocol</artifactId>
+            <artifactId>legend-engine-xt-authentication-protocol</artifactId>
         </dependency>
 
     </dependencies>

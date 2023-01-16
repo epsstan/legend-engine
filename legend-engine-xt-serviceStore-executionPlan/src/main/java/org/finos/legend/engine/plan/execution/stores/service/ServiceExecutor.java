@@ -42,6 +42,7 @@ import org.finos.legend.engine.plan.execution.result.StreamingResult;
 import org.finos.legend.engine.plan.execution.result.serialization.SerializationFormat;
 import org.finos.legend.engine.plan.execution.stores.service.activity.ServiceStoreExecutionActivity;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.RequestBodyDescription;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.specification.AuthenticationSpecification;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.HttpMethod;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.Location;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
@@ -54,7 +55,6 @@ import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreCo
 import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreAuthenticationSpec;
 import org.finos.legend.engine.plan.execution.authentication.provider.AuthenticationMethodProvider;
 import org.finos.legend.engine.plan.execution.authentication.provider.IntermediationRuleProvider;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
 import org.finos.legend.engine.shared.core.identity.factory.IdentityFactoryProvider;
 
 import java.io.Closeable;
@@ -74,7 +74,7 @@ import java.util.Map;
 
 public class ServiceExecutor
 {
-    public static InputStreamResult executeHttpService(String url, List<Header> headers, StringEntity requestBodyEntity, HttpMethod httpMethod, String mimeType, Map<String,SecurityScheme> securitySchemes, Map<String, AuthenticationSpec> authSpecs, MutableList<CommonProfile> profiles)
+    public static InputStreamResult executeHttpService(String url, List<Header> headers, StringEntity requestBodyEntity, HttpMethod httpMethod, String mimeType, Map<String,SecurityScheme> securitySchemes, Map<String, AuthenticationSpecification> authSpecs, MutableList<CommonProfile> profiles)
     {
         URI uri;
         try

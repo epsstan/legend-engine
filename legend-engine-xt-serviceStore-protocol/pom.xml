@@ -39,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-authentication-protocol</artifactId>
+            <artifactId>legend-engine-xt-authentication-protocol</artifactId>
         </dependency>
         <!-- ENGINE -->
 

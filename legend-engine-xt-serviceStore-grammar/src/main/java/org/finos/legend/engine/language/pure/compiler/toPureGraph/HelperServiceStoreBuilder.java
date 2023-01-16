@@ -26,7 +26,10 @@ import org.eclipse.collections.impl.utility.MapIterate;
 import org.finos.legend.engine.language.pure.grammar.to.HelperServiceStoreGrammarComposer;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.*;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.specification.ApiKeyAuthenticationSpecification;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.specification.AuthenticationSpecification;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.specification.OAuthAuthenticationSpecification;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.specification.UserPasswordAuthenticationSpecification;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.connection.ServiceStoreConnection;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.*;
@@ -189,22 +192,22 @@ public class HelperServiceStoreBuilder
         });
     }
 
-    public static List<Pair<String, ? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpec>> compileAuthenticationSpec(ServiceStoreConnection serviceStoreConnection, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, CompileContext context)
+    public static List<Pair<String, ? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpecification>> compileAuthenticationSpecification(ServiceStoreConnection serviceStoreConnection, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, CompileContext context)
     {
         return serviceStoreConnection.authSpecs.entrySet().stream().map(
                 entry ->
                 {
                     String securitySchemeId = entry.getKey();
-                    AuthenticationSpec authSpec = entry.getValue();
+                    AuthenticationSpecification authSpec = entry.getValue();
 
                     //validateSecurityScheme(securitySchemeId,authSpec,pureServiceStore,serviceStoreConnection.sourceInformation);
 
-                    return compileAuthenticationSpec(securitySchemeId,authSpec,context);
+                    return compileAuthenticationSpecification(securitySchemeId,authSpec,context);
 
                 }).collect(Collectors.toList());
     }
 
-    private static void validateSecurityScheme(String id, AuthenticationSpec authSpec, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, SourceInformation sourceInformation)
+    private static void validateSecurityScheme(String id, AuthenticationSpecification authSpec, Root_meta_external_store_service_metamodel_ServiceStore pureServiceStore, SourceInformation sourceInformation)
     {
         Root_meta_external_store_service_metamodel_SecurityScheme_Impl securityScheme = (Root_meta_external_store_service_metamodel_SecurityScheme_Impl) pureServiceStore._securitySchemes().getMap().get(id);
         if(securityScheme == null)
@@ -214,21 +217,21 @@ public class HelperServiceStoreBuilder
 
         if (securityScheme instanceof Root_meta_external_store_service_metamodel_SimpleHttpSecurityScheme_Impl)
         {
-            if (!(authSpec instanceof UsernamePasswordAuthenticationSpec))
+            if (!(authSpec instanceof UserPasswordAuthenticationSpecification))
             {
                 throw new EngineException("securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are [Http, UsernamePassword], [ApiKey, ApiKey], [Oauth, Oauth]",sourceInformation,EngineErrorType.COMPILATION);
             }
         }
         else if (securityScheme instanceof Root_meta_external_store_service_metamodel_ApiKeySecurityScheme_Impl)
         {
-            if (!(authSpec instanceof ApiKeyAuthenticationSpec))
+            if (!(authSpec instanceof ApiKeyAuthenticationSpecification))
             {
                 throw new EngineException("securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are [Http, UsernamePassword], [ApiKey, ApiKey], [Oauth, Oauth]",sourceInformation,EngineErrorType.COMPILATION);
             }
         }
         else if (securityScheme instanceof Root_meta_external_store_service_metamodel_OauthSecurityScheme_Impl)
         {
-            if (!(authSpec instanceof OAuthAuthenticationSpec))
+            if (!(authSpec instanceof OAuthAuthenticationSpecification))
             {
                 throw new EngineException("securityScheme-AuthenticationSpec combination is not supported. Only supported combinations are [Http, UsernamePassword], [ApiKey, ApiKey], [Oauth, Oauth]",sourceInformation,EngineErrorType.COMPILATION);
             }
@@ -403,14 +406,14 @@ public class HelperServiceStoreBuilder
                .orElseThrow(() -> new EngineException("Can't find security scheme : " + ((IdentifiedSecurityScheme)securityScheme).id,info,EngineErrorType.COMPILATION));
     }
 
-    private static Pair<String,? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpec_Impl> compileAuthenticationSpec(String securitySchemeId, AuthenticationSpec authenticationSpec, CompileContext context)
+    private static Pair<String,? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpecification_Impl> compileAuthenticationSpecification(String securitySchemeId, AuthenticationSpecification authenticationSpecification, CompileContext context)
     {
-        List<Function2<AuthenticationSpec, CompileContext, ? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpec_Impl>> processors = ListIterate.flatCollect(IAuthenticationCompilerExtension.getExtensions(), ext -> ext.getExtraAuthenticationProcessors());
+        List<Function2<AuthenticationSpecification, CompileContext, ? extends Root_meta_pure_runtime_connection_authentication_AuthenticationSpecification_Impl>> processors = ListIterate.flatCollect(IAuthenticationCompilerExtension.getExtensions(), ext -> ext.getExtraAuthenticationProcessors());
 
         return Tuples.pair(securitySchemeId, ListIterate
-                .collect(processors,processor -> processor.value(authenticationSpec,context))
+                .collect(processors,processor -> processor.value(authenticationSpecification,context))
                 .select(Objects::nonNull)
                 .getFirstOptional()
-                .orElseThrow(() -> new EngineException("Can't find AuthenticationSpec corresponding to security Scheme : " + securitySchemeId,authenticationSpec.sourceInformation,EngineErrorType.COMPILATION)));
+                .orElseThrow(() -> new EngineException("Can't find Authentication Specification corresponding to security Scheme : " + securitySchemeId,authenticationSpecification.sourceInformation,EngineErrorType.COMPILATION)));
     }
 }

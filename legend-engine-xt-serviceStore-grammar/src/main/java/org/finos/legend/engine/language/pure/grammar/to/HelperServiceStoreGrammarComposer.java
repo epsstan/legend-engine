@@ -25,6 +25,7 @@ import org.eclipse.collections.impl.utility.MapIterate;
 import org.finos.legend.engine.language.pure.compiler.toPureGraph.CompileContext;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.specification.AuthenticationSpecification;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.connection.ServiceStoreConnection;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.mapping.LocalMappingProperty;
@@ -38,7 +39,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.s
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_SecurityScheme;
 import org.finos.legend.pure.generated.Root_meta_external_store_service_metamodel_ServiceStore;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -230,9 +230,9 @@ public class HelperServiceStoreGrammarComposer
                 .orElseThrow(() -> new EngineException("Unsupported securityScheme - " + securityScheme.getClass().getSimpleName(), securityScheme.sourceInformation,EngineErrorType.PARSER));
     }
 
-    private static String renderAuthenticationSpecification(String id, AuthenticationSpec authenticationSpec, int baseIndentation)
+    private static String renderAuthenticationSpecification(String id, AuthenticationSpecification authenticationSpec, int baseIndentation)
     {
-        List<Function2<Pair<String,AuthenticationSpec>,Integer,String>> processors = ListIterate.flatCollect(IAuthenticationGrammarComposerExtension.getExtensions(), ext -> ext.getExtraAuthenticationComposers());
+        List<Function2<Pair<String,AuthenticationSpecification>,Integer,String>> processors = ListIterate.flatCollect(IAuthenticationGrammarComposerExtension.getExtensions(), ext -> ext.getExtraAuthenticationComposers());
 
         return ListIterate.collect(processors, processor -> processor.value(Tuples.pair(id, authenticationSpec),baseIndentation))
                 .select(Objects::nonNull)

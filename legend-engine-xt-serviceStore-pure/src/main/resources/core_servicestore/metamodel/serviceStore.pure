@@ -26,12 +26,6 @@ Class meta::external::store::service::metamodel::ServiceStore extends meta::pure
       $this.elements->filter(e | $e.id == $id)->toOne()
    }: ServiceStoreElement[1];
 
-   getSecuritySchemeById(id:String[1]) {
-      let scheme =  $this.securitySchemes->toOne()->keyValues()->filter(s | $s.first == $id);
-      if ( $scheme->isEmpty(),
-           | [],
-           | $scheme->toOne().second);
-   }: SecurityScheme[0..1];
 }
 
 Class <<typemodifiers.abstract>> meta::external::store::service::metamodel::ServiceStoreElement

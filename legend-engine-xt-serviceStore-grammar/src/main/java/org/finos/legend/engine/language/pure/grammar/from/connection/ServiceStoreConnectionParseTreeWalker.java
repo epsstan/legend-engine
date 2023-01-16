@@ -17,16 +17,15 @@ package org.finos.legend.engine.language.pure.grammar.from.connection;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
+import org.finos.legend.engine.language.pure.dsl.authentication.grammar.from.SpecificationSourceCode;
 import org.finos.legend.engine.language.pure.grammar.from.ParseTreeWalkerSourceInformation;
 import org.finos.legend.engine.language.pure.grammar.from.PureGrammarParserUtility;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.connection.ServiceStoreConnectionParserGrammar;
 import org.finos.legend.engine.protocol.pure.v1.model.SourceInformation;
 import org.finos.legend.engine.protocol.pure.v1.model.context.EngineErrorType;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.runtime.connection.authentication.AuthenticationSpec;
+import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.specification.AuthenticationSpecification;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.connection.ServiceStoreConnection;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
-import org.finos.legend.engine.language.pure.grammar.from.authentication.AuthenticationSpecSourceCode;
-import org.finos.legend.engine.language.pure.grammar.from.extensions.IAuthenticationSpecGrammarParserExtension;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -69,12 +68,12 @@ public class ServiceStoreConnectionParseTreeWalker
         }
     }
 
-    private Pair<String, AuthenticationSpec> visitAuthentication(ServiceStoreConnectionParserGrammar.AuthSpecificationObjectContext ctx)
+    private Pair<String, AuthenticationSpecification> visitAuthentication(ServiceStoreConnectionParserGrammar.AuthSpecificationObjectContext ctx)
     {
         SourceInformation sourceInformation = walkerSourceInformation.getSourceInformation(ctx);
 
         ServiceStoreConnectionParserGrammar.SingleAuthSpecificationContext specContext = ctx.singleAuthSpecification();
-        AuthenticationSpecSourceCode code = new AuthenticationSpecSourceCode(
+        SpecificationSourceCode code = new SpecificationSourceCode(
                 specContext.getText(),
                 specContext.authSpecificationType().getText(),
                 sourceInformation,
@@ -83,7 +82,7 @@ public class ServiceStoreConnectionParseTreeWalker
 
 
         List<IAuthenticationSpecGrammarParserExtension> extensions = IAuthenticationSpecGrammarParserExtension.getExtensions();
-        AuthenticationSpec spec = IAuthenticationSpecGrammarParserExtension.process(code, ListIterate.flatCollect(extensions, IAuthenticationSpecGrammarParserExtension::getExtraAuthenticationParsers));
+        AuthenticationSpecification spec = IAuthenticationSpecGrammarParserExtension.process(code, ListIterate.flatCollect(extensions, IAuthenticationSpecGrammarParserExtension::getExtraAuthenticationParsers));
 
         if (spec == null)
         {

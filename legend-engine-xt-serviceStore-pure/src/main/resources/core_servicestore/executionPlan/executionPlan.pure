@@ -30,7 +30,7 @@ Class meta::external::store::service::executionPlan::nodes::RestServiceExecution
    params                 : ServiceParameter[*];
    requestBodyDescription : RequestBodyDescription[0..1];
    securitySchemes        : Map<String,SecurityScheme>[0..1];
-   authSpecs              : Map<String,AuthenticationSpec>[0..1];
+   authSpecs              : Map<String,AuthenticationSpecification>[0..1];
 }
 
 Class meta::external::store::service::executionPlan::nodes::RequestBodyDescription
