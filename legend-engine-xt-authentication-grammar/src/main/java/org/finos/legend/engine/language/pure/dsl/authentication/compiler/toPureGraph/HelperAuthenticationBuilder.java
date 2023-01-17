@@ -32,6 +32,7 @@ import org.finos.legend.pure.generated.Root_meta_pure_runtime_connection_authent
 import org.finos.legend.pure.generated.Root_meta_pure_runtime_connection_authentication_AuthenticationSpecification;
 import org.finos.legend.pure.generated.Root_meta_pure_runtime_connection_authentication_CredentialVaultSecret;
 import org.finos.legend.pure.generated.Root_meta_pure_runtime_connection_authentication_PropertiesFileVaultSecret_Impl;
+import org.finos.legend.pure.generated.Root_meta_pure_runtime_connection_authentication_SystemPropertiesVaultSecret_Impl;
 import org.finos.legend.pure.generated.Root_meta_pure_runtime_connection_authentication_UserPasswordAuthenticationSpecification_Impl;
 
 public class HelperAuthenticationBuilder
@@ -117,7 +118,8 @@ public class HelperAuthenticationBuilder
         @Override
         public Root_meta_pure_runtime_connection_authentication_CredentialVaultSecret visit(SystemPropertiesCredentialVaultSecret systemPropertiesCredentialVaultSecret)
         {
-            throw new UnsupportedOperationException("TODO - epsstan");
+            return new Root_meta_pure_runtime_connection_authentication_SystemPropertiesVaultSecret_Impl("", null, context.pureModel.getClass("meta::pure::runtime::connection::authentication::SystemPropertiesVaultSecret"))
+                    ._reference(systemPropertiesCredentialVaultSecret.reference);
         }
 
         @Override

@@ -15,15 +15,10 @@
 
 package org.finos.legend.engine.language.pure.grammar.from.connection.authentication;
 
-import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.engine.language.pure.grammar.from.PureGrammarParserUtility;
 import org.finos.legend.engine.language.pure.grammar.from.antlr4.connection.authentication.SecuritySchemeParserGrammar;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ApiKeySecurityScheme;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.OauthSecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SimpleHttpSecurityScheme;
-
-import java.util.ArrayList;
 
 public class SecuritySchemeParseTreeWalker
 {
@@ -47,17 +42,6 @@ public class SecuritySchemeParseTreeWalker
 
         SecuritySchemeParserGrammar.KeynameContext keynameContext = PureGrammarParserUtility.validateAndExtractRequiredField(securitySchemeCtx.keyname(), "keyNamme", securityScheme.sourceInformation);
         securityScheme.keyName = PureGrammarParserUtility.fromGrammarString(keynameContext.STRING().getText(), true);
-
-        return securityScheme;
-    }
-
-    public OauthSecurityScheme visitOauthSecurityScheme(SecuritySchemeSourceCode code, SecuritySchemeParserGrammar.OauthSecuritySchemeContext securitySchemeContext)
-    {
-        OauthSecurityScheme securityScheme = new OauthSecurityScheme();
-        securityScheme.sourceInformation = code.getSourceInformation();
-
-        SecuritySchemeParserGrammar.ScopeDefinitionContext scopeContext = PureGrammarParserUtility.validateAndExtractRequiredField(securitySchemeContext.scopeDefinition(), "scope",securityScheme.sourceInformation);
-        securityScheme.scopes = scopeContext != null  && scopeContext.STRING() != null ? ListIterate.collect(scopeContext.STRING(), ctx -> PureGrammarParserUtility.fromGrammarString(ctx.getText(),true)) : new ArrayList<>();
 
         return securityScheme;
     }

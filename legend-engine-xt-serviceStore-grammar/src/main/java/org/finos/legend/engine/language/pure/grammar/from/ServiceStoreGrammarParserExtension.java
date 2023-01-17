@@ -121,8 +121,6 @@ public class ServiceStoreGrammarParserExtension implements IServiceStoreGrammarP
                     return parseSecurityScheme(code, p -> walker.visitSimpleHttpSecurityScheme(code, p.httpSecurityScheme()));
                 case "ApiKey":
                     return parseSecurityScheme(code, p -> walker.visitApiKeySecurityScheme(code, p.apiKeySecurityScheme()));
-                case "Oauth":
-                    return parseSecurityScheme(code, p -> walker.visitOauthSecurityScheme(code, p.oauthSecurityScheme()));
                 default:
                     return null;
             }

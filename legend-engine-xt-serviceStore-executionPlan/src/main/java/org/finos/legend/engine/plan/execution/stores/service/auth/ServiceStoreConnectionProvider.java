@@ -19,18 +19,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.collections.api.set.ImmutableSet;
 import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.authentication.credentialprovider.CredentialProvider;
 import org.finos.legend.authentication.credentialprovider.CredentialProviderProvider;
-import org.finos.legend.authentication.credentialprovider.impl.ApikeyCredentialProvider;
-import org.finos.legend.authentication.credentialprovider.impl.UserPasswordCredentialProvider;
-import org.finos.legend.authentication.intermediationrule.IntermediationRuleProvider;
-import org.finos.legend.authentication.intermediationrule.impl.ApiKeyFromVaultRule;
-import org.finos.legend.authentication.intermediationrule.impl.UserPasswordFromVaultRule;
-import org.finos.legend.authentication.vault.CredentialVaultProvider;
-import org.finos.legend.authentication.vault.impl.CredentialVaultProviderForTest;
 import org.finos.legend.engine.connection.ConnectionProvider;
 import org.finos.legend.engine.connection.ConnectionSpecification;
 import org.finos.legend.engine.plan.execution.stores.service.IServiceStoreExecutionExtension;
@@ -43,19 +35,25 @@ import org.finos.legend.engine.shared.core.identity.Identity;
 import org.finos.legend.engine.shared.core.operational.errorManagement.EngineException;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class ServiceStoreConnectionProvider extends ConnectionProvider<Pair<HttpClientBuilder,RequestBuilder>>
 {
-    public ServiceStoreConnectionProvider(CredentialProviderProvider credentialProviderProvider) 
+    private final CredentialProviderProvider credentialProviderProvider;
+
+    public ServiceStoreConnectionProvider(CredentialProviderProvider credentialProviderProvider)
     {
         super(credentialProviderProvider);
+        this.credentialProviderProvider = credentialProviderProvider;
     }
 
     public Pair<HttpClientBuilder,RequestBuilder> makeConnection(ConnectionSpecification connectionSpec, AuthenticationSpecification authenticationSpec, Identity identity) throws Exception
     {
-        assert (connectionSpec instanceof ServiceStoreConnectionSpec);
-        ServiceStoreConnectionSpec serviceStoreConnectionSpec = (ServiceStoreConnectionSpec) connectionSpec;
+        assert (connectionSpec instanceof ServiceStoreConnectionSpecification);
+        ServiceStoreConnectionSpecification serviceStoreConnectionSpecification = (ServiceStoreConnectionSpecification) connectionSpec;
 
         assert(authenticationSpec instanceof ServiceStoreAuthenticationSpecification);
         ServiceStoreAuthenticationSpecification serviceStoreAuthenticationSpecification = (ServiceStoreAuthenticationSpecification) authenticationSpec;
@@ -67,51 +65,35 @@ public class ServiceStoreConnectionProvider extends ConnectionProvider<Pair<Http
         {
             Credential cred = processSecurityScheme(entry.getKey(),entry.getValue(),authenticationSpecMap,identity);
             HttpClientBuilder httpClientBuilder = HttpClients.custom();
-            RequestBuilder builder = makeRequestUtil(serviceStoreConnectionSpec, serviceStoreAuthenticationSpecification,identity);
+            RequestBuilder builder = makeRequestUtil(serviceStoreConnectionSpecification, serviceStoreAuthenticationSpecification,identity);
             configureAuthentication(builder,httpClientBuilder,entry.getKey(),entry.getValue(), authenticationSpecMap, cred);
             return Tuples.pair(httpClientBuilder,builder);
         }
-        return Tuples.pair(HttpClients.custom(),makeRequestUtil(serviceStoreConnectionSpec, serviceStoreAuthenticationSpecification,identity));
+        return Tuples.pair(HttpClients.custom(),makeRequestUtil(serviceStoreConnectionSpecification, serviceStoreAuthenticationSpecification,identity));
     }
 
-    public static RequestBuilder makeRequestUtil(ServiceStoreConnectionSpec serviceStoreConnectionSpec, AuthenticationSpecification authenticationSpec, Identity identity) throws Exception
+    public static RequestBuilder makeRequestUtil(ServiceStoreConnectionSpecification serviceStoreConnectionSpecification, AuthenticationSpecification authenticationSpec, Identity identity) throws Exception
     {
         RequestBuilder builder = null;
-        switch (serviceStoreConnectionSpec.httpMethod.toString())
+        switch (serviceStoreConnectionSpecification.httpMethod.toString())
         {
             case "GET":
-                builder = RequestBuilder.get(serviceStoreConnectionSpec.uri);
+                builder = RequestBuilder.get(serviceStoreConnectionSpecification.uri);
                 break;
             case "POST":
-                builder = RequestBuilder.post(serviceStoreConnectionSpec.uri);
+                builder = RequestBuilder.post(serviceStoreConnectionSpecification.uri);
                 break;
             default:
-                throw new UnsupportedOperationException("The HTTP method " + serviceStoreConnectionSpec.httpMethod + " is not supported");
+                throw new UnsupportedOperationException("The HTTP method " + serviceStoreConnectionSpecification.httpMethod + " is not supported");
         }
-        serviceStoreConnectionSpec.headers.forEach(builder::addHeader);
+        serviceStoreConnectionSpecification.headers.forEach(builder::addHeader);
 
         return builder;
     }
 
-    private static Credential processSecurityScheme(String schemeId, SecurityScheme securityScheme, Map<String,AuthenticationSpecification> authenticationSpecMap, Identity identity) throws Exception
+    private Credential processSecurityScheme(String schemeId, SecurityScheme securityScheme, Map<String,AuthenticationSpecification> authenticationSpecMap, Identity identity) throws Exception
     {
-        ApikeyCredentialProvider apikeyCredentialProvider = new ApikeyCredentialProvider();
-        UserPasswordCredentialProvider userPasswordCredentialProvider = new UserPasswordCredentialProvider();
-        FastList<org.finos.legend.authentication.credentialprovider.CredentialProvider> credentialProviders = FastList.newListWith(apikeyCredentialProvider, userPasswordCredentialProvider);
-
-        CredentialVaultProvider credentialVaultProvider = CredentialVaultProviderForTest.buildForTest()
-                .withProperties("reference1", "key1")
-                .build();
-        ApiKeyFromVaultRule apiKeyRule = new ApiKeyFromVaultRule(credentialVaultProvider);
-        UserPasswordFromVaultRule userPasswordFromVaultRule = new UserPasswordFromVaultRule(credentialVaultProvider);
-        IntermediationRuleProvider intermediationRuleProvider = new IntermediationRuleProvider(FastList.newListWith(apiKeyRule,userPasswordFromVaultRule));
-
-        CredentialProviderProvider credentialProviderProvider = new CredentialProviderProvider(credentialProviders, intermediationRuleProvider);
-
-
-        return makeCredential(schemeId,credentialProviderProvider,authenticationSpecMap.get(schemeId),identity);
-
-
+        return makeCredential(schemeId, this.credentialProviderProvider,authenticationSpecMap.get(schemeId),identity);
     }
 
     private static Credential makeCredential(String securitySchemeId, CredentialProviderProvider CredentialProviderProvider, AuthenticationSpecification authenticationSpecification, Identity identity)

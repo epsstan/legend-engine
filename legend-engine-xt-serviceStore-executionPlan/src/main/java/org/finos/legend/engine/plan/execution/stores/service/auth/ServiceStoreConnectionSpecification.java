@@ -20,7 +20,7 @@ import org.finos.legend.engine.connection.ConnectionSpecification;
 import java.net.URI;
 import java.util.List;
 
-public class ServiceStoreConnectionSpec extends ConnectionSpecification {
+public class ServiceStoreConnectionSpecification extends ConnectionSpecification {
 
     public URI uri;
     public String httpMethod;
@@ -28,7 +28,7 @@ public class ServiceStoreConnectionSpec extends ConnectionSpecification {
     public StringEntity requestBodyDescription;
     public String mimeType;
 
-    public ServiceStoreConnectionSpec(URI uri, String httpMethod, List<Header> headers, StringEntity requestBodyDescription, String mimeType) {
+    public ServiceStoreConnectionSpecification(URI uri, String httpMethod, List<Header> headers, StringEntity requestBodyDescription, String mimeType) {
         this.uri = uri;
         this.httpMethod = httpMethod;
         this.headers = headers;

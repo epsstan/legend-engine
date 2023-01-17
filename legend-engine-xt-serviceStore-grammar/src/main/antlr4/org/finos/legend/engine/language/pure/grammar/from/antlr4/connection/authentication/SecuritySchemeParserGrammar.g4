@@ -34,12 +34,3 @@ location:                                   LOCATION COLON STRING SEMI_COLON
 ;
 keyname:                                    KEYNAME COLON STRING SEMI_COLON
 ;
-
-oauthSecurityScheme:                        OAUTH_SECURITY_SCHEME
-                                            BRACE_OPEN
-                                                ( scopeDefinition )*
-                                            BRACE_CLOSE
-;
-
-scopeDefinition:                            TOKEN_SCOPE COLON BRACKET_OPEN (STRING (COMMA STRING)*)? BRACKET_CLOSE SEMI_COLON
-;

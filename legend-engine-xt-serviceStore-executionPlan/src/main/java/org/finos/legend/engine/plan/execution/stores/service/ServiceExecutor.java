@@ -33,12 +33,15 @@ import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.factory.Lists;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.utility.ListIterate;
-import org.finos.legend.authentication.credentialprovider.CredentialProvider;
 import org.finos.legend.authentication.credentialprovider.CredentialProviderProvider;
-import org.finos.legend.authentication.intermediationrule.IntermediationRule;
+import org.finos.legend.authentication.credentialprovider.impl.ApikeyCredentialProvider;
+import org.finos.legend.authentication.credentialprovider.impl.UserPasswordCredentialProvider;
 import org.finos.legend.authentication.intermediationrule.IntermediationRuleProvider;
+import org.finos.legend.authentication.intermediationrule.impl.ApiKeyFromVaultRule;
+import org.finos.legend.authentication.intermediationrule.impl.UserPasswordFromVaultRule;
+import org.finos.legend.authentication.vault.CredentialVaultProvider;
+import org.finos.legend.authentication.vault.impl.SystemPropertiesCredentialVault;
 import org.finos.legend.engine.plan.execution.nodes.helpers.freemarker.FreeMarkerExecutor;
 import org.finos.legend.engine.plan.execution.nodes.state.ExecutionState;
 import org.finos.legend.engine.plan.execution.result.ConstantResult;
@@ -49,13 +52,14 @@ import org.finos.legend.engine.plan.execution.result.serialization.Serialization
 import org.finos.legend.engine.plan.execution.stores.service.activity.ServiceStoreExecutionActivity;
 import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreAuthenticationSpecification;
 import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreConnectionProvider;
-import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreConnectionSpec;
+import org.finos.legend.engine.plan.execution.stores.service.auth.ServiceStoreConnectionSpecification;
 import org.finos.legend.engine.protocol.pure.v1.model.executionPlan.nodes.RequestBodyDescription;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.authentication.specification.AuthenticationSpecification;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.HttpMethod;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.Location;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.SecurityScheme;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.store.service.model.ServiceParameter;
+import org.finos.legend.engine.shared.core.identity.Identity;
 import org.finos.legend.engine.shared.core.identity.factory.IdentityFactoryProvider;
 import org.pac4j.core.profile.CommonProfile;
 
@@ -68,7 +72,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 public class ServiceExecutor
 {
@@ -90,23 +93,44 @@ public class ServiceExecutor
         return new InputStreamResult(response, org.eclipse.collections.api.factory.Lists.mutable.with(new ServiceStoreExecutionActivity(url)));
     }
 
+    // TODO - jinani - lift this into StoreExecutor
+    private static CredentialProviderProvider initializeCredentialProviderProvider()
+    {
+        CredentialVaultProvider credentialVaultProvider = CredentialVaultProvider.builder()
+                .with(new SystemPropertiesCredentialVault())
+                .build();
+
+        IntermediationRuleProvider intermediationRuleProvider = IntermediationRuleProvider.builder()
+                .with(new ApiKeyFromVaultRule(credentialVaultProvider))
+                .with(new UserPasswordFromVaultRule(credentialVaultProvider))
+                .build();
+
+        CredentialProviderProvider credentialProviderProvider = CredentialProviderProvider.builder()
+                .with(new UserPasswordCredentialProvider())
+                .with(new ApikeyCredentialProvider())
+                .with(intermediationRuleProvider)
+                .build();
+
+        return credentialProviderProvider;
+    }
+
     public static InputStream executeRequest(HttpMethod httpMethod, URI uri, List<Header> headers, StringEntity requestBodyDescription, String mimeType, Map<String,SecurityScheme> securitySchemes, Map<String, AuthenticationSpecification> authSpecs, MutableList<CommonProfile> profiles)
     {
         Span span = GlobalTracer.get().activeSpan();
 
         try
         {
+            CredentialProviderProvider credentialProviderProvider = initializeCredentialProviderProvider();
+            ServiceStoreConnectionProvider serviceStoreConnectionProvider = new ServiceStoreConnectionProvider(credentialProviderProvider);
+            ServiceStoreConnectionSpecification connectionSpecification = new ServiceStoreConnectionSpecification(uri, httpMethod.toString(), headers, requestBodyDescription, mimeType);
+            ServiceStoreAuthenticationSpecification authenticationSpecification = new ServiceStoreAuthenticationSpecification(securitySchemes, authSpecs);
+            // TODO - jinani - We should inject identity into the StoreExecutor
+            Identity identity = IdentityFactoryProvider.getInstance().makeIdentity(profiles);
 
-            //TODO: Inject authenticationMethodProvider at a higher level
-            FastList<CredentialProvider> allMethods = FastList.newList(ServiceLoader.load(CredentialProvider.class));
-            FastList<IntermediationRule> allRules = FastList.newList(ServiceLoader.load(IntermediationRule.class));
-            CredentialProviderProvider authenticationMethodProvider = new CredentialProviderProvider(allMethods,new IntermediationRuleProvider(allRules));
+            Pair<HttpClientBuilder, RequestBuilder> builders = serviceStoreConnectionProvider.makeConnection(connectionSpecification, authenticationSpecification, identity);
 
-            Pair<HttpClientBuilder, RequestBuilder> builders = new ServiceStoreConnectionProvider(authenticationMethodProvider).makeConnection(new ServiceStoreConnectionSpec(uri,httpMethod.toString(),headers,requestBodyDescription,mimeType),new ServiceStoreAuthenticationSpecification(securitySchemes,authSpecs), IdentityFactoryProvider.getInstance().makeIdentity(profiles));
             CloseableHttpClient httpClient = builders.getOne().build();
             HttpUriRequest request = builders.getTwo().build();
-
-
             CloseableHttpResponse httpResponse = httpClient.execute(request);
 
             ObjectMapper mapper = new ObjectMapper();

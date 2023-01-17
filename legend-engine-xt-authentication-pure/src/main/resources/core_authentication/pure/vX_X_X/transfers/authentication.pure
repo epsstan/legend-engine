@@ -71,8 +71,13 @@ function meta::protocols::pure::vX_X_X::transformation::fromPureGraph::authentic
                 versionId = $a.versionId,
                 versionStage = $a.versionStage
             ),
+        s:meta::pure::runtime::connection::authentication::SystemPropertiesVaultSecret[1] |
+            ^meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::SystemPropertiesSecret(
+                _type = 'systemproperties',
+                reference = $s.reference
+            ),
         other:meta::pure::runtime::connection::authentication::CredentialVaultSecret[1] |
-            fail('Unsupported AuthenticationSpecification');
+            fail('Unsupported CredentialVaultSecret');
             ^meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::PropertiesFileVaultSecret(
                 _type = 'unknown',
                 reference = 'todo'

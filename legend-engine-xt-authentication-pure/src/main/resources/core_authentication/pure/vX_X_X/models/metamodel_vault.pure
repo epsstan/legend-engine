@@ -32,8 +32,6 @@ Class meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authenticat
 
 Class meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::SystemPropertiesSecret extends meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::CredentialVaultSecret
 {
-    versionId: String[1];
-    versionStage: String[1];
 }
 
 Class meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::AWSSecretsManagerSecret extends meta::protocols::pure::vX_X_X::metamodel::runtime::connection::authentication::CredentialVaultSecret
