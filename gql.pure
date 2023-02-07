@@ -1,0 +1,467 @@
+// Copyright 2020 Goldman Sachs
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Press F9 to execute the 'go' function...
+// Press F10 to run the full test suite
+
+import demo::gql::*;
+
+function demo::gql::testRuntime():meta::pure::runtime::Runtime[1]
+{
+   ^meta::pure::runtime::Runtime(
+     connections = ^meta::relational::runtime::TestDatabaseConnection(
+                      element = demo::gql::store::TestStore,
+                      type = meta::relational::runtime::DatabaseType.H2,
+                      timeZone = 'GMT',
+                      testDataSetupSqls =
+                          'drop table if exists Firm;\n'+
+                          'create table Firm(id INT, legal_name VARCHAR(200));\n'+
+                          'insert into Firm (id, legal_name) values (1, \'FirmA\');\n'+
+                          'insert into Firm (id, legal_name) values (2, \'FirmB\');\n'+
+                          'drop table if exists Person;\n'+
+                          'create table Person(id INT, firm_id INT, first_name, last_name VARCHAR(200));\n'+
+                          'insert into Person (id, firm_id, first_name, last_name) values (1, 1, \'John\', \'Doe\');\n'+
+                          'insert into Person (id, firm_id, first_name, last_name) values (2, 1, \'Jane\', \'Smith\');\n'+
+                          'insert into Person (id, firm_id, first_name, last_name) values (3, 2, \'Mark\', \'Moe\');\n'
+                   )
+    );
+}
+
+###Relational
+Database demo::gql::store::TestStore
+(
+  Table FirmTable
+  (
+    id INT PRIMARY KEY,
+    legal_name VARCHAR(200)
+  )
+
+  Table PersonTable
+  (
+    id INT PRIMARY KEY,
+    firm_id INT,
+    first_name VARCHAR(200),
+    last_name VARCHAR(200)
+  )
+
+  Join Firm_Person
+  (
+    FirmTable.id = PersonTable.firm_id
+  )
+)
+
+###Mapping
+import meta::pure::graphFetch::domain::tests::*;
+import meta::relational::graphFetch::domain::tests::*;
+
+Mapping demo::gql::mapping::TestMapping
+(
+  demo::gql::Person : Relational
+           {
+             id : [demo::gql::store::TestStore]PersonTable.id,
+             firstName : [demo::gql::store::TestStore]PersonTable.first_name,
+             lastName : [demo::gql::store::TestStore]PersonTable.last_name
+           }
+
+  demo::gql::Firm : Relational
+           {
+             id : [demo::gql::store::TestStore]FirmTable.id,
+             legalName : [demo::gql::store::TestStore]FirmTable.legal_name,
+             employees : [demo::gql::store::TestStore]@Firm_Person
+           }
+)
+
+###Pure
+
+import meta::pure::executionPlan::toString::*;
+import meta::external::query::graphQL::transformation::queryToPure::*;
+import meta::external::query::graphQL::transformation::introspection::*;
+
+import meta::external::query::graphQL::metamodel::sdl::*;
+import meta::external::query::graphQL::metamodel::sdl::executable::*;
+import meta::external::query::graphQL::metamodel::sdl::value::*;
+import meta::external::query::graphQL::metamodel::sdl::typeSystem::*;
+import meta::external::query::graphQL::serialization::*;
+import meta::external::query::graphQL::*;
+import meta::pure::executionPlan::*;
+import meta::pure::profiles::*;
+import meta::pure::functions::tests::model::*;
+
+
+Class demo::gql::Query
+{
+  allFirms() { demo::gql::Firm.all()}: demo::gql::Firm[0..*];
+  firmByStringId(id:String[1]) {demo::gql::Firm.all()->filter(f | $f.id == $id->parseInteger())->first()}: demo::gql::Firm[0..1];
+  firmByIntegerId(id:Integer[1]) {demo::gql::Firm.all()->filter(f | $f.id == $id)->first()}: demo::gql::Firm[0..1];
+
+  allPersons() { demo::gql::Person.all()}: demo::gql::Person[0..*];
+  personsByLastName(last:String[1]) {demo::gql::Person.all()->filter(p | $p.lastName == $last)}: demo::gql::Person[0..*];
+}
+
+Class demo::gql::Firm
+{
+  id: Integer[1];
+  legalName: String[1];
+  employees: demo::gql::Person[*];
+}
+
+Class demo::gql::Person
+{
+  id: Integer[1];
+  firstName: String[1];
+  lastName: String[1];
+  employer: demo::gql::Firm[0..1];
+}
+
+function demo::gql::test::testAllFirms():Boolean[1]
+{
+    let gqlQuery = ^Document(
+    definitions =
+      [
+        ^OperationDefinition(
+          type = OperationType.query,
+          name = 'query1',
+          selectionSet = ^Field(
+            name = 'allFirms',
+            arguments = [],
+            selectionSet = ^Field(
+              name = 'legalName'
+            )
+          )
+        )
+      ]
+  );
+
+  let cls = demo::gql::Query;
+  let plans = meta::external::query::graphQL::transformation::queryToPure::getPlansFromGraphQL($cls, demo::gql::mapping::TestMapping, demo::gql::testRuntime(), $gqlQuery, meta::relational::extension::relationalExtensions());
+  let planAsString = $plans->at(0).second->meta::pure::executionPlan::toString::planToString(meta::relational::extension::relationalExtensions());
+  let expected = 'PureExp\n' +
+'(\n' +
+'  type = String\n' +
+'  expression =  -> serialize(#{demo::gql::Firm {legalName}}#)\n' +
+'  (\n' +
+'    StoreMappingGlobalGraphFetch\n' +
+'    (\n' +
+'      type = PartialClass[impls=[(demo::gql::Firm | TestMapping.demo_gql_Firm)], propertiesWithParameters = [legalName]]\n' +
+'      resultSizeRange = *\n' +
+'      store = demo::gql::store::TestStore\n' +
+'      localGraphFetchExecutionNode = \n' +
+'         RelationalGraphFetch\n' +
+'         (\n' +
+'           type = PartialClass[impls=[(demo::gql::Firm | TestMapping.demo_gql_Firm)], propertiesWithParameters = [legalName]]\n' +
+'           nodeIndex = 0\n' +
+'           relationalNode = \n' +
+'              SQL\n' +
+'              (\n' +
+'                type = meta::pure::metamodel::type::Any\n' +
+'                resultColumns = [("pk_0", INT), ("legalName", VARCHAR(200))]\n' +
+'                sql = select "root".id as "pk_0", "root".legal_name as "legalName" from FirmTable as "root"\n' +
+'                connection = TestDatabaseConnection(type = "H2")\n' +
+'              )\n' +
+'           children = [\n' +
+'              \n' +
+'           ]\n' +
+'         )\n' +
+'      children = [\n' +
+'         \n' +
+'      ]\n' +
+'      localTreeIndices = [0, 1]\n' +
+'      dependencyIndices = []\n' +
+'    )\n' +
+'  )\n' +
+')\n';
+
+  assertEquals($expected, $planAsString);
+  //meta::pure::executionPlan::execute($plan, [],meta::relational::extension::relationalExtensions());
+  true;
+}
+
+
+function demo::gql::test::testFirmByStringId():Boolean[1]
+{
+    let gqlQuery = ^Document(
+    definitions =
+      [
+        ^OperationDefinition(
+          type = OperationType.query,
+          name = 'query2',
+          selectionSet = ^Field(
+            name = 'firmByStringId',
+            arguments = [
+              ^Argument(name='id', value=^StringValue(value='1'))
+            ],
+            selectionSet = ^Field(
+              name = 'legalName'
+            )
+          )
+        )
+      ]
+  );
+
+  let cls = demo::gql::Query;
+  let plans = meta::external::query::graphQL::transformation::queryToPure::getPlansFromGraphQL($cls, demo::gql::mapping::TestMapping, demo::gql::testRuntime(), $gqlQuery, meta::relational::extension::relationalExtensions());
+  let planAsString = $plans->at(0).second->meta::pure::executionPlan::toString::planToString(meta::relational::extension::relationalExtensions());
+  let expected = 'PureExp\n' +
+'(\n' +
+'  type = String\n' +
+'  expression =  -> serialize(#{demo::gql::Firm {legalName}}#)\n' +
+'  (\n' +
+'    StoreMappingGlobalGraphFetch\n' +
+'    (\n' +
+'      type = PartialClass[impls=[(demo::gql::Firm | TestMapping.demo_gql_Firm)], propertiesWithParameters = [legalName]]\n' +
+'      resultSizeRange = 0..1\n' +
+'      store = demo::gql::store::TestStore\n' +
+'      localGraphFetchExecutionNode = \n' +
+'         RelationalGraphFetch\n' +
+'         (\n' +
+'           type = PartialClass[impls=[(demo::gql::Firm | TestMapping.demo_gql_Firm)], propertiesWithParameters = [legalName]]\n' +
+'           nodeIndex = 0\n' +
+'           relationalNode = \n' +
+'              SQL\n' +
+'              (\n' +
+'                type = meta::pure::metamodel::type::Any\n' +
+'                resultColumns = [("pk_0", INT), ("legalName", VARCHAR(200))]\n' +
+'                sql = select "root".id as "pk_0", "root".legal_name as "legalName" from FirmTable as "root" where "root".id = cast(\'1\' as integer)\n' +
+'                connection = TestDatabaseConnection(type = "H2")\n' +
+'              )\n' +
+'           children = [\n' +
+'              \n' +
+'           ]\n' +
+'         )\n' +
+'      children = [\n' +
+'         \n' +
+'      ]\n' +
+'      localTreeIndices = [0, 1]\n' +
+'      dependencyIndices = []\n' +
+'    )\n' +
+'  )\n' +
+')\n';
+
+  assertEquals($expected, $planAsString);
+  //meta::pure::executionPlan::execute($plan, [],meta::relational::extension::relationalExtensions());
+  true;
+}
+
+function demo::gql::test::testFirmByIntegerId():Boolean[1]
+{
+    let gqlQuery = ^Document(
+    definitions =
+      [
+        ^OperationDefinition(
+          type = OperationType.query,
+          name = 'query2',
+          selectionSet = ^Field(
+            name = 'firmByIntegerId',
+            arguments = [
+              ^Argument(name='id', value=^IntValue(value=1))
+            ],
+            selectionSet = ^Field(
+              name = 'legalName'
+            )
+          )
+        )
+      ]
+  );
+
+  let cls = demo::gql::Query;
+  let plans = meta::external::query::graphQL::transformation::queryToPure::getPlansFromGraphQL($cls, demo::gql::mapping::TestMapping, demo::gql::testRuntime(), $gqlQuery, meta::relational::extension::relationalExtensions());
+  let planAsString = $plans->at(0).second->meta::pure::executionPlan::toString::planToString(meta::relational::extension::relationalExtensions());
+  let expected = 'PureExp\n' +
+'(\n' +
+'  type = String\n' +
+'  expression =  -> serialize(#{demo::gql::Firm {legalName}}#)\n' +
+'  (\n' +
+'    StoreMappingGlobalGraphFetch\n' +
+'    (\n' +
+'      type = PartialClass[impls=[(demo::gql::Firm | TestMapping.demo_gql_Firm)], propertiesWithParameters = [legalName]]\n' +
+'      resultSizeRange = 0..1\n' +
+'      store = demo::gql::store::TestStore\n' +
+'      localGraphFetchExecutionNode = \n' +
+'         RelationalGraphFetch\n' +
+'         (\n' +
+'           type = PartialClass[impls=[(demo::gql::Firm | TestMapping.demo_gql_Firm)], propertiesWithParameters = [legalName]]\n' +
+'           nodeIndex = 0\n' +
+'           relationalNode = \n' +
+'              SQL\n' +
+'              (\n' +
+'                type = meta::pure::metamodel::type::Any\n' +
+'                resultColumns = [("pk_0", INT), ("legalName", VARCHAR(200))]\n' +
+'                sql = select "root".id as "pk_0", "root".legal_name as "legalName" from FirmTable as "root" where "root".id = 1\n' +
+'                connection = TestDatabaseConnection(type = "H2")\n' +
+'              )\n' +
+'           children = [\n' +
+'              \n' +
+'           ]\n' +
+'         )\n' +
+'      children = [\n' +
+'         \n' +
+'      ]\n' +
+'      localTreeIndices = [0, 1]\n' +
+'      dependencyIndices = []\n' +
+'    )\n' +
+'  )\n' +
+')\n';
+
+  assertEquals($expected, $planAsString);
+  //meta::pure::executionPlan::execute($plan, [],meta::relational::extension::relationalExtensions());
+  true;
+}
+
+function demo::gql::test::testAllPersons():Boolean[1]
+{
+    let gqlQuery = ^Document(
+    definitions =
+      [
+        ^OperationDefinition(
+          type = OperationType.query,
+          name = 'query3',
+          selectionSet = ^Field(
+            name = 'allPersons',
+            arguments = [
+            ],
+            selectionSet = ^Field(
+              name = 'firstName'
+            )
+          )
+        )
+      ]
+  );
+
+  let cls = demo::gql::Query;
+  let plans = meta::external::query::graphQL::transformation::queryToPure::getPlansFromGraphQL($cls, demo::gql::mapping::TestMapping, demo::gql::testRuntime(), $gqlQuery, meta::relational::extension::relationalExtensions());
+  let planAsString = $plans->at(0).second->meta::pure::executionPlan::toString::planToString(meta::relational::extension::relationalExtensions());
+  let expected = 'PureExp\n' +
+'(\n' +
+'  type = String\n' +
+'  expression =  -> serialize(#{demo::gql::Person {firstName}}#)\n' +
+'  (\n' +
+'    StoreMappingGlobalGraphFetch\n' +
+'    (\n' +
+'      type = PartialClass[impls=[(demo::gql::Person | TestMapping.demo_gql_Person)], propertiesWithParameters = [firstName]]\n' +
+'      resultSizeRange = *\n' +
+'      store = demo::gql::store::TestStore\n' +
+'      localGraphFetchExecutionNode = \n' +
+'         RelationalGraphFetch\n' +
+'         (\n' +
+'           type = PartialClass[impls=[(demo::gql::Person | TestMapping.demo_gql_Person)], propertiesWithParameters = [firstName]]\n' +
+'           nodeIndex = 0\n' +
+'           relationalNode = \n' +
+'              SQL\n' +
+'              (\n' +
+'                type = meta::pure::metamodel::type::Any\n' +
+'                resultColumns = [("pk_0", INT), ("firstName", VARCHAR(200))]\n' +
+'                sql = select "root".id as "pk_0", "root".first_name as "firstName" from PersonTable as "root"\n' +
+'                connection = TestDatabaseConnection(type = "H2")\n' +
+'              )\n' +
+'           children = [\n' +
+'              \n' +
+'           ]\n' +
+'         )\n' +
+'      children = [\n' +
+'         \n' +
+'      ]\n' +
+'      localTreeIndices = [0, 1]\n' +
+'      dependencyIndices = []\n' +
+'    )\n' +
+'  )\n' +
+')\n';
+
+  assertEquals($expected, $planAsString);
+  //meta::pure::executionPlan::execute($plan, [],meta::relational::extension::relationalExtensions());
+  true;
+}
+
+
+function demo::gql::test::testPersonsByLastName():Boolean[1]
+{
+    let gqlQuery = ^Document(
+    definitions =
+      [
+        ^OperationDefinition(
+          type = OperationType.query,
+          name = 'query4',
+          selectionSet = ^Field(
+            name = 'personsByLastName',
+            arguments = [
+              ^Argument(name='last', value=^StringValue(value='alice'))
+            ],
+            selectionSet = ^Field(
+              name = 'firstName'
+            )
+          )
+        )
+      ]
+  );
+
+  let cls = demo::gql::Query;
+  let plans = meta::external::query::graphQL::transformation::queryToPure::getPlansFromGraphQL($cls, demo::gql::mapping::TestMapping, demo::gql::testRuntime(), $gqlQuery, meta::relational::extension::relationalExtensions());
+  let planAsString = $plans->at(0).second->meta::pure::executionPlan::toString::planToString(meta::relational::extension::relationalExtensions());
+  let expected = 'PureExp\n' +
+'(\n' +
+'  type = String\n' +
+'  expression =  -> serialize(#{demo::gql::Person {firstName}}#)\n' +
+'  (\n' +
+'    StoreMappingGlobalGraphFetch\n' +
+'    (\n' +
+'      type = PartialClass[impls=[(demo::gql::Person | TestMapping.demo_gql_Person)], propertiesWithParameters = [firstName]]\n' +
+'      resultSizeRange = *\n' +
+'      store = demo::gql::store::TestStore\n' +
+'      localGraphFetchExecutionNode = \n' +
+'         RelationalGraphFetch\n' +
+'         (\n' +
+'           type = PartialClass[impls=[(demo::gql::Person | TestMapping.demo_gql_Person)], propertiesWithParameters = [firstName]]\n' +
+'           nodeIndex = 0\n' +
+'           relationalNode = \n' +
+'              SQL\n' +
+'              (\n' +
+'                type = meta::pure::metamodel::type::Any\n' +
+'                resultColumns = [("pk_0", INT), ("firstName", VARCHAR(200))]\n' +
+'                sql = select "root".id as "pk_0", "root".first_name as "firstName" from PersonTable as "root" where "root".last_name = \'alice\'\n' +
+'                connection = TestDatabaseConnection(type = "H2")\n' +
+'              )\n' +
+'           children = [\n' +
+'              \n' +
+'           ]\n' +
+'         )\n' +
+'      children = [\n' +
+'         \n' +
+'      ]\n' +
+'      localTreeIndices = [0, 1]\n' +
+'      dependencyIndices = []\n' +
+'    )\n' +
+'  )\n' +
+')\n';
+
+  assertEquals($expected, $planAsString);
+  //meta::pure::executionPlan::execute($plans->at(0).second, [],meta::relational::extension::relationalExtensions());
+  true;
+}
+
+function go():Any[*]
+{
+  demo::gql::test::testAllFirms();
+  demo::gql::test::testFirmByStringId();
+  demo::gql::test::testFirmByIntegerId();
+  demo::gql::test::testAllPersons();
+  demo::gql::test::testPersonsByLastName();
+
+
+  /*
+  Execution error at (resource:/core/pure/executionPlan/executionPlan_execution.pure line:41 column:11), "Match failure: @_00ea3t9(36509829) instanceOf PureExpressionPlatformExecutionNode"
+    1: resource:/core/pure/executionPlan/executionPlan_execution.pure line:41 column:11
+    2: resource:/core/pure/executionPlan/executionPlan_execution.pure line:26 column:29
+    3: resource:/welcome.pure line:447 column:30
+    4: resource:/welcome.pure line:462 column:20
+  */
+}
