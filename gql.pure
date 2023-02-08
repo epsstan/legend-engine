@@ -84,6 +84,7 @@ Mapping demo::gql::mapping::TestMapping
 
 ###Pure
 
+import meta::external::query::graphQL::binding::*;
 import meta::pure::executionPlan::toString::*;
 import meta::external::query::graphQL::transformation::queryToPure::*;
 import meta::external::query::graphQL::transformation::introspection::*;
@@ -99,7 +100,8 @@ import meta::pure::profiles::*;
 import meta::pure::functions::tests::model::*;
 
 
-Class demo::gql::Query
+
+Class <<GraphQL.Query>>  demo::gql::Query
 {
   allFirms() { demo::gql::Firm.all()}: demo::gql::Firm[0..*];
   firmByStringId(id:String[1]) {demo::gql::Firm.all()->filter(f | $f.id == $id->parseInteger())->first()}: demo::gql::Firm[0..1];
@@ -107,6 +109,8 @@ Class demo::gql::Query
 
   allPersons() { demo::gql::Person.all()}: demo::gql::Person[0..*];
   personsByLastName(last:String[1]) {demo::gql::Person.all()->filter(p | $p.lastName == $last)}: demo::gql::Person[0..*];
+
+  personByPersonFilter(filter:demo::gql::PersonFilter[1]) {demo::gql::Person.all()->filter(p | $p.firstName == $filter.firstName && $p.lastName == $filter.lastName)->first()}: demo::gql::Person[0..1];
 }
 
 Class demo::gql::Firm
@@ -114,6 +118,12 @@ Class demo::gql::Firm
   id: Integer[1];
   legalName: String[1];
   employees: demo::gql::Person[*];
+}
+
+Class demo::gql::PersonFilter
+{
+  firstName: String[1];
+  lastName: String[1];
 }
 
 Class demo::gql::Person
@@ -448,14 +458,56 @@ function demo::gql::test::testPersonsByLastName():Boolean[1]
   true;
 }
 
+
+Class demo::gql::Simple
+{
+  s:String[1];
+  i:Integer[1];
+  f:Float[1];
+}
+
+
+function demo::gql::test::schemagen1():Boolean[1]
+{
+  let res = meta::external::query::graphQL::binding::fromPure::sdl::transformPureToGraphQLSDL([demo::gql::Simple])
+            ->map(x|$x->meta::external::query::graphQL::serialization::graphQLtoString())
+            ->joinStrings('\n\n');
+
+  print($res);
+  true;
+}
+
+function demo::gql::test::schemagen2():Boolean[1]
+{
+  let res = meta::external::query::graphQL::binding::fromPure::sdl::transformPureToGraphQLSDL([demo::gql::Firm, demo::gql::Person])
+            ->map(x|$x->meta::external::query::graphQL::serialization::graphQLtoString())
+            ->joinStrings('\n\n');
+
+  print($res);
+  true;
+}
+
+function demo::gql::test::schemagen3():Boolean[1]
+{
+  let res = meta::external::query::graphQL::binding::fromPure::sdl::transformPureToGraphQLSDL([demo::gql::Query, demo::gql::Firm, demo::gql::Person, demo::gql::PersonFilter])
+            ->map(x|$x->meta::external::query::graphQL::serialization::graphQLtoString())
+            ->joinStrings('\n\n');
+
+  //print($res);
+  true;
+}
+
 function go():Any[*]
 {
+  /*
   demo::gql::test::testAllFirms();
   demo::gql::test::testFirmByStringId();
   demo::gql::test::testFirmByIntegerId();
   demo::gql::test::testAllPersons();
   demo::gql::test::testPersonsByLastName();
+  */
 
+  demo::gql::test::schemagen3();
 
   /*
   Execution error at (resource:/core/pure/executionPlan/executionPlan_execution.pure line:41 column:11), "Match failure: @_00ea3t9(36509829) instanceOf PureExpressionPlatformExecutionNode"
@@ -465,3 +517,9 @@ function go():Any[*]
     4: resource:/welcome.pure line:462 column:20
   */
 }
+
+/*
+Compilation error at (resource:/core_external_query_graphql/transformation/tests/tests.pure line:129 column:311), "meta::relational::extension::relationalExtensions():Extension[*] is not visible in the file /core_external_query_graphql/transformation/tests/tests.pure"
+    1: resource:/core_external_query_graphql/transformation/tests/tests.pure line:129 column:311
+
+*/

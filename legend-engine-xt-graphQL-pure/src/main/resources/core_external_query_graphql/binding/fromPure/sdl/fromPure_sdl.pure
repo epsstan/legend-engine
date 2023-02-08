@@ -2,7 +2,13 @@ import meta::external::query::graphQL::binding::fromPure::sdl::*;
 import meta::external::query::graphQL::metamodel::sdl::typeSystem::*;
 import meta::external::query::graphQL::metamodel::sdl::executable::*;
 import meta::pure::model::unit::*;
-
+import meta::pure::functions::math::divide::*;
+import meta::pure::mapping::*;
+import meta::pure::metamodel::path::*;
+import meta::pure::router::clustering::*;
+import meta::pure::router::metamodel::*;
+import meta::pure::router::metamodel::clustering::*;
+import meta::pure::runtime::*;
 
 Class meta::external::query::graphQL::metamodel::sdl::GraphQLSDLContainer extends meta::external::shared::format::metamodel::SchemaDetail
 {
@@ -52,6 +58,32 @@ function meta::external::query::graphQL::binding::fromPure::sdl::schemaDetailToS
                   ->joinStrings('\n');
 }
 
+
+function meta::external::query::graphQL::binding::fromPure::sdl::isClass( rawType:meta::pure::metamodel::type::Type[*] ) : Boolean[1]
+{
+   let type = $rawType->toOne();
+   $type->match([
+      p:PrimitiveType[1]    | false,
+      e:Enumeration<Any>[1] | false,
+      c:Class<Any>[1]       | true
+   ]);
+}
+
+function meta::external::query::graphQL::binding::fromPure::sdl::processQueryType(queryType:Class<Any>[1]):Class<Any>[*]
+{
+  let qualifiedProps = $queryType->allProperties()->filter(p | $p->instanceOf(QualifiedProperty));
+  $qualifiedProps->map(p|
+    $p->functionType().parameters->evaluateAndDeactivate()->tail()->map(qp| 
+      if ($qp.genericType.rawType->isClass(),|$qp.genericType.rawType->cast(@Class<Any>), |[])
+    );
+  );
+}
+
+function meta::external::query::graphQL::binding::fromPure::sdl::detectGQLInputTypes(queryTypes:Class<Any>[*]):Class<Any>[*]
+{
+  $queryTypes->map(q| $q->processQueryType());
+}
+
 function meta::external::query::graphQL::binding::fromPure::sdl::transformPureToGraphQLSDL(types:meta::pure::metamodel::PackageableElement[*]):meta::external::query::graphQL::metamodel::sdl::typeSystem::TypeSystemDefinition[*]
 {
   let allTypes = $types->findTypes();
@@ -60,6 +92,11 @@ function meta::external::query::graphQL::binding::fromPure::sdl::transformPureTo
   let mutation = $allTypes->cast(@AnnotatedElement)->filter(t|$t.stereotypes.value->contains('Mutation'))->map(x|^RootOperationTypeDefinition(operationType = OperationType.mutation, type = $x->cast(@Class<Any>).name->toOne()));
   let subscription = $allTypes->cast(@AnnotatedElement)->filter(t|$t.stereotypes.value->contains('Subscription'))->map(x|^RootOperationTypeDefinition(operationType = OperationType.subscription, type = $x->cast(@Class<Any>).name->toOne()));
 
+  let queryTypes = $allTypes->cast(@AnnotatedElement)->filter(t|$t.stereotypes.value->contains('Query'))->map(x|$x->cast(@Class<Any>));
+
+  let inputTypeClasses = detectGQLInputTypes($queryTypes);
+
+  if ($inputTypeClasses->size() > 0, | print('Detected ' + $inputTypeClasses->size()->toString() + ' GQL input types'), | print('No GQL input types'));
 
   $allTypes->map(c|
     $c->match(
