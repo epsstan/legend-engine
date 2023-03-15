@@ -1,3 +1,5 @@
+
+```
 function sqlAST():Any[*]
 {
   meta::relational::tests::postProcessor::setUp();
@@ -35,3 +37,5 @@ function sqlAST():Any[*]
   println($sqlString);
   $sql->traverse();
 }
+
+```
