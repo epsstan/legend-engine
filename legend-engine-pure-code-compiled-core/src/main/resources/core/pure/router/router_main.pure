@@ -124,6 +124,12 @@ function meta::pure::router::routeFunction(f:FunctionDefinition<Any>[1], routing
    print(if($debug.debug,|'\n'+$debug.space+'Enriching Function Expressions with relevant info (mapping / binding / platform) and assigning routing strategy:\n',|''));
    let enrichedExpressions = enrichFunctionExpressions($functionExpressions, $routingStrategy, $exeCtx, $openVariables, $extensions, $debug);
 
+
+   //println('**************************************');
+   //$enrichedExpressions->map(x:Any[*], x|println($x));
+   //println($enrichedExpressions);
+   //println('**************************************');
+
    // Enriching Function Expressions with more information based on type of expression (subTypes of ExtendedRoutedValueSpecification)
    print(if($debug.debug,|'\n'+$debug.space+'Enriching Function Expressions with strategy based info (mapping / binding / platform):\n',|''));
    let enrichedExpressionsAfterStrategyBasedEnrichment = $enrichedExpressions->map(exp | $exp->enrichExpressionWithStrategyBasedEnrichment($exeCtx, $extensions, $debug));

@@ -263,6 +263,7 @@ function <<access.private>> meta::pure::router::store::routing::findExistingSet(
 
 function <<access.private>> meta::pure::router::store::routing::findExistingPemutationSet(state:RoutingState[1], debug:DebugContext[1]):PermutationSet[0..1]
 {
+    //epsstan fail();
    let setPath = getSetPath($state);
    print(if($debug.debug,|$debug.space+'Looking for:"'+$setPath+'"',|''));
    let permutationSet = $state.routingStrategy->cast(@StoreMappingRoutingStrategy)->toOne().setsByDepth->get($setPath);
