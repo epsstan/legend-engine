@@ -1,0 +1,186 @@
+{
+  "_type": "simple",
+  "authDependent": false,
+  "rootExecutionNode": {
+    "_type": "relationalBlock",
+    "authDependent": false,
+    "executionNodes": [
+      {
+        "_type": "sql",
+        "authDependent": false,
+        "connection": {
+          "_type": "RelationalDatabaseConnection",
+          "authenticationStrategy": {
+            "_type": "snowflakePublic",
+            "passPhraseVaultReference": "snowflakePkPassphraseRef",
+            "privateKeyVaultReference": "snowflakePkRef",
+            "publicUserName": "SUMMIT_DEV1"
+          },
+          "datasourceSpecification": {
+            "_type": "snowflake",
+            "accountName": "ki79827",
+            "cloudType": "aws",
+            "databaseName": "SUMMIT_DEV",
+            "region": "us-east-2",
+            "role": "SUMMIT_DEV",
+            "warehouseName": "SUMMIT_DEV"
+          },
+          "element": "database::snowflake",
+          "postProcessorWithParameter": [],
+          "postProcessors": [],
+          "type": "Snowflake"
+        },
+        "executionNodes": [],
+        "resultColumns": [],
+        "resultType": {
+          "_type": "void"
+        },
+        "sqlQuery": "ALTER SESSION SET QUERY_TAG = '{\"executionTraceID\" : \"${execID}\", \"engineUser\" : \"${userId}\"}';"
+      },
+      {
+        "_type": "relationalTdsInstantiation",
+        "authDependent": false,
+        "executionNodes": [
+          {
+            "_type": "sql",
+            "authDependent": false,
+            "connection": {
+              "_type": "RelationalDatabaseConnection",
+              "authenticationStrategy": {
+                "_type": "snowflakePublic",
+                "passPhraseVaultReference": "snowflakePkPassphraseRef",
+                "privateKeyVaultReference": "snowflakePkRef",
+                "publicUserName": "SUMMIT_DEV1"
+              },
+              "datasourceSpecification": {
+                "_type": "snowflake",
+                "accountName": "ki79827",
+                "cloudType": "aws",
+                "databaseName": "SUMMIT_DEV",
+                "region": "us-east-2",
+                "role": "SUMMIT_DEV",
+                "warehouseName": "SUMMIT_DEV"
+              },
+              "element": "database::snowflake",
+              "postProcessorWithParameter": [],
+              "postProcessors": [],
+              "type": "Snowflake"
+            },
+            "executionNodes": [],
+            "resultColumns": [
+              {
+                "dataType": "VARCHAR(200)",
+                "label": "\"Legal Name\""
+              },
+              {
+                "dataType": "VARCHAR(200)",
+                "label": "\"Employees/First Name\""
+              },
+              {
+                "dataType": "VARCHAR(200)",
+                "label": "\"Employees/Last Name\""
+              }
+            ],
+            "resultType": {
+              "_type": "dataType",
+              "dataType": "meta::pure::metamodel::type::Any"
+            },
+            "sqlComment": "-- \"executionTraceID\" : \"${execID}\"",
+            "sqlQuery": "select \"root\".LEGAL_NAME as \"Legal Name\", \"person_0\".FIRST_NAME as \"Employees/First Name\", \"person_0\".LAST_NAME as \"Employees/Last Name\" from SCHEMA1.FIRM as \"root\" left outer join SCHEMA1.PERSON as \"person_0\" on (\"person_0\".FIRMID = \"root\".ID)"
+          }
+        ],
+        "resultType": {
+          "_type": "tds",
+          "tdsColumns": [
+            {
+              "enumMapping": {},
+              "name": "Legal Name",
+              "relationalType": "VARCHAR(200)",
+              "type": "String"
+            },
+            {
+              "enumMapping": {},
+              "name": "Employees/First Name",
+              "relationalType": "VARCHAR(200)",
+              "type": "String"
+            },
+            {
+              "enumMapping": {},
+              "name": "Employees/Last Name",
+              "relationalType": "VARCHAR(200)",
+              "type": "String"
+            }
+          ]
+        }
+      }
+    ],
+    "finallyExecutionNodes": [
+      {
+        "_type": "sql",
+        "authDependent": false,
+        "connection": {
+          "_type": "RelationalDatabaseConnection",
+          "authenticationStrategy": {
+            "_type": "snowflakePublic",
+            "passPhraseVaultReference": "snowflakePkPassphraseRef",
+            "privateKeyVaultReference": "snowflakePkRef",
+            "publicUserName": "SUMMIT_DEV1"
+          },
+          "datasourceSpecification": {
+            "_type": "snowflake",
+            "accountName": "ki79827",
+            "cloudType": "aws",
+            "databaseName": "SUMMIT_DEV",
+            "region": "us-east-2",
+            "role": "SUMMIT_DEV",
+            "warehouseName": "SUMMIT_DEV"
+          },
+          "element": "database::snowflake",
+          "postProcessorWithParameter": [],
+          "postProcessors": [],
+          "type": "Snowflake"
+        },
+        "executionNodes": [],
+        "resultColumns": [],
+        "resultType": {
+          "_type": "void"
+        },
+        "sqlQuery": "ALTER SESSION UNSET QUERY_TAG;"
+      }
+    ],
+    "resultType": {
+      "_type": "tds",
+      "tdsColumns": [
+        {
+          "enumMapping": {},
+          "name": "Legal Name",
+          "relationalType": "VARCHAR(200)",
+          "type": "String"
+        },
+        {
+          "enumMapping": {},
+          "name": "Employees/First Name",
+          "relationalType": "VARCHAR(200)",
+          "type": "String"
+        },
+        {
+          "enumMapping": {},
+          "name": "Employees/Last Name",
+          "relationalType": "VARCHAR(200)",
+          "type": "String"
+        }
+      ]
+    }
+  },
+  "serializer": {
+    "name": "pure",
+    "version": "vX_X_X"
+  },
+  "templateFunctions": [
+    "<#function renderCollection collection separator prefix suffix replacementMap defaultValue><#if collection?size == 0><#return defaultValue></#if><#assign newCollection = collection><#list replacementMap as oldValue, newValue>   <#assign newCollection = collection?map(ele -> ele?replace(oldValue, newValue))></#list><#return prefix + newCollection?join(suffix + separator + prefix) + suffix></#function>",
+    "<#function collectionSize collection> <#return collection?size?c> </#function>",
+    "<#function optionalVarPlaceHolderOperationSelector optionalParameter trueClause falseClause><#if optionalParameter?has_content || optionalParameter?is_string><#return trueClause><#else><#return falseClause></#if></#function>",
+    "<#function varPlaceHolderToString optionalParameter prefix suffix replacementMap defaultValue><#if optionalParameter?is_enumerable && !optionalParameter?has_content><#return defaultValue><#else><#assign newParam = optionalParameter><#list replacementMap as oldValue, newValue>   <#assign newParam = newParam?replace(oldValue, newValue)></#list><#return prefix + newParam + suffix></#if></#function>",
+    "<#function equalEnumOperationSelector enumVal inDyna equalDyna><#assign enumList = enumVal?split(\",\")><#if enumList?size = 1><#return equalDyna><#else><#return inDyna></#if></#function>"
+  ]
+}
