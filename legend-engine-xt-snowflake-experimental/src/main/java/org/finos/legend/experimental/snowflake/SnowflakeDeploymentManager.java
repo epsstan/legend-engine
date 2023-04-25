@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class SnowflakeDeploymentManager
 {
-    public DeploymentArtifacts generateDeploymentArtifacts() throws Exception
+    public DeploymentArtifacts generateDeploymentArtifactsForService() throws Exception
     {
         DeploymentArtifacts deploymentArtifacts = new DeploymentArtifacts();
         SingleExecutionPlan singleExecutionPlan = this.generatePlan();
@@ -21,6 +21,7 @@ public class SnowflakeDeploymentManager
 
     public SingleExecutionPlan generatePlan() throws Exception
     {
+        // TODO
         return null;
     }
 
@@ -36,6 +37,21 @@ public class SnowflakeDeploymentManager
         SQLExecutionNode firstSQLExecutionNode = (SQLExecutionNode) sqlExecutionNodes.getFirst();
 
         deploymentArtifacts.addRawSQL(firstSQLExecutionNode.sqlQuery);
+
+        deploymentArtifacts.addFoo("foo");
+        deploymentArtifacts.addBar("bar");
+    }
+
+    public DeploymentResult deployService() throws Exception
+    {
+        DeploymentArtifacts deploymentArtifacts = this.generateDeploymentArtifactsForService();
+        DeploymentResult deploymentResult = this.deploy(deploymentArtifacts);
+        return deploymentResult;
+    }
+
+    public DeploymentResult deploy(DeploymentArtifacts deploymentArtifacts)
+    {
+        return new DeploymentResult();
     }
 
     public static class DeploymentArtifacts
@@ -61,5 +77,20 @@ public class SnowflakeDeploymentManager
         {
             this.artifacts.put("RAW_SQL", rawSQL);
         }
+
+        public void addFoo(String foo)
+        {
+            this.artifacts.put("FOO", foo);
+        }
+
+        public void addBar(String bar)
+        {
+            this.artifacts.put("BAR", bar);
+        }
+    }
+
+    public static class DeploymentResult
+    {
+        public Map<String, String> keyValues = new HashMap<>();
     }
 }

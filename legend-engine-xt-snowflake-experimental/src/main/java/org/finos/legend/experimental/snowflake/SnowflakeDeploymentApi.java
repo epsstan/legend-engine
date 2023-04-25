@@ -41,12 +41,34 @@ public class SnowflakeDeploymentApi
         return response;
     }
 
+    @GET
+    @Path("generateArtifactsForService")
+    @ApiOperation(value = "Generate Artifacts")
+    @Consumes({MediaType.APPLICATION_JSON})
     public Response generateArtifacts(HttpServletRequest mockRequest, @Pac4JProfileManager ProfileManager<CommonProfile> profileManager)
     {
         try
         {
-            SnowflakeDeploymentManager.DeploymentArtifacts deploymentArtifacts = this.snowflakeDeploymentManager.generateDeploymentArtifacts();
+            SnowflakeDeploymentManager.DeploymentArtifacts deploymentArtifacts = this.snowflakeDeploymentManager.generateDeploymentArtifactsForService();
             Response response = Response.ok(deploymentArtifacts).build();
+            return response;
+        }
+        catch (Exception e)
+        {
+            return Response.serverError().build();
+        }
+    }
+
+    @GET
+    @Path("deployArtifactsForService")
+    @ApiOperation(value = "Generate And Deploy Artifacts")
+    @Consumes({MediaType.APPLICATION_JSON})
+    public Response generateAndDeployArtifacts(HttpServletRequest mockRequest, @Pac4JProfileManager ProfileManager<CommonProfile> profileManager)
+    {
+        try
+        {
+            SnowflakeDeploymentManager.DeploymentResult deploymentResult = this.snowflakeDeploymentManager.deployService();
+            Response response = Response.ok(deploymentResult).build();
             return response;
         }
         catch (Exception e)

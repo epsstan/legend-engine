@@ -31,7 +31,6 @@ import org.h2.tools.Server;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -104,7 +103,7 @@ public class TestPlanExecutionWithAuthenticationFlow extends AbstractTestPlanExe
         closeConnection(connection);
     }
 
-    @Ignore
+    @Test
     // TODO - fix this test. For now it registers a fake key just to verify just to verify credential resolution
     public void testPlanExecutionWithSnowflakeKeyPair() throws Exception
     {
