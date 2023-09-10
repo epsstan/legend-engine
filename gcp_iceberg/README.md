@@ -152,3 +152,7 @@ curl --header "Authorization: Bearer $(gcloud auth application-default print-acc
 
 ```
 
+# Adam's Demo
+
+https://github.com/GoogleCloudPlatform/data-analytics-golden-demo
+
