@@ -90,7 +90,7 @@ insert into `sky-225649-proj-c89517cd.epsstan.biglake1` values(2, 'two');
 insert into `sky-225649-proj-c89517cd.epsstan.biglake1` values(3, 'three');
 ```
 
-__GCS Data___
+__GCS Data__
 
 ```
 gcloud storage ls --recursive gs://epsstan-bucket1
@@ -105,7 +105,7 @@ gs://epsstan-bucket1/biglake1/data/b911e7cd-4b7a-41d5-902c-7ea642ebca49-af94c5c8
 ```
 
 
-__GCS Metadata __
+__GCS Metadata__
 ```
 TODO
 ```
