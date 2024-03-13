@@ -38,6 +38,8 @@
         <!-- Core System -->
         <module>legend-engine-core</module>
 
+        <module>legend-engine-identity</module>
+
         <!-- Pure Extension -->
         <module>legend-engine-pure</module>
 
